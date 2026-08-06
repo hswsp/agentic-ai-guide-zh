@@ -104,9 +104,9 @@ $$
 
 > **KTO 数据格式**
 >
-> 与 DPO 需要 \verb|{"prompt": ..., "chosen": ..., "rejected": ...}| 不同
+> 与 DPO 需要 `{"prompt": ..., "chosen": ..., "rejected": ...}` 不同
 >
-> KTO 只需要：\verb|{"prompt": ..., "completion": ..., "label": true/false}|
+> KTO 只需要：`{"prompt": ..., "completion": ..., "label": true/false}`
 >
 > 这意味着你可以使用：
 >

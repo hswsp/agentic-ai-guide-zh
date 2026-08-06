@@ -27,7 +27,6 @@ permalink: /part2/ch11-large-scale-system-architecture.html
 > | 生成用 KV cache | 20--60 GB |
 > | **合计** | **1470--1560 GB** |
 >
-> skip
 > $\div$ 80 GB/GPU = **至少 19--20 块 A100**（尚未计入任何并行开销）。
 
 ## 并行策略详解
@@ -43,7 +42,7 @@ permalink: /part2/ch11-large-scale-system-architecture.html
 
 **原始 DP（PyTorch `DataParallel`）。**
 
-单进程方案：一块 ``主'' GPU 负责分发输入、汇集输出、广播梯度。受 GIL 以及到主 GPU 的 PCIe 带宽限制。
+单进程方案：一块 “主” GPU 负责分发输入、汇集输出、广播梯度。受 GIL 以及到主 GPU 的 PCIe 带宽限制。
 
 **分布式数据并行（DDP，`DistributedDataParallel`）。**
 
@@ -142,7 +141,7 @@ TP 把权重显存切到了多块 GPU 上。但 LayerNorm 和 Dropout 作用在*
 
 ![序列并行通过沿序列维度切分，降低 LayerNorm/Dropout 的激活显存。通信（AllGather/ReduceScatter）取代了标准 TP 中的 AllReduce——总传输字节数不变，但显存得以节省。](/figures/fig_036_seq-parallel.png)
 
-> **SP 通信是 ``免费'' 的**
+> **SP 通信是 “免费” 的**
 >
 > 标准 TP 在每个子层后做 AllReduce，等价于 ReduceScatter + AllGather。SP 只是*重排*了这些原语：
 >
@@ -162,7 +161,7 @@ $$
 
 **气泡（Bubble）问题。**
 
-朴素流水线执行会产生 ``气泡''——某个 stage 等待前一 stage 的输入或后一 stage 的梯度时的空闲时间：
+朴素流水线执行会产生 “气泡”——某个 stage 等待前一 stage 的输入或后一 stage 的梯度时的空闲时间：
 
 
 ![流水线气泡对比。左：朴素流水线只有一个 micro-batch，75% 时间空闲。右：$M=4$ 个 micro-batch 的 GPipe 大幅缩小气泡。当 $M \gg P$ 时，气泡占比趋近于 0。](/figures/fig_037_pipeline-bubble.png)
@@ -579,23 +578,23 @@ ds_config = {
 
 其中 $M$ 是消息大小（字节），$N$ 是参与者数量。
 
-\newpage
+
 > **通信-计算重叠**
 >
 > 现代框架（FSDP、DeepSpeed）会积极地让通信与计算重叠：
 >
-> **前向传播**：当第 $i$ 层在计算时，AllGather 预取第 $i+1$ 层的参数。第 $i$ 层一结束，其参数立刻被丢弃（``free-after-forward''）。
+> **前向传播**：当第 $i$ 层在计算时，AllGather 预取第 $i+1$ 层的参数。第 $i$ 层一结束，其参数立刻被丢弃（“free-after-forward”）。
 >
 > **反向传播**：当第 $i$ 层在算梯度时，ReduceScatter 发送第 $i+1$ 层的梯度。调优得当时，这种重叠可隐藏 70--90% 的通信延迟。
 >
-> **调优旋钮**：`prefetch_factor`（提前预取多少层）、`reduce_bucket_size`（梯度归约的粒度）、`backward_prefetch`（反向预取的 ``pre'' 还是 ``post'' 策略）。
+> **调优旋钮**：`prefetch_factor`（提前预取多少层）、`reduce_bucket_size`（梯度归约的粒度）、`backward_prefetch`（反向预取的 “pre” 还是 “post” 策略）。
 
 ### 网络拓扑设计
 
 生产集群采用 **fat-tree** 或 **rail-optimized**（按轨优化）拓扑：
 
 - **Fat-tree**：每一级都具备全二分带宽。任一节点都能以满速与任一其他节点通信。代价昂贵（需要大量交换机），但灵活性最高。
-- **Rail-optimized**：每个节点的 GPU $i$ 连接到同一台叶子交换机（``轨 $i$''）。轨内 AllReduce 便宜，跨轨流量昂贵。Meta 的 RSC 和 Google 的 TPU pod 都采用此拓扑。
+- **Rail-optimized**：每个节点的 GPU $i$ 连接到同一台叶子交换机（“轨 $i$”）。轨内 AllReduce 便宜，跨轨流量昂贵。Meta 的 RSC 和 Google 的 TPU pod 都采用此拓扑。
 - **3D torus / Dragonfly**：用于 HPC 集群（Frontier、Aurora）。拓扑感知的作业放置至关重要。
 
 > **作业放置很重要**
@@ -690,10 +689,10 @@ $$
 **RLHF 训练大致云端 GPU 成本（2024--2025 价格）**
 | **GPU** | **按需/小时** | **Spot/小时** | **显存** | **适用场景** |
 | --- | --- | --- | --- | --- |
-| A100 80GB | $2.50--3.50 | $1.00--1.50 | 80 GB HBM2e | 经济型训练、生成集群 |
-| H100 80GB | $4.00--6.00 | $2.00--3.00 | 80 GB HBM3 | 生产级训练 |
-| H200 141GB | $6.00--8.00 | --- | 141 GB HBM3e | 大上下文、少卡配置 |
-| MI300X 192GB | $3.50--5.00 | $1.50--2.50 | 192 GB HBM3 | 性价比替代方案 |
+| A100 80GB | 2.50--3.50 美元 | 1.00--1.50 美元 | 80 GB HBM2e | 经济型训练、生成集群 |
+| H100 80GB | 4.00--6.00 美元 | 2.00--3.00 美元 | 80 GB HBM3 | 生产级训练 |
+| H200 141GB | 6.00--8.00 美元 | --- | 141 GB HBM3e | 大上下文、少卡配置 |
+| MI300X 192GB | 3.50--5.00 美元 | 1.50--2.50 美元 | 192 GB HBM3 | 性价比替代方案 |
 
 ### RLHF 训练成本估算
 
@@ -708,23 +707,23 @@ $$
 > | 每步用时（解耦） | 45 秒 |
 > | 总训练时间 | $10000 \times 45 / 3600 = 125$ 小时 |
 > | GPU 数（生成 + 训练） | 64 块 A100-80GB |
-> | 每 GPU-小时成本（spot） | $1.20 |
-> | **总成本** | $125 \times 64 \times \$1.20 =$ **$9,600** |
+> | 每 GPU-小时成本（spot） | 1.20 美元 |
+> | **总成本** | 125 × 64 × 1.20 美元 = **9,600 美元** |
 >
 > **按阶段拆分**：
 >
-> - 生成集群（32 GPU）：$4,800（占 60% 时间）
-> - 训练集群（32 GPU）：$4,800（可重叠 $\rightarrow$ 实际 $3,400）
+> - 生成集群（32 GPU）：4,800 美元（占 60% 时间）
+> - 训练集群（32 GPU）：4,800 美元（可重叠 $\rightarrow$ 实际 3,400 美元）
 > - 打分（与生成共享 GPU）：已含在上文中
 >
-> **重叠后**：完整对齐 70B 模型的实际成本约为 **$7,500**。
+> **重叠后**：完整对齐 70B 模型的实际成本约为 **7,500 美元**。
 
 ### 成本优化策略
 
 - **Spot/可抢占实例**：节省 50--70%。要求 checkpoint 机制健壮（每 5 分钟保存一次）。
 - **合理配型**：不要用 H100 做生成（显存带宽瓶颈）；推理时 A100 的 tokens/$ 相近。
 - **量化推理**：生成与打分用 INT8/FP8 可让相应集群的 GPU 数减半。
-- **渐进式训练**：先用 8B 代理模型做 reward 工程/调试（约 $200），再扩到 70B。
+- **渐进式训练**：先用 8B 代理模型做 reward 工程/调试（约 200 美元），再扩到 70B。
 - **用 LoRA 取消 reference**：彻底移除 reference 模型（显存减少 50%）。
 - **先短后长**：按 256$\rightarrow$512$\rightarrow$1024 token 的 curriculum 生成可节省 40% 算力。
 
