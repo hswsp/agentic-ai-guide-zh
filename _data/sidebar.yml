@@ -32,10 +32,14 @@
       url: /part2/ch12-llm-agent-training.html
 - divider: true
 - title: Part III — Reasoning 推理
-  children: []
+  children:
+    - title: 第 13 章 面向大型推理模型的强化学习
+      url: /part3/ch13-reasoning.html
 - divider: true
 - title: Part IV — Evaluation 评估
-  children: []
+  children:
+    - title: 第 14 章 LLM 评估
+      url: /part4/ch14-evaluation.html
 - divider: true
 - title: Part V — Agentic AI 智能体 AI
   children: []
