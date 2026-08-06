@@ -1,0 +1,22 @@
+- title: 首页
+  url: /
+- divider: true
+- title: Part I — Foundations 基础
+  children:
+    - title: 第 1 章 LLM 架构与优化方法
+      url: /part1/ch01-llm-architecture.html
+- divider: true
+- title: Part II — RL Methods for LLMs 面向 LLM 的 RL 方法
+  children: []
+- divider: true
+- title: Part III — Reasoning 推理
+  children: []
+- divider: true
+- title: Part IV — Evaluation 评估
+  children: []
+- divider: true
+- title: Part V — Agentic AI 智能体 AI
+  children: []
+- divider: true
+- title: Part VI — Assessment & Reference 自测与参考
+  children: []

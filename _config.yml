@@ -1,0 +1,36 @@
+remote_theme: sighingnow/jekyll-gitbook
+
+title: 智能体 AI 漫游指南
+description: 从基础到系统 —— The Hitchhiker's Guide to Agentic AI 中文译本
+lang: zh-CN
+
+collections:
+  pages:
+    output: true
+  posts:
+    output: true
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      lang: zh-CN
+  - scope:
+      path: "_pages"
+      type: pages
+    values:
+      layout: home
+      permalink: /:path/
+
+plugins:
+  - jekyll-remote-theme
+  - jekyll-include-cache
+
+exclude:
+  - README.md
+  - book.tex
+  - contents
+  - book.bib
+  - Makefile
+  - docs
+  - .github
