@@ -5,6 +5,10 @@
   children:
     - title: 第 1 章 LLM 架构与优化方法
       url: /part1/ch01-llm-architecture.html
+    - title: 第 2 章 面向 LLM 的系统基础
+      url: /part1/ch02-systems-foundations.html
+    - title: 第 3 章 强化学习导论
+      url: /part1/ch03-rl-intro.html
 - divider: true
 - title: Part II — RL Methods for LLMs 面向 LLM 的 RL 方法
   children: []
