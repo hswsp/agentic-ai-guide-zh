@@ -69,4 +69,10 @@
       url: /part5/ch26-agentic-ui.html
 - divider: true
 - title: Part VI — Assessment & Reference 自测与参考
-  children: []
+  children:
+    - title: 第 27 章 测验题与详细解答
+      url: /part6/ch27-quiz.html
+    - title: 第 28 章 速查手册
+      url: /part6/ch28-quickref.html
+    - title: 第 29 章 总结与未来方向
+      url: /part6/ch29-conclusion.html
