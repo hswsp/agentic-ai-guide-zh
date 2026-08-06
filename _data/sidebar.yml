@@ -11,7 +11,25 @@
       url: /part1/ch03-rl-intro.html
 - divider: true
 - title: Part II — RL Methods for LLMs 面向 LLM 的 RL 方法
-  children: []
+  children:
+    - title: 第 4 章 大语言模型的强化学习基础
+      url: /part2/ch04-rl-basics.html
+    - title: 第 5 章 PPO——近端策略优化
+      url: /part2/ch05-ppo.html
+    - title: 第 6 章 DPO——直接偏好优化
+      url: /part2/ch06-dpo.html
+    - title: 第 7 章 GRPO —— 组相对策略优化
+      url: /part2/ch07-grpo.html
+    - title: 第 8 章 偏好优化变体
+      url: /part2/ch08-preference-optimization-variants.html
+    - title: 第 9 章 奖励模型训练
+      url: /part2/ch09-reward-model-training.html
+    - title: 第 10 章 SFT 最佳实践与技巧
+      url: /part2/ch10-sft-best-practices.html
+    - title: 第 11 章 大规模系统架构与基础设施
+      url: /part2/ch11-large-scale-system-architecture.html
+    - title: 第 12 章 LLM 智能体训练
+      url: /part2/ch12-llm-agent-training.html
 - divider: true
 - title: Part III — Reasoning 推理
   children: []
