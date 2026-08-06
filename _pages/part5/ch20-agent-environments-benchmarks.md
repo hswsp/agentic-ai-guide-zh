@@ -1,7 +1,7 @@
 ---
 layout: home
 title: Agent 环境与基准
-permalink: /part5/ch20-agent-environments.html
+permalink: /part5/ch20-agent-environments-benchmarks.html
 ---
 
 # Agent 环境与基准
