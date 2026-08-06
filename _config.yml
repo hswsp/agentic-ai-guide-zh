@@ -4,11 +4,33 @@ title: 智能体 AI 漫游指南
 description: 从基础到系统 —— The Hitchhiker's Guide to Agentic AI 中文译本
 lang: zh-CN
 
+# GitHub Pages project page deployment
+url: https://hswsp.github.io
+baseurl: /agentic-ai-guide-zh
+
 collections:
-  pages:
+  part1:
+    output: true
+  part2:
+    output: true
+  part3:
+    output: true
+  part4:
+    output: true
+  part5:
+    output: true
+  part6:
     output: true
   posts:
     output: true
+
+ordered_collections:
+  - part1
+  - part2
+  - part3
+  - part4
+  - part5
+  - part6
 
 defaults:
   - scope:
@@ -16,11 +38,35 @@ defaults:
     values:
       lang: zh-CN
   - scope:
-      path: "_pages"
-      type: pages
+      path: "_part1"
+      type: part1
     values:
       layout: home
-      permalink: /:path/
+  - scope:
+      path: "_part2"
+      type: part2
+    values:
+      layout: home
+  - scope:
+      path: "_part3"
+      type: part3
+    values:
+      layout: home
+  - scope:
+      path: "_part4"
+      type: part4
+    values:
+      layout: home
+  - scope:
+      path: "_part5"
+      type: part5
+    values:
+      layout: home
+  - scope:
+      path: "_part6"
+      type: part6
+    values:
+      layout: home
 
 plugins:
   - jekyll-remote-theme

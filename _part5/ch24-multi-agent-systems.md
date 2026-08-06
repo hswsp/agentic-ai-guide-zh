@@ -46,7 +46,7 @@ permalink: /part5/ch24-multi-agent-systems.html
 
 在集中式架构中，由单一的*Orchestrator* Agent（也称为 supervisor、manager 或 planner）持有全局状态，分解任务，将子任务委派给工作 Agent，并汇总它们的结果。其拓扑是**中心辐射式（hub-and-spoke）**：所有通信都通过中心节点流动。
 
-![集中式（Supervisor）架构。Manager 将任务委派给专门化的 Worker，并汇总它们的输出。所有通信均通过中央枢纽流动。](/figures/fig_069_centralized-arch.png)
+![集中式（Supervisor）架构。Manager 将任务委派给专门化的 Worker，并汇总它们的输出。所有通信均通过中央枢纽流动。]({{ site.baseurl }}/figures/fig_069_centralized-arch.png)
 
 Manager 的职责包括：
 
@@ -113,7 +113,7 @@ Manager 的职责包括：
 
 在去中心化架构中，Agent 之间直接交互，没有中央协调者。其拓扑是**网状（mesh）**：任意 Agent 可以与任意其他 Agent 通信。协调通过局部交互涌现，而非通过全局规划。
 
-![去中心化（peer-to-peer）架构。Agent 直接通信；协调从局部交互中涌现。](/figures/fig_070_decentralized-arch.png)
+![去中心化（peer-to-peer）架构。Agent 直接通信；协调从局部交互中涌现。]({{ site.baseurl }}/figures/fig_070_decentralized-arch.png)
 
 对等系统中的涌现式协调通过以下机制产生：
 
@@ -132,7 +132,7 @@ Manager 的职责包括：
 
 层级式架构将集中式模式推广为具有多层管理的**树形结构**。顶层 Orchestrator 委派给特定领域的子 Manager，后者再委派给专门化 Worker。这映射了大型企业的组织结构。
 
-![层级式架构。顶层 Orchestrator 委派给领域子 Manager，后者再委派给专门化 Worker。虚线箭头表示升级路径。](/figures/fig_071_hierarchical-arch.png)
+![层级式架构。顶层 Orchestrator 委派给领域子 Manager，后者再委派给专门化 Worker。虚线箭头表示升级路径。]({{ site.baseurl }}/figures/fig_071_hierarchical-arch.png)
 
 层级式系统的关键特征：
 

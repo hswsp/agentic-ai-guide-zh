@@ -63,7 +63,7 @@ NVIDIA 已经发布了一系列 GPU 架构，每一代都为深度学习带来�
 
 GPU 由一组**流式多处理器（Streaming Multiprocessor，SM）**阵列组成，每个 SM 都是独立的处理器，拥有自己的寄存器文件、共享内存和执行单元。理解 SM 是理解 GPU 性能的关键。
 
-![左：A100 单个流式多处理器（SM）的内部结构——64 个 FP32 CUDA cores、4 个 Tensor Cores、4 个 warp 调度器、256 KB 寄存器文件以及 192 KB 共享内存/L1 缓存。右：完整 A100 芯片包含 108 个 SM，共享 40 MB L2 缓存和 80 GB HBM2e。左侧边栏的带宽标注显示了从寄存器到 HBM 的急剧下降。](/figures/fig_016_fig16.png)
+![左：A100 单个流式多处理器（SM）的内部结构——64 个 FP32 CUDA cores、4 个 Tensor Cores、4 个 warp 调度器、256 KB 寄存器文件以及 192 KB 共享内存/L1 缓存。右：完整 A100 芯片包含 108 个 SM，共享 40 MB L2 缓存和 80 GB HBM2e。左侧边栏的带宽标注显示了从寄存器到 HBM 的急剧下降。]({{ site.baseurl }}/figures/fig_016_fig16.png)
 
 > **SM 的关键组件**
 >
@@ -151,7 +151,7 @@ NVMe SSD（例如 Samsung 990 Pro）顺序读取可达约 7 GB/s。ZeRO-Infinity
 >   = \frac{312 \times 10^{12}}{2 \times 10^{12}} = 156 \text{ FLOP/Byte (A100 BF16)}
 > $$
 
-![A100 BF16 的 Roofline 模型（Roofline Model）。Attention 深陷于内存密集区间；大型 GEMM（FFN 层）则是计算密集的。](/figures/fig_017_fig17.png)
+![A100 BF16 的 Roofline 模型（Roofline Model）。Attention 深陷于内存密集区间；大型 GEMM（FFN 层）则是计算密集的。]({{ site.baseurl }}/figures/fig_017_fig17.png)
 
 > **示例：Attention 的算术强度**
 >
@@ -316,7 +316,7 @@ NVLink 是同一节点内 GPU 之间的点对点互联。每条链路都是双�
 
 下图展示了典型的双节点 GPU 集群拓扑，同时显示节点内（NVLink）和节点间（InfiniBand）通信路径。
 
-![两节点 8-GPU 拓扑。节点内：通过 NVSwitch 的 NVLink 4（总计 900 GB/s）。节点间：通过机架顶端交换机的 InfiniBand NDR 400Gb/s。每个节点配有 8 块 IB 网卡（每块 GPU 一块），用于轨道优化 AllReduce。](/figures/fig_018_fig18.png)
+![两节点 8-GPU 拓扑。节点内：通过 NVSwitch 的 NVLink 4（总计 900 GB/s）。节点间：通过机架顶端交换机的 InfiniBand NDR 400Gb/s。每个节点配有 8 块 IB 网卡（每块 GPU 一块），用于轨道优化 AllReduce。]({{ site.baseurl }}/figures/fig_018_fig18.png)
 
 > **根据带宽选择并行策略**
 >
@@ -457,7 +457,7 @@ vLLM 将 PagedAttention 封装在一整套服务栈中：连续批处理（Conti
 
 #### 架构总览
 
-![vLLM 架构：请求自上而下流动。Scheduler 管理准入与抢占，Block Manager 负责虚拟到物理 KV cache 映射（像操作系统页表一样），Model Executor 在 GPU HBM 中从预分配的块池读取数据并执行批量推理。](/figures/fig_019_fig19.png)
+![vLLM 架构：请求自上而下流动。Scheduler 管理准入与抢占，Block Manager 负责虚拟到物理 KV cache 映射（像操作系统页表一样），Model Executor 在 GPU HBM 中从预分配的块池读取数据并执行批量推理。]({{ site.baseurl }}/figures/fig_019_fig19.png)
 
 #### 核心组件
 

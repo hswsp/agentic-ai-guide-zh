@@ -25,7 +25,7 @@ permalink: /part5/ch19-agent-design-patterns.html
 
 最简单的模式：将复杂任务拆分为固定序列的 LLM 调用，将一个调用的结果作为上下文传入下一个调用。步骤之间的校验门可在错误向下游传播之前及早捕获它们。
 
-![带质量门的 Prompt 链。每一步都是独立的 LLM 调用。质量门可以基于 LLM，也可以基于程序逻辑。](/figures/fig_060_fig60.png)
+![带质量门的 Prompt 链。每一步都是独立的 LLM 调用。质量门可以基于 LLM，也可以基于程序逻辑。]({{ site.baseurl }}/figures/fig_060_fig60.png)
 
 **适用场景**：天然顺序化的任务——内容生成、数据转换、多阶段分析。
 
@@ -35,7 +35,7 @@ permalink: /part5/ch19-agent-design-patterns.html
 
 由分类器（LLM 或传统方法）检查输入，并分派到专门的处理器。
 
-![路由模式：输入被分类一次，然后由专门的处理器处理。](/figures/fig_061_fig61.png)
+![路由模式：输入被分类一次，然后由专门的处理器处理。]({{ site.baseurl }}/figures/fig_061_fig61.png)
 
 **适用场景**：不同任务类型对应不同的最佳 Prompt、工具或模型。如客服分诊、多模态输入处理。
 
@@ -57,7 +57,7 @@ permalink: /part5/ch19-agent-design-patterns.html
 
 在该模式下，由 LLM 自身决定如何拆分工作。一个 Orchestrator 模型分析任务、产出子任务计划、将每个子任务分派给 Worker LLM（可能使用不同的 Prompt 或工具），最终将它们的输出合并为一致的结果。与并行化的关键区别在于：分解逻辑是由模型生成的，而非硬编码的。
 
-![Orchestrator-workers：LLM 决定如何分解任务，并综合各 Worker 的结果。](/figures/fig_062_fig62.png)
+![Orchestrator-workers：LLM 决定如何分解任务，并综合各 Worker 的结果。]({{ site.baseurl }}/figures/fig_062_fig62.png)
 
 **适用场景**：开放式问题，子任务的数量和性质无法在设计时穷举——例如“重构这个代码库”需要先理解依赖图，再决定要修改哪些文件。
 
@@ -65,7 +65,7 @@ permalink: /part5/ch19-agent-design-patterns.html
 
 一个双模型反馈循环 [madaan2023selfrefine]：生成器产出候选输出，由独立的评估器依据显式标准对其打分。若得分低于阈值，则将评估器的评论追加到生成器的上下文中，循环往复，直到达到质量标准或耗尽重试预算。
 
-![Evaluator-optimizer：无需训练的迭代式精化。](/figures/fig_063_fig63.png)
+![Evaluator-optimizer：无需训练的迭代式精化。]({{ site.baseurl }}/figures/fig_063_fig63.png)
 
 **适用场景**：具有明确质量标准的任务——必须通过测试的代码、必须保留语义的翻译、必须符合风格指南的写作。
 

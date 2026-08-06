@@ -36,7 +36,7 @@ $$\text{Integrations with standard} = N + M$$
 
 与**语言服务器协议（Language Server Protocol, LSP）**的类比尤为贴切。在 LSP 出现之前，每一个 IDE 都必须为每一种编程语言单独实现语言支持（自动补全、跳转定义、错误高亮）。在 LSP 之后，语言服务器与编辑器只需说一种共同的协议。MCP 之于 AI 工具使用，正如 LSP 之于开发者工具链。
 
-![MCP 的工作方式：一次用户请求依次流经 Host、LLM 与 MCP Server。LLM 决定调用哪一个工具（步骤 3）；Host 通过 JSON-RPC 将该调用路由到对应的 server（步骤 4）；结果再回传给 LLM 进行自然语言整理（步骤 5--7）。用户看不到任何协议层的细节。](/figures/fig_066_mcp-flow.png)
+![MCP 的工作方式：一次用户请求依次流经 Host、LLM 与 MCP Server。LLM 决定调用哪一个工具（步骤 3）；Host 通过 JSON-RPC 将该调用路由到对应的 server（步骤 4）；结果再回传给 LLM 进行自然语言整理（步骤 5--7）。用户看不到任何协议层的细节。]({{ site.baseurl }}/figures/fig_066_mcp-flow.png)
 
 ## 架构概览
 
@@ -102,7 +102,7 @@ MCP 的一项关键设计决定是：连接是**有状态会话**，而非无状
 
 图 展示了完整的 MCP 栈，从用户界面一直到外部服务。
 
-![完整的 MCP 架构栈。Host 管理一个或多个 Client，每个 Client 通过传输层（stdio 或 Streamable HTTP）与一个 MCP Server 维持有状态的会话。所有 client--server 通信均使用 JSON-RPC 2.0。Server 包装外部服务，并将其暴露为标准化的 Tools、Resources 与 Prompts。](/figures/fig_067_mcp-architecture.png)
+![完整的 MCP 架构栈。Host 管理一个或多个 Client，每个 Client 通过传输层（stdio 或 Streamable HTTP）与一个 MCP Server 维持有状态的会话。所有 client--server 通信均使用 JSON-RPC 2.0。Server 包装外部服务，并将其暴露为标准化的 Tools、Resources 与 Prompts。]({{ site.baseurl }}/figures/fig_067_mcp-architecture.png)
 
 ## 核心原语
 

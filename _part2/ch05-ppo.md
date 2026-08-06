@@ -187,7 +187,7 @@ $$
 ## 用于 RLHF 的 PPO：完整循环
 
 
-![fig_025_fig25.png](/figures/fig_025_fig25.png)
+![fig_025_fig25.png]({{ site.baseurl }}/figures/fig_025_fig25.png)
 
 > **70B Chat 模型的具体 PPO 步骤**
 >
@@ -220,7 +220,7 @@ $$
 ## 细节机制：Logits 与 Policy 更新
 
 
-![PPO 端到端流程：从 prompt batch 出发，经过生成、reward 打分、KL 计算、advantage 估计，到 clipped policy 更新。反馈环显示更新后的 policy 又被用于下一次生成。](/figures/fig_026_fig26.png)
+![PPO 端到端流程：从 prompt batch 出发，经过生成、reward 打分、KL 计算、advantage 估计，到 clipped policy 更新。反馈环显示更新后的 policy 又被用于下一次生成。]({{ site.baseurl }}/figures/fig_026_fig26.png)
 
 PPO 在内存中维护两份不同的参数状态，它们共享同一神经网络拓扑，但在优化过程中持有不同的权重值：
 

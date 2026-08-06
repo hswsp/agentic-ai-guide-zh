@@ -12,7 +12,7 @@ permalink: /part1/ch01-llm-architecture.html
 
 在深入架构细节之前，让我们先建立大语言模型如何将文本转换为文本的直觉。整个过程遵循一条简单的流水线：**文本 $\to$ Token $\to$ 表征 $\to$ Token $\to$ 文本**。
 
-![LLM 流水线：文本被分词为子词单元，转换为整数 ID，嵌入为稠密向量，经 Transformer 层处理，投影到词表 logits，最后解码回文本。虚线回路展示自回归生成——每个输出 Token 被追加到输入中作为下一次前向传播的输入。](/figures/fig_001_pipeline.png)
+![LLM 流水线：文本被分词为子词单元，转换为整数 ID，嵌入为稠密向量，经 Transformer 层处理，投影到词表 logits，最后解码回文本。虚线回路展示自回归生成——每个输出 Token 被追加到输入中作为下一次前向传播的输入。]({{ site.baseurl }}/figures/fig_001_pipeline.png)
 
 > **四个关键阶段**
 >
@@ -50,7 +50,7 @@ permalink: /part1/ch01-llm-architecture.html
 > 3. 将出现频率最高的对合并为一个新符号
 > 4. 重复步骤 2--3 共 $k$ 次迭代（直到达到目标词表大小）
 
-![BPE 分词示例：从字符开始，算法迭代地合并出现频率最高的相邻对，直到该词成为单个 Token 或词表预算耗尽。](/figures/fig_003_fig3.png)
+![BPE 分词示例：从字符开始，算法迭代地合并出现频率最高的相邻对，直到该词成为单个 Token 或词表预算耗尽。]({{ site.baseurl }}/figures/fig_003_fig3.png)
 
 ### 其他分词方法
 
@@ -165,13 +165,13 @@ Transformer[vaswani2017attention] 是所有现代 LLM 的基础。理解其组�
 
 仅解码器（decoder-only）的 Transformer 依次通过嵌入层、重复的注意力+FFN 块以及最终对词表 logits 的投影来处理 Token。下图展示了完整架构。
 
-![仅解码器 Transformer 块（GPT 风格，Pre-Norm 变体）。每个子层（注意力、FFN）之前先经过 LayerNorm，之后接残差相加：$\mathbf{x} + \text{SubLayer}(\text{LN}(\mathbf{x}))$。这种 Pre-Norm 顺序（被 Llama、GPT-3、Mistral 采用）在无需 warmup 的情况下稳定训练，不同于原始的 Post-Norm（在相加之后应用 LayerNorm）。$L$ 个相同的块被堆叠，之后是一个最终的 LayerNorm 和到词表 logits 的线性投影。](/figures/fig_004_decoder-only.png)
+![仅解码器 Transformer 块（GPT 风格，Pre-Norm 变体）。每个子层（注意力、FFN）之前先经过 LayerNorm，之后接残差相加：$\mathbf{x} + \text{SubLayer}(\text{LN}(\mathbf{x}))$。这种 Pre-Norm 顺序（被 Llama、GPT-3、Mistral 采用）在无需 warmup 的情况下稳定训练，不同于原始的 Post-Norm（在相加之后应用 LayerNorm）。$L$ 个相同的块被堆叠，之后是一个最终的 LayerNorm 和到词表 logits 的线性投影。]({{ site.baseurl }}/figures/fig_004_decoder-only.png)
 
 ### 原始的编码器-解码器 Transformer
 
 Transformer 最初被提出[vaswani2017attention] 时是一种用于序列到序列任务（机器翻译、摘要）的**编码器-解码器**架构。尽管现代 LLM 主要使用仅解码器变体（GPT 风格），理解完整架构仍然至关重要，因为交叉注意力和带掩码的自注意力——两者都起源于此——仍是基础构建模块。
 
-![原始 Transformer 架构（Vaswani 等，2017）。编码器（左）通过双向自注意力处理整个输入。解码器（右）使用带掩码的自注意力以及对编码器表征的交叉注意力来自回归生成 Token。虚线框表示重复的层块（$\times N$）；灰线表示绕过每个子层的残差连接。注意：原始工作使用 **Post-Norm**（LayerNorm 在残差相加*之后*应用：$\text{LN}(\mathbf{x} + \text{SubLayer}(\mathbf{x}))$），不同于现代 LLM 使用 Pre-Norm。](/figures/fig_005_transformer-original.png)
+![原始 Transformer 架构（Vaswani 等，2017）。编码器（左）通过双向自注意力处理整个输入。解码器（右）使用带掩码的自注意力以及对编码器表征的交叉注意力来自回归生成 Token。虚线框表示重复的层块（$\times N$）；灰线表示绕过每个子层的残差连接。注意：原始工作使用 **Post-Norm**（LayerNorm 在残差相加*之后*应用：$\text{LN}(\mathbf{x} + \text{SubLayer}(\mathbf{x}))$），不同于现代 LLM 使用 Pre-Norm。]({{ site.baseurl }}/figures/fig_005_transformer-original.png)
 
 **编码器（Encoder）。**
 
@@ -249,7 +249,7 @@ $$\text{CrossAttn}(Q_{\text{dec}}, K_{\text{enc}}, V_{\text{enc}}) = \text{softm
 - "king" 和 "bicycle" 距离很远（无关）
 - 向量运算捕捉关系：$\vec{\text{king}} - \vec{\text{man}} + \vec{\text{woman}} \approx \vec{\text{queen}}$
 
-![嵌入空间可视化（二维投影）：语义相似的词聚集在一起。嵌入表在预训练期间学习这些位置，纯粹从文本中的共现模式中捕捉含义。](/figures/fig_006_fig6.png)
+![嵌入空间可视化（二维投影）：语义相似的词聚集在一起。嵌入表在预训练期间学习这些位置，纯粹从文本中的共现模式中捕捉含义。]({{ site.baseurl }}/figures/fig_006_fig6.png)
 
 **嵌入表。**
 
@@ -279,7 +279,7 @@ $$
 
 当使用预训练嵌入（例如来自 BERT 或 GPT-2）用于下游任务（如检索 RAG 或推荐系统冷启动）时，会出现一个关键问题：学习到的表征高度**各向异性（anisotropic）**——它们占据嵌入空间中一个狭窄的锥形区域，而非均匀分布在所有方向上[ethayarajh2019contextual]。
 
-![嵌入空间中的各向同性（isotropy）与各向异性（anisotropy）。左：各向同性的嵌入均匀分布，使余弦相似度成为可靠的语义相关性度量。右：各向异性的嵌入（如 BERT 中观察到的）聚集在狭窄的锥形内，导致所有对的余弦相似度都很高，无论语义内容如何。白化（whitening）变换空间以恢复各向同性。](/figures/fig_007_fig7.png)
+![嵌入空间中的各向同性（isotropy）与各向异性（anisotropy）。左：各向同性的嵌入均匀分布，使余弦相似度成为可靠的语义相关性度量。右：各向异性的嵌入（如 BERT 中观察到的）聚集在狭窄的锥形内，导致所有对的余弦相似度都很高，无论语义内容如何。白化（whitening）变换空间以恢复各向同性。]({{ site.baseurl }}/figures/fig_007_fig7.png)
 
 **这为何对应用很重要：**
 
@@ -737,7 +737,7 @@ NLAE 引入了一个"语言模型在回路中"的设计，使其计算昂贵，�
 
 Transformer 主干网络为每个位置产生上下文隐藏状态 $\mathbf{h}_t \in \mathbb{R}^d$。我们*如何处理*这些隐藏状态——即**预测头（Prediction Head）**——定义了任务本身。同一个 Transformer 主干网络只需更换预测头，就能服务于完全不同的目的。
 
-![同一个 Transformer 主干网络通过更换预测头即可支持不同任务。本文使用的全部三种预测头在最终投影层之下具有完全相同的架构。](/figures/fig_008_prediction-heads.png)
+![同一个 Transformer 主干网络通过更换预测头即可支持不同任务。本文使用的全部三种预测头在最终投影层之下具有完全相同的架构。]({{ site.baseurl }}/figures/fig_008_prediction-heads.png)
 
 ### 语言建模头（预训练阶段）
 
@@ -893,7 +893,7 @@ $$\theta_{t+1} = \theta_t - \eta \nabla_\theta \mathcal{L}(\theta_t)$$
 
 其中 $\eta > 0$ 是**学习率（Learning Rate）**——也就是步长。这就是**梯度下降（Gradient Descent）**[rumelhart1986learning]。
 
-![梯度下降：从随机初始化 $\theta_0$ 开始，每一步都将参数沿降低损失的方向移动，步长由学习率 $\eta$ 控制。该过程会向某个（局部）最小值收敛。](/figures/fig_009_fig9.png)
+![梯度下降：从随机初始化 $\theta_0$ 开始，每一步都将参数沿降低损失的方向移动，步长由学习率 $\eta$ 控制。该过程会向某个（局部）最小值收敛。]({{ site.baseurl }}/figures/fig_009_fig9.png)
 
 **为何全梯度下降不可行。**
 
@@ -1034,7 +1034,7 @@ AdamW[loshchilov2019adamw] 修正了权重衰减与自适应优化器交互时�
 
 ### 学习率调度策略
 
-![常见学习率调度。所有调度都包含一个线性预热阶段。WSD（Warmup-Stable-Decay）正成为预训练的事实标准。](/figures/fig_010_fig10.png)
+![常见学习率调度。所有调度都包含一个线性预热阶段。WSD（Warmup-Stable-Decay）正成为预训练的事实标准。]({{ site.baseurl }}/figures/fig_010_fig10.png)
 
 **(a) 恒定调度（Constant）。**
 
@@ -1642,7 +1642,7 @@ SFT 训练指南。
 >
 > Aghajanyan 等[aghajanyan2020intrinsic]表明，微调发生在一个非常低维的子空间——微调任务的「内在维度（intrinsic dimensionality）」远小于模型的参数量。一个 175B 模型的微调任务内在维度可能 $<$10,000。LoRA 直接利用了这一点：秩 $r$ 把每个权重矩阵的更新约束在 $r$ 维子空间内。
 
-![LoRA 将权重更新 $\Delta W$ 分解为两个小矩阵 $B \times A$。原始权重 $W$ 保持冻结；只有 $B$ 和 $A$ 接收梯度。推理时，乘积 $BA$ 可以零开销地合并到 $W$ 中。](/figures/fig_011_lora-decomposition.png)
+![LoRA 将权重更新 $\Delta W$ 分解为两个小矩阵 $B \times A$。原始权重 $W$ 保持冻结；只有 $B$ 和 $A$ 接收梯度。推理时，乘积 $BA$ 可以零开销地合并到 $W$ 中。]({{ site.baseurl }}/figures/fig_011_lora-decomposition.png)
 
 > **为什么 $\alpha/r$ 缩放很重要**
 >
@@ -1813,7 +1813,7 @@ LoRA 主导了现代实践，但并非唯一的参数高效方法。为完整起
 > - 通常每个 Token 在 $N=8$--64 个专家中激活 $K=2$ 个
 > - 总参数量随 $N$ 增长；**激活参数量** 按 FFN 大小的 $K/N$ 比例增长
 
-![具有 8 个专家和 Top-2 路由的 MoE 层。每个 Token 只计算门控值最高的两个专家；其余专家被完全跳过。](/figures/fig_012_fig12.png)
+![具有 8 个专家和 Top-2 路由的 MoE 层。每个 Token 只计算门控值最高的两个专家；其余专家被完全跳过。]({{ site.baseurl }}/figures/fig_012_fig12.png)
 
 ### 负载均衡
 
@@ -1968,7 +1968,7 @@ $$
 
 **缺点：** 对开放式生成仍倾向于产生泛泛、重复的文本；计算量增加 $B$ 倍；所有束往往收敛到相似的输出。
 
-![束宽为 $B=2$ 的束搜索。在每一步，只有得分最高的 2 个部分序列会被保留（蓝色）。得分较低的候选会被剪枝（灰色）。](/figures/fig_013_fig13.png)
+![束宽为 $B=2$ 的束搜索。在每一步，只有得分最高的 2 个部分序列会被保留（蓝色）。得分较低的候选会被剪枝（灰色）。]({{ site.baseurl }}/figures/fig_013_fig13.png)
 
 ### 多样化束搜索（Diverse Beam Search）
 
@@ -2019,7 +2019,7 @@ $$
 
 **缺点：** 在核的尾部仍会包含一些低质量 Token；阈值是一个单一的全局超参数。
 
-![Top-$p$（核）采样：Token 按概率排序并依次加入，直到累计质量达到 $p=0.9$。核（深蓝）会根据分布形状自适应其大小——这里 5 个 Token 就足够了。](/figures/fig_014_fig14.png)
+![Top-$p$（核）采样：Token 按概率排序并依次加入，直到累计质量达到 $p=0.9$。核（深蓝）会根据分布形状自适应其大小——这里 5 个 Token 就足够了。]({{ site.baseurl }}/figures/fig_014_fig14.png)
 
 > **Top-$k$ 与 Top-$p$**
 >
@@ -2833,7 +2833,7 @@ LLM 安全威胁类别。
 
 ### 安全训练流水线
 
-![安全贯穿每个阶段：预训练中的数据过滤、SFT 中的拒答示例、RLHF 中专门的安全奖励模型，以及迭代式红队测试。](/figures/fig_015_fig15.png)
+![安全贯穿每个阶段：预训练中的数据过滤、SFT 中的拒答示例、RLHF 中专门的安全奖励模型，以及迭代式红队测试。]({{ site.baseurl }}/figures/fig_015_fig15.png)
 
 ### 关键安全机制
 

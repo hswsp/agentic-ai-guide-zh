@@ -22,7 +22,7 @@ harness 强制实施清晰的 **关注点分离**（separation of concerns）：
 - **通信（Communication）**——harness 处理 Agent、用户与外部服务之间的消息路由。
 - **可观测性（Observability）**——harness 对每一步进行埋点，用于日志、追踪与调试。
 
-![agent harness 的高层架构。LLM 只负责推理；所有执行、记忆、路由与可观测性都由 harness 管理。](/figures/fig_053_harness-arch.png)
+![agent harness 的高层架构。LLM 只负责推理；所有执行、记忆、路由与可观测性都由 harness 管理。]({{ site.baseurl }}/figures/fig_053_harness-arch.png)
 
 > **为何要分离关注点？**
 >
@@ -114,7 +114,7 @@ $$
 - **按重要性排序保留：** 将 system prompt 和首条用户消息固定（pinned），对其余消息应用重要性评分。
 - **分层摘要（Hierarchical Summarization）：** 维护一个多层摘要金字塔——最近的轮次原文保留，较旧的轮次以段落摘要保留，最旧的轮次合并为一个抽象摘要。
 
-![三种滑动窗口策略。红色 = 固定保留，灰色 = 丢弃，蓝色 = 原文保留，黄色 = 摘要，绿色 = 新消息。](/figures/fig_054_sliding-window.png)
+![三种滑动窗口策略。红色 = 固定保留，灰色 = 丢弃，蓝色 = 原文保留，黄色 = 摘要，绿色 = 新消息。]({{ site.baseurl }}/figures/fig_054_sliding-window.png)
 
 ### 递归 Context 分解
 
@@ -173,7 +173,7 @@ Context rot（上下文腐烂）——即模型准确率随 Context 长度增长
 
 该模式可推广至摘要之外的场景：递归搜索（在数百万 Token 中查找针式信息）、递归分析（审计大型代码库）、递归抽取（解析文档语料库），都遵循相同的“分解—递归—聚合”结构。
 
-![递归语言模型（RLM）。根模型将 Context 划分为若干块，在深度~1 派生子 LLM 调用，子调用可能进一步递归（深度~2）。结果向上回流（绿色虚线箭头）并聚合为最终答案。任何单次调用都不会处理完整 Context。](/figures/fig_055_rlm.png)
+![递归语言模型（RLM）。根模型将 Context 划分为若干块，在深度~1 派生子 LLM 调用，子调用可能进一步递归（深度~2）。结果向上回流（绿色虚线箭头）并聚合为最终答案。任何单次调用都不会处理完整 Context。]({{ site.baseurl }}/figures/fig_055_rlm.png)
 
 ### Token 计数与预算监控
 
@@ -440,7 +440,7 @@ MCP 采用客户端-服务器模型：
 3. MCP server 执行工具并返回结构化结果。
 4. harness 将结果以 `tool` 消息的形式插入 Context。
 
-![MCP 架构。harness 充当 MCP client，通过标准化传输将工具调用路由到专门的 MCP server。](/figures/fig_056_mcp-arch.png)
+![MCP 架构。harness 充当 MCP client，通过标准化传输将工具调用路由到专门的 MCP server。]({{ site.baseurl }}/figures/fig_056_mcp-arch.png)
 
 ## 编排模式
 
@@ -454,7 +454,7 @@ $$
 \text{Thought}_t \to \text{Action}_t \to \text{Observation}_t \to \text{Thought}_{t+1} \to \cdots
 $$
 
-![ReAct 循环：Agent 在推理与行动之间交替，直到满足终止条件。](/figures/fig_057_react-loop.png)
+![ReAct 循环：Agent 在推理与行动之间交替，直到满足终止条件。]({{ site.baseurl }}/figures/fig_057_react-loop.png)
 
 **实现细节。**
 
@@ -485,7 +485,7 @@ Plan-and-Execute 对长时程任务更高效（LLM 调用更少），但对意�
 
 一个中央"supervisor" LLM 接收用户请求，将其分解，并将子任务路由到专门的 Agent。结果由 supervisor 聚合。
 
-![Supervisor 模式：一个编排者将任务路由至专门的 Agent。](/figures/fig_058_supervisor.png)
+![Supervisor 模式：一个编排者将任务路由至专门的 Agent。]({{ site.baseurl }}/figures/fig_058_supervisor.png)
 
 **Peer-to-Peer（点对点）。**
 
@@ -533,7 +533,7 @@ $$
 G = (V, E, \sigma_0), \quad v \in V: \text{agent step}, \quad e \in E: \text{conditional transition}, \quad \sigma_0: \text{initial state}
 $$
 
-![一个人机协同 Agent 的示例工作流图。状态与条件转移都是显式的，使控制流可审计。](/figures/fig_059_workflow-graph.png)
+![一个人机协同 Agent 的示例工作流图。状态与条件转移都是显式的，使控制流可审计。]({{ site.baseurl }}/figures/fig_059_workflow-graph.png)
 
 ## 状态管理
 

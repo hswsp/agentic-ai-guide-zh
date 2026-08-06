@@ -8,7 +8,7 @@ permalink: /part1/ch03-rl-intro.html
 
 强化学习（Reinforcement Learning，RL）是一种范式，其中**智能体（agent）**通过与**环境（environment）**交互、接收**奖励（rewards）**作为反馈，并优化其**策略（policy）**以最大化长期累积奖励来学习做出序贯决策[sutton2018reinforcement]。与监督学习（需要带标签的输入-输出对）不同，RL 通过*试错（trial and error）*来发现最优行为。
 
-![强化学习概览：智能体与环境交互，接收奖励作为反馈，并通过试错更新其策略。与从带标签数据对学习的监督学习不同，RL 通过经验最大化奖励来学习应当做什么。](/figures/fig_020_fig20.png)
+![强化学习概览：智能体与环境交互，接收奖励作为反馈，并通过试错更新其策略。与从带标签数据对学习的监督学习不同，RL 通过经验最大化奖励来学习应当做什么。]({{ site.baseurl }}/figures/fig_020_fig20.png)
 
 ## 马尔可夫决策过程（Markov Decision Process，MDP）
 
@@ -94,7 +94,7 @@ $$
 
 强化学习算法可以从多个维度进行分类。理解这一分类体系有助于针对特定问题选择合适的方法。
 
-![强化学习方法的分类。](/figures/fig_021_fig21.png)
+![强化学习方法的分类。]({{ site.baseurl }}/figures/fig_021_fig21.png)
 
 > **关键：关键分类区分**
 >
@@ -400,7 +400,7 @@ $$
 \hat{A}_t^{\text{GAE}} = \sum_{l=0}^{T-t} (\gamma\lambda)^l \delta_{t+l}, \quad \delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)
 $$
 
-![GAE 数据流：每个 TD 残差 $\delta_{t+l}^V$ 在求和前被乘以权重 $(\gamma\lambda)^l$。$\lambda$ 越大，纳入的未来残差越多（偏差更低，方差更高）。](/figures/fig_022_fig22.png)
+![GAE 数据流：每个 TD 残差 $\delta_{t+l}^V$ 在求和前被乘以权重 $(\gamma\lambda)^l$。$\lambda$ 越大，纳入的未来残差越多（偏差更低，方差更高）。]({{ site.baseurl }}/figures/fig_022_fig22.png)
 
 > **直觉：$\lambda$ 控制什么——偏差-方差权衡**
 >
@@ -419,7 +419,7 @@ $$
 
 ### 架构光谱：边界情形分析
 
-![GAE 中的偏差 vs 方差：$\lambda$ 控制这一权衡。较小的 $\lambda$（左）通过自举得到高偏差/低方差；较大的 $\lambda$（右）使用完整 Monte Carlo 回报得到低偏差/高方差。最优选择（$\lambda \in [0.9, 0.95]$）在稳定训练与准确的长程信用分配之间取得平衡。](/figures/fig_023_fig23.png)
+![GAE 中的偏差 vs 方差：$\lambda$ 控制这一权衡。较小的 $\lambda$（左）通过自举得到高偏差/低方差；较大的 $\lambda$（右）使用完整 Monte Carlo 回报得到低偏差/高方差。最优选择（$\lambda \in [0.9, 0.95]$）在稳定训练与准确的长程信用分配之间取得平衡。]({{ site.baseurl }}/figures/fig_023_fig23.png)
 
 超参数 $\lambda$ 充当了两种基本估计范式之间的「滑尺」。
 

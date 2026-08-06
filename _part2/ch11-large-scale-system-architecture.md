@@ -12,7 +12,7 @@ permalink: /part2/ch11-large-scale-system-architecture.html
 ## 4 模型显存挑战
 
 
-![70B PPO 显存预算：RLHF 所需的四个模型及其显存占用。合计 1470--1560GB。朴素方案最少需要 19--20 块 A100-80GB。使用 ZeRO-3 时：8 个节点即可装下。](/figures/fig_031_fig31.png)
+![70B PPO 显存预算：RLHF 所需的四个模型及其显存占用。合计 1470--1560GB。朴素方案最少需要 19--20 块 A100-80GB。使用 ZeRO-3 时：8 个节点即可装下。]({{ site.baseurl }}/figures/fig_031_fig31.png)
 
 > **显存预算现实核对——70B BF16**
 >
@@ -34,7 +34,7 @@ permalink: /part2/ch11-large-scale-system-architecture.html
 训练大语言模型必须把计算分布到许多 GPU 上。可以沿*多个本质不同的维度*并行，每种都有各自的取舍。本节用数学公式、示意图和实践指引详细介绍每种策略。
 
 
-![四种并行策略概览。生产系统通常会同时组合其中 2--3 种。](/figures/fig_032_fig32.png)
+![四种并行策略概览。生产系统通常会同时组合其中 2--3 种。]({{ site.baseurl }}/figures/fig_032_fig32.png)
 
 ### 数据并行（Data Parallelism, DP）与分布式数据并行（Distributed Data Parallelism, DDP）
 
@@ -49,7 +49,7 @@ permalink: /part2/ch11-large-scale-system-architecture.html
 多进程方案：每块 GPU 各自运行一个进程。在反向计算继续进行的同时，通过 ring-AllReduce [sergeev2018horovod] 在后台同步梯度。
 
 
-![DDP：每块 GPU 持有完整的模型副本并处理不同的 batch。梯度通过 ring AllReduce 取平均，与反向计算重叠。](/figures/fig_033_ddp.png)
+![DDP：每块 GPU 持有完整的模型副本并处理不同的 batch。梯度通过 ring AllReduce 取平均，与反向计算重叠。]({{ site.baseurl }}/figures/fig_033_ddp.png)
 
 **DDP 的关键特性**：
 
@@ -97,7 +97,7 @@ $$
 权重矩阵按行切：$W = [W_0; W_1; \ldots; W_{T-1}]$，其中 $W_i \in \mathbb{R}^{d/T \times h}$。输入 $X$ 也必须切开。每块 GPU 计算一个部分和，再通过 **AllReduce** 得到最终输出。
 
 
-![列并行线性层（TP=2）。权重按列切开；每块 GPU 独立计算 $XW_i$。MLP 将其与行并行层配对，从而避免多余的 AllReduce。](/figures/fig_034_tp-column.png)
+![列并行线性层（TP=2）。权重按列切开；每块 GPU 独立计算 $XW_i$。MLP 将其与行并行层配对，从而避免多余的 AllReduce。]({{ site.baseurl }}/figures/fig_034_tp-column.png)
 
 **TP 下的 Transformer Block。**
 
@@ -108,7 +108,7 @@ $$
 3. **合计**：每个 Transformer 层 2 次 AllReduce（attention 一次，MLP 一次）。
 
 
-![单个 Transformer block 中的张量并行通信模式。每层需要两次 AllReduce 操作（红色标注）——attention 之后一次，MLP 之后一次。](/figures/fig_035_tp-transformer.png)
+![单个 Transformer block 中的张量并行通信模式。每层需要两次 AllReduce 操作（红色标注）——attention 之后一次，MLP 之后一次。]({{ site.baseurl }}/figures/fig_035_tp-transformer.png)
 
 > **为什么 TP 必须限制在节点内**
 >
@@ -139,7 +139,7 @@ TP 把权重显存切到了多块 GPU 上。但 LayerNorm 和 Dropout 作用在*
 对那些不需要跨 GPU 通信的操作（LayerNorm、Dropout、残差连接），按*序列维度*切分。每块 GPU 对这些操作只处理 $s/T$ 长的序列切片，仅在真正需要的地方（attention、线性层）再 gather 出完整序列。
 
 
-![序列并行通过沿序列维度切分，降低 LayerNorm/Dropout 的激活显存。通信（AllGather/ReduceScatter）取代了标准 TP 中的 AllReduce——总传输字节数不变，但显存得以节省。](/figures/fig_036_seq-parallel.png)
+![序列并行通过沿序列维度切分，降低 LayerNorm/Dropout 的激活显存。通信（AllGather/ReduceScatter）取代了标准 TP 中的 AllReduce——总传输字节数不变，但显存得以节省。]({{ site.baseurl }}/figures/fig_036_seq-parallel.png)
 
 > **SP 通信是 “免费” 的**
 >
@@ -164,7 +164,7 @@ $$
 朴素流水线执行会产生 “气泡”——某个 stage 等待前一 stage 的输入或后一 stage 的梯度时的空闲时间：
 
 
-![流水线气泡对比。左：朴素流水线只有一个 micro-batch，75% 时间空闲。右：$M=4$ 个 micro-batch 的 GPipe 大幅缩小气泡。当 $M \gg P$ 时，气泡占比趋近于 0。](/figures/fig_037_pipeline-bubble.png)
+![流水线气泡对比。左：朴素流水线只有一个 micro-batch，75% 时间空闲。右：$M=4$ 个 micro-batch 的 GPipe 大幅缩小气泡。当 $M \gg P$ 时，气泡占比趋近于 0。]({{ site.baseurl }}/figures/fig_037_pipeline-bubble.png)
 
 **气泡占比公式。**
 
@@ -221,7 +221,7 @@ $$
 FSDP [zhao2023pytorch]（PyTorch）和 ZeRO-3 [rajbhandari2020zero]（DeepSpeed）解决了 DDP 固有的显存重复问题：不再让每块 GPU 都保存完整的参数、梯度和优化器状态，而是每块 GPU 只拥有 $1/N$ 的切片，需要时即时重建完整张量。
 
 
-![FSDP 把所有模型状态切片到多块 GPU 上。每块 GPU 拥有 $1/N$ 的参数、优化器状态和梯度。在每层计算前，通过 AllGather 按需重建完整参数。](/figures/fig_038_fsdp.png)
+![FSDP 把所有模型状态切片到多块 GPU 上。每块 GPU 拥有 $1/N$ 的参数、优化器状态和梯度。在每层计算前，通过 AllGather 按需重建完整参数。]({{ site.baseurl }}/figures/fig_038_fsdp.png)
 
 **FSDP 每层的执行流程：**
 
@@ -280,7 +280,7 @@ model = FSDP(
 大规模生产系统（70B+）会同时组合 TP、PP 和 DP/FSDP：
 
 
-![16 块 GPU 上的 3D 并行布局：TP=4（每个方框内，走 NVLink）、PP=2（橙色箭头，stage 之间）、DP=2（红色箭头，梯度同步）。每个维度利用通信层级中不同的一层。](/figures/fig_039_3d-parallel.png)
+![16 块 GPU 上的 3D 并行布局：TP=4（每个方框内，走 NVLink）、PP=2（橙色箭头，stage 之间）、DP=2（红色箭头，梯度同步）。每个维度利用通信层级中不同的一层。]({{ site.baseurl }}/figures/fig_039_3d-parallel.png)
 
 > **生产配方：64 块 A100-80GB（8 节点）上的 70B**
 >
@@ -380,7 +380,7 @@ outputs = engine.generate(prompts, sampling_params)
 诸如 DeepSpeed-Chat [yao2023deepspeedchat] 与 OpenRLHF [hu2024openrlhf] 这样的生产级 RLHF 系统采用**解耦式架构**，将生成、打分、训练拆成三个可独立扩展的集群。
 
 
-![解耦式 RLHF 架构。每个集群针对自己的负载做优化。打分后的 rollout 先在经验缓冲（experience buffer）中累积，再被训练消费。](/figures/fig_040_fig40.png)
+![解耦式 RLHF 架构。每个集群针对自己的负载做优化。打分后的 rollout 先在经验缓冲（experience buffer）中累积，再被训练消费。]({{ site.baseurl }}/figures/fig_040_fig40.png)
 
 > **为什么要解耦？**
 >
@@ -496,7 +496,7 @@ ds_config = {
 ## 端到端延迟拆解
 
 
-![不重叠（单体式）。解耦后：生成与训练重叠，实际加速 1.4$\times$。](/figures/fig_041_fig41.png)
+![不重叠（单体式）。解耦后：生成与训练重叠，实际加速 1.4$\times$。]({{ site.baseurl }}/figures/fig_041_fig41.png)
 
 | **阶段** | **用时（70B）** | **受限于** | **优化手段** |
 | --- | --- | --- | --- |

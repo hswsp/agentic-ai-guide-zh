@@ -205,7 +205,7 @@ Web 环境向 Agent 提供一个浏览器，并要求其在真实或模拟网站
 
 Agent 环境的激增带来了碎片化问题：每个环境都暴露不同的 API、使用不同的观察格式、需要不同的脚手架。**OpenEnv** [huggingface2025openenv] 是 Hugging Face 最近推出的开源框架，直接针对这一问题：它为 Agent 执行环境提供 Gymnasium 风格 [towers2024gymnasium] 的接口（`step()`、`reset()`、`state()`），以基于 Docker 的隔离部署通过 WebSocket 通信。OpenEnv 与更广泛的标准化努力互补，如 AgentGym [xi2024agentgym]（为 LLM Agent 跨多种环境提供统一格式平台）和 BrowserGym [drouin2024browsergym]（标准化 Web Agent 基准的观察和动作空间）。下文的设计原则概括了这些项目共同收敛出的最佳实践。
 
-![OpenEnv 架构与一个 LLM Agent。Agent 通过 harness 循环进行推理，并调用类型化的 EnvClient。客户端通过 WebSocket 与运行在 Docker 容器内的 HTTPEnvServer 通信。RL 训练器（虚线）可选地包裹该循环，以采集 rollout 和奖励信号用于 Policy 优化。](/figures/fig_064_openenv-arch.png)
+![OpenEnv 架构与一个 LLM Agent。Agent 通过 harness 循环进行推理，并调用类型化的 EnvClient。客户端通过 WebSocket 与运行在 Docker 容器内的 HTTPEnvServer 通信。RL 训练器（虚线）可选地包裹该循环，以采集 rollout 和奖励信号用于 Policy 优化。]({{ site.baseurl }}/figures/fig_064_openenv-arch.png)
 
 ### 标准化的 Agent--环境接口
 
@@ -378,7 +378,7 @@ LLM Agent 环境的奖励函数通常是*基于执行*的：环境在每个 Epis
 
 图 展示了实践中使用的四种主要接口模式。
 
-![四种 Agent--环境接口模式。(a) 基于文本是 LLM 最常用的方式；(b) 结构化 JSON 可实现精确解析；(c) 多模态结合截图与可访问性树用于 GUI 任务；(d) 流式接口支持没有离散回合边界的实时交互。](/figures/fig_065_env-agent-interface.png)
+![四种 Agent--环境接口模式。(a) 基于文本是 LLM 最常用的方式；(b) 结构化 JSON 可实现精确解析；(c) 多模态结合截图与可访问性树用于 GUI 任务；(d) 流式接口支持没有离散回合边界的实时交互。]({{ site.baseurl }}/figures/fig_065_env-agent-interface.png)
 
 **基于文本的观察/动作。**
 

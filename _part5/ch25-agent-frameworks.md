@@ -52,7 +52,7 @@ Agent 是有状态、长时间运行的进程，单次执行可能跨越数分�
 
 结构化的开发生命周期能帮助团队系统地从概念走向生产。图 展示了五个主要阶段。
 
-![Agent 开发生命周期。每个阶段的反馈环确保持续改进。](/figures/fig_072_agent-lifecycle.png)
+![Agent 开发生命周期。每个阶段的反馈环确保持续改进。]({{ site.baseurl }}/figures/fig_072_agent-lifecycle.png)
 
 ### 阶段 1：设计
 
@@ -258,7 +258,7 @@ result = graph.invoke(
 )
 ```
 
-![研究型 Agent 的 LangGraph 执行图。条件边实现了 Tool 使用循环与错误处理。](/figures/fig_073_langgraph-graph.png)
+![研究型 Agent 的 LangGraph 执行图。条件边实现了 Tool 使用循环与错误处理。]({{ site.baseurl }}/figures/fig_073_langgraph-graph.png)
 
 ### AutoGen（Microsoft）
 
@@ -727,7 +727,7 @@ SK 特别适合企业部署，原因包括：
 
 模块化方案把 Agent 系统拆解为可独立替换的组件：
 
-![模块化 Agent 架构。编排器将任务派发给各核心服务；每个服务自管其存储。虚线表示可选的跨服务通信。](/figures/fig_074_modular-arch.png)
+![模块化 Agent 架构。编排器将任务派发给各核心服务；每个服务自管其存储。虚线表示可选的跨服务通信。]({{ site.baseurl }}/figures/fig_074_modular-arch.png)
 
 ### 关键开源构件
 
@@ -824,7 +824,7 @@ agent = Agent(model="gpt-4o", tools=tools)
 
 测试 Agent 需要一套多层策略，以应对非确定性、有状态、多步骤系统所特有的挑战。
 
-![Agent 测试金字塔。下层数量多且更快；上层提供更高的可信度。](/figures/fig_075_testing-pyramid.png)
+![Agent 测试金字塔。下层数量多且更快；上层提供更高的可信度。]({{ site.baseurl }}/figures/fig_075_testing-pyramid.png)
 
 ### Tool 的单元测试
 
@@ -1148,7 +1148,7 @@ print(f"Replay output: {response.choices[0].message.content[:300]}")
 
 要大规模部署 Agent，必须在执行模型、状态管理和资源分配三方面格外审慎。
 
-![基于队列的异步 Agent 部署。worker 从队列拉取任务，并独立持久化各自状态。](/figures/fig_076_deployment-arch.png)
+![基于队列的异步 Agent 部署。worker 从队列拉取任务，并独立持久化各自状态。]({{ site.baseurl }}/figures/fig_076_deployment-arch.png)
 
 ### 异步 Agent 执行
 

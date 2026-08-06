@@ -558,7 +558,7 @@ OpenHands [wang2024openhands] 和 SWE-Agent [yang2024sweagent] 应用 GRPO 训�
 ### 架构概览
 
 
-![生产力副驾架构：LLM Agent（带 RL Policy $\pi_\theta$）接收用户意图并与多个应用 API 交互。基于任务成功、用户反馈和效率指标的 reward 信号驱动 Policy 改进。](/figures/fig_043_fig43.png)
+![生产力副驾架构：LLM Agent（带 RL Policy $\pi_\theta$）接收用户意图并与多个应用 API 交互。基于任务成功、用户反馈和效率指标的 reward 信号驱动 Policy 改进。]({{ site.baseurl }}/figures/fig_043_fig43.png)
 
 ### 生产力副驾的形式化 MDP 定义
 
