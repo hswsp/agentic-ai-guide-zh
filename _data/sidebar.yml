@@ -42,7 +42,31 @@
       url: /part4/ch14-evaluation.html
 - divider: true
 - title: Part V — Agentic AI 智能体 AI
-  children: []
+  children:
+    - title: 第 15 章 智能体 AI 简介
+      url: /part5/ch15-agentic-ai-intro.html
+    - title: 第 16 章 检索增强生成（RAG）
+      url: /part5/ch16-rag.html
+    - title: 第 17 章 智能体记忆系统
+      url: /part5/ch17-memory-systems.html
+    - title: 第 18 章 Agent Harness —— 上下文管理与编排
+      url: /part5/ch18-agent-harness.html
+    - title: 第 19 章 Agent 设计模式
+      url: /part5/ch19-agent-design-patterns.html
+    - title: 第 20 章 Agent 环境与基准
+      url: /part5/ch20-agent-environments.html
+    - title: 第 21 章 模型上下文协议（MCP）
+      url: /part5/ch21-mcp.html
+    - title: 第 22 章 Agent Skills
+      url: /part5/ch22-agent-skills.html
+    - title: 第 23 章 智能体到智能体通信（A2A）
+      url: /part5/ch23-a2a.html
+    - title: 第 24 章 多智能体系统（Multi-Agent Systems）
+      url: /part5/ch24-multi-agent-systems.html
+    - title: 第 25 章 Agent 开发框架
+      url: /part5/ch25-agent-frameworks.html
+    - title: 第 26 章 Agentic UI 框架
+      url: /part5/ch26-agentic-ui.html
 - divider: true
 - title: Part VI — Assessment & Reference 自测与参考
   children: []
