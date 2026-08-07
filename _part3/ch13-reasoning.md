@@ -131,7 +131,7 @@ $$
 其中：
 
 - $\mathcal{G}$：**想法生成器**——产生 $b$ 个候选的下一想法：$\{z^{(1)}, \ldots, z^{(b)}\} \sim \pi_\theta(\cdot \mid s)$
-- $\mathcal{E}$：**状态评估器**——为部分解打分：$V(s) \in \{$*sure*, *maybe*, *impossible*$\}$ 或 $V(s) \in [0, 1]$
+- $\mathcal{E}$：**状态评估器**——为部分解打分：$V(s) \in \{\text{sure}, \text{maybe}, \text{impossible}\}$ 或 $V(s) \in [0, 1]$
 - $\pi_\theta$：生成想法的语言模型
 - $\text{Search}$：搜索算法（BFS 或 DFS）
 
