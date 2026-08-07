@@ -94,7 +94,7 @@ $$
 
 ### Q1：解释 PPO 的裁剪目标。为什么它比朴素 policy gradient 更有效？
 
-**答**：朴素 policy gradient：$\nabla J = \mathbb{E}[\nabla\log\pi(a|s) \cdot \hat{A}]$。问题：一个幸运/不幸的样本就能产生巨大的梯度 $\rightarrow$ policy 跳到糟糕区域 $\rightarrow$ 生成乱码 $\rightarrow$ 下一个梯度让情况更糟 $\rightarrow$ 进入无法挽回的“死亡螺旋”。
+**答**：朴素 policy gradient：$\nabla J = \mathbb{E}[\nabla\log\pi(a\mid s) \cdot \hat{A}]$。问题：一个幸运/不幸的样本就能产生巨大的梯度 $\rightarrow$ policy 跳到糟糕区域 $\rightarrow$ 生成乱码 $\rightarrow$ 下一个梯度让情况更糟 $\rightarrow$ 进入无法挽回的“死亡螺旋”。
 
 **PPO 的方案**：将概率比 $r = \pi_\text{new}/\pi_\text{old}$ 裁剪到 $[0.8, 1.2]$。
 
@@ -102,7 +102,7 @@ $$
 
 **关键洞见**：它是对 TRPO 的 KL 约束的一阶近似，但无需昂贵的二阶优化。每次更新对 policy 的改变最多 $\pm$20\%。
 
-**对 LLM 而言**：Token 级比率 $r_t = \pi_\theta(y_t|y_{<t})/\pi_\text{old}(y_t|y_{<t})$ 防止任何单个 Token 的概率发生过大变化，从而维持生成的连贯性。
+**对 LLM 而言**：Token 级比率 $r_t = \pi_\theta(y_t\mid y_{<t})/\pi_\text{old}(y_t\mid y_{<t})$ 防止任何单个 Token 的概率发生过大变化，从而维持生成的连贯性。
 
 *复习：第 5 章（PPO）。*
 
@@ -110,7 +110,7 @@ $$
 
 **答**：从 RLHF 目标出发：$\max_\pi \mathbb{E}[r(x,y)] - \beta D_\text{KL}[\pi\|\pi_\text{ref}]$。
 
-**步骤 1**：写出 KKT 条件。最优 policy 有闭式解：$\pi^*(y|x) \propto \pi_\text{ref}(y|x)\exp(r(x,y)/\beta)$。
+**步骤 1**：写出 KKT 条件。最优 policy 有闭式解：$\pi^*(y\mid x) \propto \pi_\text{ref}(y\mid x)\exp(r(x,y)/\beta)$。
 
 **步骤 2**：反解出 reward 的表达：$r(x,y) = \beta\log(\pi^*/\pi_\text{ref}) + \beta\log Z(x)$。
 
@@ -523,7 +523,7 @@ TD 误差（$\gamma=1$）：$\delta_1 = 0 + V_2 - V_1 = 0.05$，$\delta_2 = 0 + 
 
 **答**：
 
-**KL 衡量什么**：当前 policy 与参考之间的平均对数比：$D_\text{KL} = \mathbb{E}_{y\sim\pi_\theta}[\log(\pi_\theta(y|x)/\pi_\text{ref}(y|x))]$。KL=0 意味着与参考完全相同。KL=10 意味着 policy 对其偏好的输出多投放了 10 nats 的概率。
+**KL 衡量什么**：当前 policy 与参考之间的平均对数比：$D_\text{KL} = \mathbb{E}_{y\sim\pi_\theta}[\log(\pi_\theta(y\mid x)/\pi_\text{ref}(y\mid x))]$。KL=0 意味着与参考完全相同。KL=10 意味着 policy 对其偏好的输出多投放了 10 nats 的概率。
 
 **健康区间**：训练中 3--10。缓慢增长无妨。突发飙升 = 出问题。
 
@@ -650,13 +650,13 @@ TD 误差（$\gamma=1$）：$\delta_1 = 0 + V_2 - V_1 = 0.05$，$\delta_2 = 0 + 
 
 ### Q23：GSPO vs GRPO——根本区别在哪？什么时候重要？
 
-**答**：**GRPO**：*逐 Token*计算重要性比 $w_{i,t} = \pi_\theta(o_{i,t}|q, o_{i,<t}) / \pi_\text{old}(o_{i,t}|q, o_{i,<t})$，然后独立裁剪每个 Token。
+**答**：**GRPO**：*逐 Token*计算重要性比 $w_{i,t} = \pi_\theta(o_{i,t}\mid q, o_{i,<t}) / \pi_\text{old}(o_{i,t}\mid q, o_{i,<t})$，然后独立裁剪每个 Token。
 
-**GSPO**：在*序列级*计算重要性比：$s_i(\theta) = (\pi_\theta(o_i|q)/\pi_\text{old}(o_i|q))^{1/|o_i|}$——Token 概率的几何均值。裁剪这单一的序列级比率。
+**GSPO**：在*序列级*计算重要性比：$s_i(\theta) = (\pi_\theta(o_i\mid q)/\pi_\text{old}(o_i\mid q))^{1/\lvert o_i \rvert}$——Token 概率的几何均值。裁剪这单一的序列级比率。
 
 **为何重要**：GRPO 的逐 Token 裁剪把每个 Token 视为独立，但语言中它们高度相关。序列前段的微小逐 Token 变化在多个 Token 上指数级放大。GSPO 通过审视完整序列概率来捕捉这一点。
 
-**长度归一化**：$1/|o_i|$ 指数保证不同长度序列间的公平比较。否则更长的序列总是有更低的概率比。
+**长度归一化**：$1/\lvert o_i \rvert$ 指数保证不同长度序列间的公平比较。否则更长的序列总是有更低的概率比。
 
 **何时用 GSPO**：当训练变为 off-policy 时（`steps_per_generation > 1` 或 `num_iterations > 1`）。如果完全 on-policy（比率 $\approx 1$），GRPO 与 GSPO 等价。
 
@@ -722,7 +722,7 @@ $G=2$ 加二元 reward（一个对一个错）时：归一化后 $\hat{A}_\text{
 
 ### Q28：什么是 SimPO？为什么“无参考模型”是优势？
 
-**答**：SimPO 用回答的平均对数概率作为隐式 reward 信号：$r(x,y) = \frac{1}{|y|}\sum_t \log \pi_\theta(y_t|x, y_{<t})$——无需参考模型。
+**答**：SimPO 用回答的平均对数概率作为隐式 reward 信号：$r(x,y) = \frac{1}{\lvert y \rvert}\sum_t \log \pi_\theta(y_t\mid x, y_{<t})$——无需参考模型。
 
 loss 中加入目标 margin $\gamma$：chosen 回答的平均 log-prob 应至少比 rejected 高 $\gamma$。
 
@@ -731,7 +731,7 @@ loss 中加入目标 margin $\gamma$：chosen 回答的平均 log-prob 应至少
 1. **显存**：无参考模型 = 70B 节省 70--140GB。可在同样硬件上训练更大的模型。
 2. **简洁性**：无需管理/加载/服务第二份模型副本。
 3. **无陈旧参考**：DPO 的参考随着训练推进越来越不相关。SimPO 没有这个问题。
-4. **内置长度归一化**：$1/|y|$ 天然防止长度偏差（DPO 需显式处理）。
+4. **内置长度归一化**：$1/\lvert y \rvert$ 天然防止长度偏差（DPO 需显式处理）。
 
 **权衡**：没有参考锚点，模型有更多自由去塌缩或漂移。$\gamma$ margin 和长度归一化部分缓解了这一点，但在激进训练时 SimPO 可能不如 DPO 稳定。
 
@@ -946,7 +946,7 @@ TRL：`loss_type=["sigmoid", "sft"], loss_weights=[1.0, 1.0]`
 
 ### Q39：推导 Bradley-Terry reward 模型的 loss。它有哪些局限？
 
-**答**：**Bradley-Terry 模型（Bradley-Terry Model）**：给定两个回答，更好的那个（$y_w$）被偏好的概率：$P(y_w \succ y_l | x) = \sigma(r(x, y_w) - r(x, y_l))$，其中 $\sigma$ 是 sigmoid。
+**答**：**Bradley-Terry 模型（Bradley-Terry Model）**：给定两个回答，更好的那个（$y_w$）被偏好的概率：$P(y_w \succ y_l \mid x) = \sigma(r(x, y_w) - r(x, y_l))$，其中 $\sigma$ 是 sigmoid。
 
 **MLE 推导**：给定 $N$ 个偏好对，最大化似然：$\prod_i P(y_w^i \succ y_l^i)$。取负对数：$\mathcal{L} = -\sum_i \log\sigma(r(x_i, y_w^i) - r(x_i, y_l^i))$。
 

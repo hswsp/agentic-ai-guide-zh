@@ -12,16 +12,16 @@ permalink: /part6/ch28-quickref.html
 
 $$
 \begin{align}
-\text{PPO Clip:}&\quad L = \mathbb{E}[\min(r_t\hat{A}_t, \text{clip}(r_t,1{\pm}\epsilon)\hat{A}_t)], \quad r_t = \pi_\theta(a_t|s_t)/\pi_{\text{old}}(a_t|s_t) \\
-\text{DPO:}&\quad L = -\mathbb{E}[\log\sigma(\beta\log\tfrac{\pi_\theta(y_w|x)}{\pi_\text{ref}(y_w|x)} - \beta\log\tfrac{\pi_\theta(y_l|x)}{\pi_\text{ref}(y_l|x)})] \\
+\text{PPO Clip:}&\quad L = \mathbb{E}[\min(r_t\hat{A}_t, \text{clip}(r_t,1{\pm}\epsilon)\hat{A}_t)], \quad r_t = \pi_\theta(a_t\mid s_t)/\pi_{\text{old}}(a_t\mid s_t) \\
+\text{DPO:}&\quad L = -\mathbb{E}[\log\sigma(\beta\log\tfrac{\pi_\theta(y_w\mid x)}{\pi_\text{ref}(y_w\mid x)} - \beta\log\tfrac{\pi_\theta(y_l\mid x)}{\pi_\text{ref}(y_l\mid x)})] \\
 \text{GRPO:}&\quad \hat{A}_i = (r_i - \mu_G)/\sigma_G, \quad \text{then PPO clip update (no critic)} \\
 \text{KTO:}&\quad L = \lambda_w(1 - v(y_w)) + \lambda_l \cdot v(y_l), \quad v = \sigma(\beta\log(\pi_\theta/\pi_\text{ref}) - z) \\
 \text{IPO:}&\quad L = \mathbb{E}[(\log(\pi_\theta(y_w)/\pi_\text{ref}(y_w)) - \log(\pi_\theta(y_l)/\pi_\text{ref}(y_l)) - 1/(2\beta))^2] \\
 \text{ORPO:}&\quad L = L_\text{SFT}(y_w) - \lambda\log\sigma(\log(\text{odds}(y_w)/\text{odds}(y_l))) \\
 \text{GAE:}&\quad \hat{A}_t = \textstyle\sum_{l=0}^{T-t}(\gamma\lambda)^l\delta_{t+l}, \quad \delta_t = r_t + \gamma V(s_{t+1}) - V(s_t) \\
-\text{KL Penalty:}&\quad R_\text{total} = r_\phi(x,y) - \beta D_\text{KL}[\pi_\theta(y|x)\|\pi_\text{ref}(y|x)] \\
+\text{KL Penalty:}&\quad R_\text{total} = r_\phi(x,y) - \beta D_\text{KL}[\pi_\theta(y\mid x)\|\pi_\text{ref}(y\mid x)] \\
 \text{RM (Bradley-Terry):}&\quad L = -\mathbb{E}[\log\sigma(r_\phi(x,y_w)-r_\phi(x,y_l))] \\
-\text{Best-of-N:}&\quad y^* = \arg\max_{y_i \sim \pi_\theta(\cdot|x),\, i=1..N} r_\phi(x, y_i)
+\text{Best-of-N:}&\quad y^* = \arg\max_{y_i \sim \pi_\theta(\cdot\mid x),\, i=1..N} r_\phi(x, y_i)
 \end{align}
 $$
 
@@ -110,7 +110,7 @@ $$
 \begin{align}
 \text{Cosine similarity:}&\quad \text{sim}(q, d) = \frac{q \cdot d}{\|q\| \cdot \|d\|} \\
 \text{Retrieval:}&\quad \mathcal{D}_k = \text{top-}k_{d \in \mathcal{C}} \; \text{sim}(\text{embed}(q),\; \text{embed}(d)) \\
-\text{RAG generation:}&\quad P(y|q) = P_\text{LLM}(y \;|\; q, \mathcal{D}_k) \\
+\text{RAG generation:}&\quad P(y\mid q) = P_\text{LLM}(y \;\mid\; q, \mathcal{D}_k) \\
 \text{Chunking overlap:}&\quad \text{stride} = \text{chunk\_size} - \text{overlap} \\
 \text{Reranker (cross-enc):}&\quad \text{score}(q, d) = \text{MLP}(\text{BERT}([q; d]))
 \end{align}

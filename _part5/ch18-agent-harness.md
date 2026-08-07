@@ -103,10 +103,10 @@ $$
 为每一轮分配重要性权重 $w_i$（例如包含工具结果或用户更正的轮次权重更高）。优先截断权重最低的轮次：
 
 $$
-\min_{S \subseteq [n]} \sum_{i \notin S} w_i \quad \text{s.t.} \quad \sum_{i \in S} |m_i| \leq B_H
+\min_{S \subseteq [n]} \sum_{i \notin S} w_i \quad \text{s.t.} \quad \sum_{i \in S} \lvert m_i \rvert \leq B_H
 $$
 
-这是 0/1 背包问题的一个变体，可以通过按 $w_i / |m_i|$ 排序进行贪心求解。
+这是 0/1 背包问题的一个变体，可以通过按 $w_i / \lvert m_i \rvert$ 排序进行贪心求解。
 
 ### 滑动窗口方法
 
@@ -246,7 +246,7 @@ Few-shot 示例提升可靠性但消耗 Token。harness 应该 [liu2022makes]：
 形式化地，few-shot 选择是一个带约束的优化问题——在 Token 预算约束下最大化总相关性：
 
 $$
-\text{examples}^* = \underset{E \subseteq \mathcal{E},\; |E| \leq k}{\arg\max} \sum_{e \in E} \text{sim}(e(e_{\text{input}}),\, e(q)) \quad \text{s.t.} \quad \sum_{e \in E} |e| \leq B_M
+\text{examples}^* = \underset{E \subseteq \mathcal{E},\; \lvert E \rvert \leq k}{\arg\max} \sum_{e \in E} \text{sim}(e(e_{\text{input}}),\, e(q)) \quad \text{s.t.} \quad \sum_{e \in E} \lvert e \rvert \leq B_M
 $$
 
 ### 工具描述
@@ -472,7 +472,7 @@ Agent 不是逐步决策，而是先生成一个完整的计划，然后依次�
 3. **计划修订：** 如果某步骤失败或产生意外结果，则从当前状态重新规划。
 
 $$
-\text{Plan} = \text{Planner}(q), \quad \text{Result} = \prod_{i=1}^{|\text{Plan}|} \text{Executor}(\text{Plan}[i],\, \text{context}_i)
+\text{Plan} = \text{Planner}(q), \quad \text{Result} = \prod_{i=1}^{\lvert \text{Plan} \rvert} \text{Executor}(\text{Plan}[i],\, \text{context}_i)
 $$
 
 Plan-and-Execute 对长时程任务更高效（LLM 调用更少），但对意外观察的适应性较差。

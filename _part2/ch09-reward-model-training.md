@@ -295,7 +295,7 @@ Plackett-Luce(PL)模型 [plackett1975analysis] 是将 Bradley-Terry 推广至完
 >
 > **Loss 函数**:
 > $$
-> \mathcal{L}_{PL}(\phi) = -\frac{1}{|\mathcal{D}|} \sum_{(q, \pi) \in \mathcal{D}} \sum_{i=1}^{K-1} \left[ r_\phi(y_{\pi(i)}, q) - \log \sum_{j=i}^{K} e^{r_\phi(y_{\pi(j)}, q)} \right]
+> \mathcal{L}_{PL}(\phi) = -\frac{1}{\lvert \mathcal{D} \rvert} \sum_{(q, \pi) \in \mathcal{D}} \sum_{i=1}^{K-1} \left[ r_\phi(y_{\pi(i)}, q) - \log \sum_{j=i}^{K} e^{r_\phi(y_{\pi(j)}, q)} \right]
 > $$
 
 > **Plackett-Luce 退化为 Bradley-Terry**

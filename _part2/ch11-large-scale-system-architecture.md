@@ -88,7 +88,7 @@ model = DDP(model, device_ids=[local_rank],
 
 权重矩阵 $W \in \mathbb{R}^{d \times h}$ 按列切到 $T$ 块 GPU 上：
 $$
-W = [W_0 \;|\; W_1 \;|\; \cdots \;|\; W_{T-1}], \quad W_i \in \mathbb{R}^{d \times h/T}
+W = [W_0 \;\mid\; W_1 \;\mid\; \cdots \;\mid\; W_{T-1}], \quad W_i \in \mathbb{R}^{d \times h/T}
 $$
 每块 GPU $i$ 独立计算 $Y_i = XW_i$（无需通信）。输出沿 hidden 维度被切开。
 

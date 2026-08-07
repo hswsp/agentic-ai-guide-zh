@@ -153,7 +153,7 @@ $$
 当用 LLM 生成评估标签时，校准至关重要：评判者的分数必须与人类判断对齐。令 $h_i \in [0,1]$ 为样本 $i$ 的人类偏好分数，$\hat{h}_i$ 为评判者预测分数。校准误差由期望校准误差（Expected Calibration Error, ECE）[guo2017calibration] 度量：
 
 $$
-\text{ECE} = \sum_{b=1}^{B} \frac{|B_b|}{n} \left| \text{acc}(B_b) - \text{conf}(B_b) \right|
+\text{ECE} = \sum_{b=1}^{B} \frac{\lvert B_b \rvert}{n} \left\lvert \text{acc}(B_b) - \text{conf}(B_b) \right\rvert
 $$
 
 其中 $B_b$ 是第 $b$ 个置信度区间，$\text{acc}(B_b)$ 是该区间内评判者与人类一致的样本比例，$\text{conf}(B_b)$ 是该区间内评判者的平均置信度。
@@ -335,10 +335,10 @@ $$
 其中 $p_n$ 是修正后的 $n$-gram 精度，$w_n = 1/N$ 为均匀权重，BP 为简短惩罚（brevity penalty）：
 
 $$
-\text{BP} = \begin{cases} 1 & \text{if } |h| > |r| \\ e^{1 - |r|/|h|} & \text{if } |h| \leq |r| \end{cases}
+\text{BP} = \begin{cases} 1 & \text{if } \lvert h \rvert > \lvert r \rvert \\ e^{1 - \lvert r \rvert/\lvert h \rvert} & \text{if } \lvert h \rvert \leq \lvert r \rvert \end{cases}
 $$
 
-其中 $|r|$ 为长度最接近的参考的长度。修正后的 $n$-gram 精度将每个 $n$-gram 的计数截断到其在任一参考中的最大出现次数：
+其中 $\lvert r \rvert$ 为长度最接近的参考的长度。修正后的 $n$-gram 精度将每个 $n$-gram 的计数截断到其在任一参考中的最大出现次数：
 
 $$
 p_n = \frac{\sum_{\text{ngram} \in h} \min\!\left(\text{count}(\text{ngram}, h),\, \max_{r \in \mathcal{R}} \text{count}(\text{ngram}, r)\right)}{\sum_{\text{ngram} \in h} \text{count}(\text{ngram}, h)}
@@ -357,7 +357,7 @@ $$
 $$
 
 $$
-\text{ROUGE-L} = \frac{\text{LCS}(h, r)}{|r|}
+\text{ROUGE-L} = \frac{\text{LCS}(h, r)}{\lvert r \rvert}
 $$
 
 其中 LCS 表示最长公共子序列（Longest Common Subsequence）。ROUGE-1 与 ROUGE-2 度量 unigram 与 bigram 的召回；ROUGE-L 则捕捉句子级结构。F-measure 变体在精度与召回之间取得平衡：
@@ -373,11 +373,11 @@ $$
 BERTScore[zhang2020bertscore] 使用预训练 BERT 模型的上下文 Embedding 来计算 Token 级相似度。给定假设 Token $\hat{\mathbf{x}} = \langle \hat{x}_1, \ldots, \hat{x}_m \rangle$ 与参考 Token $\mathbf{x} = \langle x_1, \ldots, x_n \rangle$，及其 Embedding $\hat{\mathbf{e}}_i$ 与 $\mathbf{e}_j$：
 
 $$
-R_{\text{BERT}} = \frac{1}{|x|} \sum_{x_j \in \mathbf{x}} \max_{\hat{x}_i \in \hat{\mathbf{x}}} \frac{\hat{\mathbf{e}}_i^\top \mathbf{e}_j}{\|\hat{\mathbf{e}}_i\| \|\mathbf{e}_j\|}
+R_{\text{BERT}} = \frac{1}{\lvert x \rvert} \sum_{x_j \in \mathbf{x}} \max_{\hat{x}_i \in \hat{\mathbf{x}}} \frac{\hat{\mathbf{e}}_i^\top \mathbf{e}_j}{\|\hat{\mathbf{e}}_i\| \|\mathbf{e}_j\|}
 $$
 
 $$
-P_{\text{BERT}} = \frac{1}{|\hat{x}|} \sum_{\hat{x}_i \in \hat{\mathbf{x}}} \max_{x_j \in \mathbf{x}} \frac{\hat{\mathbf{e}}_i^\top \mathbf{e}_j}{\|\hat{\mathbf{e}}_i\| \|\mathbf{e}_j\|}
+P_{\text{BERT}} = \frac{1}{\lvert \hat{x} \rvert} \sum_{\hat{x}_i \in \hat{\mathbf{x}}} \max_{x_j \in \mathbf{x}} \frac{\hat{\mathbf{e}}_i^\top \mathbf{e}_j}{\|\hat{\mathbf{e}}_i\| \|\mathbf{e}_j\|}
 $$
 
 $$
@@ -455,7 +455,7 @@ $$
 - **Token 级 F1：**将预测与金标答案视为 Token 的多重集，并计算 F1 分数：
 
 $$
-F1 = \frac{2 \cdot |\text{pred} \cap \text{gold}|}{|\text{pred}| + |\text{gold}|}
+F1 = \frac{2 \cdot \lvert \text{pred} \cap \text{gold} \rvert}{\lvert \text{pred} \rvert + \lvert \text{gold} \rvert}
 $$
 
 对于多答案设置，报告对所有金标答案取最大值后的 F1。
@@ -480,13 +480,13 @@ Agent 化的 LLM 在环境中运作、执行动作序列，并须完成多步任
 Agent 任务的主要指标是任务成功率（Task Success Rate, TSR）：Agent 达成指定目标状态的任务比例：
 
 $$
-\text{TSR} = \frac{1}{|\mathcal{T}|} \sum_{\tau \in \mathcal{T}} \mathbf{1}[\text{goal}(\tau) \text{ achieved}]
+\text{TSR} = \frac{1}{\lvert \mathcal{T} \rvert} \sum_{\tau \in \mathcal{T}} \mathbf{1}[\text{goal}(\tau) \text{ achieved}]
 $$
 
 目标的达成通常由一个确定性的 Oracle 来验证（例如检查数据库状态、文件系统状态或测试用例执行结果）。对于允许部分得分的任务，可以定义分级成功度量：
 
 $$
-\text{TSR}_{\text{graded}} = \frac{1}{|\mathcal{T}|} \sum_{\tau \in \mathcal{T}} \text{score}(\tau) \in [0, 1]
+\text{TSR}_{\text{graded}} = \frac{1}{\lvert \mathcal{T} \rvert} \sum_{\tau \in \mathcal{T}} \text{score}(\tau) \in [0, 1]
 $$
 
 ### 轨迹效率
@@ -516,7 +516,7 @@ $$
 对于需要推理链的任务（例如多跳问答、数学解题），步骤级准确性衡量正确推理步骤所占的比例：
 
 $$
-\text{SRA} = \frac{1}{|\mathcal{T}|} \sum_{\tau \in \mathcal{T}} \frac{1}{|S_\tau|} \sum_{s \in S_\tau} \mathbf{1}[s \text{ is correct}]
+\text{SRA} = \frac{1}{\lvert \mathcal{T} \rvert} \sum_{\tau \in \mathcal{T}} \frac{1}{\lvert S_\tau \rvert} \sum_{s \in S_\tau} \mathbf{1}[s \text{ is correct}]
 $$
 
 其中 $S_\tau$ 是轨迹 $\tau$ 中的推理步骤集合。步骤的正确性可由过程奖励模型（Process Reward Model, PRM）或人工标注来验证。

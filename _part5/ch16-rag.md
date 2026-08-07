@@ -116,10 +116,10 @@ Answer:"""
 
 $$
   \text{BM25}(d, q) = \sum_{i=1}^{n} \text{IDF}(t_i) \cdot
-    \frac{f(t_i, d) \cdot (k_1 + 1)}{f(t_i, d) + k_1 \cdot \left(1 - b + b \cdot \frac{|d|}{\text{avgdl}}\right)}
+    \frac{f(t_i, d) \cdot (k_1 + 1)}{f(t_i, d) + k_1 \cdot \left(1 - b + b \cdot \frac{\lvert d \rvert}{\text{avgdl}}\right)}
 $$
 
-其中 $f(t_i, d)$ 为词频，$|d|$ 为文档长度，$\text{avgdl}$ 为平均文档长度，$k_1 \in [1.2, 2.0]$、$b = 0.75$ 为可调参数。
+其中 $f(t_i, d)$ 为词频，$\lvert d \rvert$ 为文档长度，$\text{avgdl}$ 为平均文档长度，$k_1 \in [1.2, 2.0]$、$b = 0.75$ 为可调参数。
 
 > **稀疏检索仍然占优的场景**
 >
@@ -199,7 +199,7 @@ SPLADE（Sparse Lexical and Expansion Model）[formal2021splade] 使用预训练
 
 给定输入文本 $x = [x_1, \ldots, x_n]$：
 
-1. 通过 Transformer 编码器，并经由 MLM 头部得到上下文表示 $\mathbf{H} \in \mathbb{R}^{n \times |\mathcal{V}|}$
+1. 通过 Transformer 编码器，并经由 MLM 头部得到上下文表示 $\mathbf{H} \in \mathbb{R}^{n \times \lvert \mathcal{V} \rvert}$
 2. 跨位置聚合，并应用一个饱和激活：
 
 $$
@@ -215,7 +215,7 @@ $$
 
 **打分。**
 
-查询和文档分别映射为稀疏向量 $\mathbf{w}^q, \mathbf{w}^d \in \mathbb{R}^{|\mathcal{V}|}$。相关性得分就是一个简单的点积：
+查询和文档分别映射为稀疏向量 $\mathbf{w}^q, \mathbf{w}^d \in \mathbb{R}^{\lvert \mathcal{V} \rvert}$。相关性得分就是一个简单的点积：
 
 $$
   s(q, d) = \sum_{t \in \mathcal{V}} w_t^q \cdot w_t^d
@@ -281,7 +281,7 @@ $$
 ColBERT [khattab2020colbert] 将查询和文档编码为 Token 级 Embedding 的*集合*，并使用 *MaxSim* 算子进行打分：
 
 $$
-  s(q, d) = \sum_{i \in |\mathbf{q}|} \max_{j \in |\mathbf{d}|} \mathbf{q}_i^\top \mathbf{d}_j
+  s(q, d) = \sum_{i \in \lvert \mathbf{q} \rvert} \max_{j \in \lvert \mathbf{d} \rvert} \mathbf{q}_i^\top \mathbf{d}_j
 $$
 
 这种晚期交互（Late Interaction）机制比单向量双编码器更具表达力，又因为文档 Embedding 可离线预计算而远比交叉编码器更快。
@@ -292,8 +292,8 @@ $$
 
 $$
 \begin{aligned}
-  \mathbf{q}_i &= \text{Linear}(E_Q(q)_i) \in \mathbb{R}^{128}, \quad i = 1, \ldots, |q| \\
-  \mathbf{d}_j &= \text{Linear}(E_D(d)_j) \in \mathbb{R}^{128}, \quad j = 1, \ldots, |d|
+  \mathbf{q}_i &= \text{Linear}(E_Q(q)_i) \in \mathbb{R}^{128}, \quad i = 1, \ldots, \lvert q \rvert \\
+  \mathbf{d}_j &= \text{Linear}(E_D(d)_j) \in \mathbb{R}^{128}, \quad j = 1, \ldots, \lvert d \rvert
 \end{aligned}
 $$
 
@@ -317,7 +317,7 @@ $$
 
 - **离线文档编码**：编码一次，服务于多次查询
 - **PLAID 索引** [santhanam2022colbertv2]：对文档 Embedding 聚类，用聚类中心进行初步候选检索，然后只在候选集上计算精确的 MaxSim——延迟可降低 5--10$\times$
-- **索引大小**：每文档 $|d| \times 128$ 个浮点数（比单向量方法更大，但通过量化可压缩到约每维度 2 字节）
+- **索引大小**：每文档 $\lvert d \rvert \times 128$ 个浮点数（比单向量方法更大，但通过量化可压缩到约每维度 2 字节）
 
 ### 检索方法对比
 
@@ -873,19 +873,19 @@ Search-R1 使用组相对策略优化（Group Relative Policy Optimization, GRPO
 **Recall@K。**
 
 $$
-  \text{Recall@}K = \frac{|\mathcal{R}_K \cap \mathcal{R}^*|}{|\mathcal{R}^*|}
+  \text{Recall@}K = \frac{\lvert \mathcal{R}_K \cap \mathcal{R}^* \rvert}{\lvert \mathcal{R}^* \rvert}
 $$
 
 **Precision@K。**
 
 $$
-  \text{Precision@}K = \frac{|\mathcal{R}_K \cap \mathcal{R}^*|}{K}
+  \text{Precision@}K = \frac{\lvert \mathcal{R}_K \cap \mathcal{R}^* \rvert}{K}
 $$
 
 **平均倒数排名（Mean Reciprocal Rank, MRR）。**
 
 $$
-  \text{MRR} = \frac{1}{|Q|} \sum_{i=1}^{|Q|} \frac{1}{\text{rank}_i}
+  \text{MRR} = \frac{1}{\lvert Q \rvert} \sum_{i=1}^{\lvert Q \rvert} \frac{1}{\text{rank}_i}
 $$
 
 其中 $\text{rank}_i$ 是查询 $i$ 第一个相关文档的排名。
@@ -1125,7 +1125,7 @@ RAFT [zhang2024raft] 在混合了相关文档与*干扰*文档的设置下训练
 
 $$
   \mathcal{L}_{\text{RAFT}} = -\mathbb{E}_{(q,a,d^*,\{d_i^-\})} \left[
-    \log P_\theta\!\left(\text{CoT}(d^*) \oplus a \;\middle|\; q, d^*, \{d_i^-\}\right)
+    \log P_\theta\!\left(\text{CoT}(d^*) \oplus a \;\middle\vert\; q, d^*, \{d_i^-\}\right)
   \right]
 $$
 

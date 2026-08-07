@@ -31,7 +31,7 @@ PPO 的 value model（critic）在语言任务上存在三大问题：
 
 ## 算法
 
-1. 对每个 prompt $x$，采样 $G$ 条 completion：$\{y_1, \ldots, y_G\} \sim \pi_\theta(\cdot|x)$
+1. 对每个 prompt $x$，采样 $G$ 条 completion：$\{y_1, \ldots, y_G\} \sim \pi_\theta(\cdot\mid x)$
 2. 对每条打分：$r_i = R(x, y_i)$
 3. 组内归一化：$\hat{A}_i = \frac{r_i - \mu_G}{\sigma_G}$，其中 $\mu_G = \frac{1}{G}\sum_j r_j$，$\sigma_G = \text{std}(\{r_j\})$
 4. 用这些 advantage 应用 PPO 风格的 clipped 更新
@@ -242,14 +242,14 @@ def verbalized_sample(model, tokenizer, task, n=5):
 > $$
 > 逐 token 的 clipped surrogate loss 为：
 > $$
-> \mathcal{L}_{GRPO} = -\frac{1}{G}\sum_{i=1}^G \frac{1}{|o_i|}
-> \sum_{t=1}^{|o_i|}
+> \mathcal{L}_{GRPO} = -\frac{1}{G}\sum_{i=1}^G \frac{1}{\lvert o_i \rvert}
+> \sum_{t=1}^{\lvert o_i \rvert}
 > \min\!\Bigl(
 > \rho_{i,t}\,\hat{A}_i,\;
 > clip(\rho_{i,t},1{-}\epsilon,1{+}\epsilon)\,\hat{A}_i
 > \Bigr),
 > $$
-> 其中 $\rho_{i,t} = \pi_\theta(o_{i,t}|q,o_{i,<t})\,/\,\pi_{\text{old}}(o_{i,t}|q,o_{i,<t})$。
+> 其中 $\rho_{i,t} = \pi_\theta(o_{i,t}\mid q,o_{i,<t})\,/\,\pi_{\text{old}}(o_{i,t}\mid q,o_{i,<t})$。
 
 ### DAPO —— Dynamic Adaptive Policy Optimization
 
@@ -278,8 +278,8 @@ $$
 
 $$
 \mathcal{L}_{token} =
--\frac{1}{\sum_{i=1}^G |o_i|}
-\sum_{i=1}^G \sum_{t=1}^{|o_i|}
+-\frac{1}{\sum_{i=1}^G \lvert o_i \rvert}
+\sum_{i=1}^G \sum_{t=1}^{\lvert o_i \rvert}
 \min\!\bigl(\rho_{i,t}\hat{A}_i,\;
 clip_{DAPO}(\rho_{i,t},\hat{A}_i)\,\hat{A}_i\bigr).
 $$
@@ -293,7 +293,7 @@ $$
 $$
 m_i = \mathbf{1}[EOS \in o_i], \qquad
 \mathcal{L}_{filtered} =
--\frac{\sum_{i=1}^G m_i \sum_t (\cdots)}{\sum_{i=1}^G m_i |o_i|}.
+-\frac{\sum_{i=1}^G m_i \sum_t (\cdots)}{\sum_{i=1}^G m_i \lvert o_i \rvert}.
 $$
 
 #### 组件 4 —— 软过长惩罚（Soft Overlong Punishment）
@@ -301,7 +301,7 @@ $$
 比起硬 mask，更软的变体应用一个长度惩罚，随着 completion 接近最大长度 $L_{\max}$ 平滑增长：
 
 $$
-r_i \leftarrow r_i - \lambda \cdot \max\!\left(0,\, \frac{|o_i| - L_{cache}}{L_{\max} - L_{cache}}\right),
+r_i \leftarrow r_i - \lambda \cdot \max\!\left(0,\, \frac{\lvert o_i \rvert - L_{cache}}{L_{\max} - L_{cache}}\right),
 $$
 
 其中 $L_{\text{cache}}$ 是一个“安全”长度阈值。
@@ -351,12 +351,12 @@ DAPO 会重新采样那些整组 completion 获得相同 reward（全对或全�
 >
 > GRPO *逐 token* 地 clip importance ratio。但一条 500 token 的序列，即使每个单独的 ratio 都在 $[1-\epsilon, 1+\epsilon]$ 内，逐 token ratio 的乘积可能大或小到天文数字。当在同一 batch 上进行多次 gradient 步（off-policy）时，这种不匹配迅速放大，clipping 界限在序列级别上变得毫无意义。
 
-GSPO [chen2025gspo] 将 *序列级* importance weight 定义为逐 token ratio 的几何平均，等价于完整序列概率比的 $|o_i|$ 次方根：
+GSPO [chen2025gspo] 将 *序列级* importance weight 定义为逐 token ratio 的几何平均，等价于完整序列概率比的 $\lvert o_i \rvert$ 次方根：
 
 $$
 \boxed{
-s_i(\theta) = \left(\frac{\pi_\theta(o_i \mid q)}{\pi_{old}(o_i \mid q)}\right)^{1/|o_i|}
-= \exp\!\left(\frac{1}{|o_i|}\sum_{t=1}^{|o_i|} \log \frac{\pi_\theta(o_{i,t}|q,o_{i,<t})}{\pi_{old}(o_{i,t}|q,o_{i,<t})}\right).
+s_i(\theta) = \left(\frac{\pi_\theta(o_i \mid q)}{\pi_{old}(o_i \mid q)}\right)^{1/\lvert o_i \rvert}
+= \exp\!\left(\frac{1}{\lvert o_i \rvert}\sum_{t=1}^{\lvert o_i \rvert} \log \frac{\pi_\theta(o_{i,t}\mid q,o_{i,<t})}{\pi_{old}(o_{i,t}\mid q,o_{i,<t})}\right).
 $$
 
 这是 *长度归一化* 的序列概率比。GSPO loss 对每条序列 clip 这个单一标量：
@@ -369,7 +369,7 @@ $$
 
 > **GSPO 与 GRPO 的 Clipping 对比**
 >
-> - **GRPO**：独立 clip $|o_i|$ 个逐 token ratio。一条序列可以所有 ratio 都在界内、却拥有 $10^{50}$ 的乘积 ratio。
+> - **GRPO**：独立 clip $\lvert o_i \rvert$ 个逐 token ratio。一条序列可以所有 ratio 都在界内、却拥有 $10^{50}$ 的乘积 ratio。
 > - **GSPO**：对每条序列 clip 一次几何平均。保证 *序列级* policy 变化有界。
 > - GSPO 在 off-policy 重要性采样上理论正确；GRPO 只是近似。
 
@@ -408,7 +408,7 @@ $$
 Dr. GRPO 修改逐 token gradient 权重，以考虑该 token 对 reward 信号的边际贡献。模型本就赋予高概率的 token（无论 reward 如何）会被降权：
 
 $$
-w_{i,t} = \hat{A}_i \cdot \bigl(1 - \pi_{ref}(o_{i,t}|q,o_{i,<t})\bigr),
+w_{i,t} = \hat{A}_i \cdot \bigl(1 - \pi_{ref}(o_{i,t}\mid q,o_{i,<t})\bigr),
 $$
 
 其中 $\pi_{\text{ref}}$ 是参考（预训练）模型。这是一种 *token 效率* 形式：gradient 被集中到 policy 真正需要改变的 token 上。
@@ -451,8 +451,8 @@ $$
 \mathcal{L}_{2-GRPO} \approx
 -\mathbb{E}_{(o^+, o^-) \sim \pi_\theta}\!\left[
 \log \sigma\!\left(
-\beta \log \frac{\pi_\theta(o^+|q)}{\pi_{old}(o^+|q)}
-- \beta \log \frac{\pi_\theta(o^-|q)}{\pi_{old}(o^-|q)}
+\beta \log \frac{\pi_\theta(o^+\mid q)}{\pi_{old}(o^+\mid q)}
+- \beta \log \frac{\pi_\theta(o^-\mid q)}{\pi_{old}(o^-\mid q)}
 \right)
 \right],
 $$
@@ -551,7 +551,7 @@ TIS 通过将 gradient 乘以一个截断的修正因子来纠正偏差：
 
 $$
 \boxed{
-w_{TIS}(o_i) = \min\!\left(C,\; \frac{\pi_{train}(o_i|q)}{\pi_{vllm}(o_i|q)}\right),
+w_{TIS}(o_i) = \min\!\left(C,\; \frac{\pi_{train}(o_i\mid q)}{\pi_{vllm}(o_i\mid q)}\right),
 $$
 
 其中 $\pi_{\text{train}}$ 是训练前向传播给出的概率，$\pi_{\text{vllm}}$ 是 vLLM 报告的概率。在 $C$ 处截断可防止极端修正破坏训练稳定性。
@@ -561,7 +561,7 @@ $$
 MIS 采取更激进的策略：对任何修正 ratio 超过阈值 $C$ 的序列，将其 gradient 置零：
 
 $$
-w_{MIS}(o_i) = \mathbf{1}\!\left[\frac{\pi_{train}(o_i|q)}{\pi_{vllm}(o_i|q)} \le C\right].
+w_{MIS}(o_i) = \mathbf{1}\!\left[\frac{\pi_{train}(o_i\mid q)}{\pi_{vllm}(o_i\mid q)} \le C\right].
 $$
 
 这更保守，但避免了大（即使被截断）修正权重的风险。
@@ -652,13 +652,13 @@ DPPO 直接使用新旧 policy 分布间的 Total Variation（TV）或 KL 散度
 
 $$
 \mathcal{L}_{DPPO} = -\mathbb{E}\!\left[
-\hat{A} \cdot \pi_\theta(o|q) \cdot \mathbf{1}[D(\pi_\theta \| \pi_{old}) \le \delta]
+\hat{A} \cdot \pi_\theta(o\mid q) \cdot \mathbf{1}[D(\pi_\theta \| \pi_{old}) \le \delta]
 \right],
 $$
 
 其中 $D$ 是所选的散度度量。在实践中，DPPO 用 token 级二值或 top-$k$ mask 来近似：
 
-- **binary_tv**：mask 掉 $|\pi_\theta - \pi_{\text{old}}| > \delta$ 的 token。
+- **binary_tv**：mask 掉 $\lvert \pi_\theta - \pi_{\text{old}} \rvert > \delta$ 的 token。
 - **binary_kl**：mask 掉 $\pi_\theta \log(\pi_\theta/\pi_{\text{old}}) > \delta$ 的 token。
 - **topk_tv**：仅保留按 TV 贡献排序的 top-$k$ token。
 - **topk_kl**：仅保留按 KL 贡献排序的 top-$k$ token。
@@ -707,7 +707,7 @@ CISPO 结合了 batch 级缩放、DAPO 的 token 级 loss 聚合以及非对称 
 $$
 \mathcal{L}_{CISPO} =
 -\frac{1}{\sum_{i,t} m_{i,t}}
-\sum_{i=1}^G \sum_{t=1}^{|o_i|} m_{i,t} \cdot
+\sum_{i=1}^G \sum_{t=1}^{\lvert o_i \rvert} m_{i,t} \cdot
 \min\!\bigl(\rho_{i,t}\hat{A}_i,\;
 clip_{DAPO}(\rho_{i,t},\hat{A}_i)\,\hat{A}_i\bigr),
 $$

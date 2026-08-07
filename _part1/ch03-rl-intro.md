@@ -16,14 +16,14 @@ MDP 是一个五元组 $(S, A, P, R, \gamma)$：
 
 - $S$：状态空间——环境所有可能的配置
 - $A$：动作空间——智能体可用的所有动作
-- $P(s'|s, a)$：转移函数——在状态 $s$ 下采取动作 $a$ 后到达状态 $s'$ 的概率
+- $P(s'\mid s, a)$：转移函数——在状态 $s$ 下采取动作 $a$ 后到达状态 $s'$ 的概率
 - $R(s, a, s')$：奖励函数——一次状态转移获得的即时标量反馈
 - $\gamma \in [0, 1]$：折扣因子——未来奖励相对于即时奖励的权重
 
 **马尔可夫性质（Markov Property）**：未来只依赖于当前状态，而不依赖于历史：
 
 $$
-P(s_{t+1} | s_t, a_t, s_{t-1}, a_{t-1}, \ldots) = P(s_{t+1} | s_t, a_t)
+P(s_{t+1} \mid s_t, a_t, s_{t-1}, a_{t-1}, \ldots) = P(s_{t+1} \mid s_t, a_t)
 $$
 
 这一性质使问题变得可处理。
@@ -33,14 +33,14 @@ $$
 > 在每个时间步 $t$：
 >
 > 1. 智能体观察状态 $s_t$
-> 2. 智能体根据策略 $\pi(a|s)$ 选择动作 $a_t$
-> 3. 环境转移到 $s_{t+1} \sim P(\cdot|s_t, a_t)$
+> 2. 智能体根据策略 $\pi(a\mid s)$ 选择动作 $a_t$
+> 3. 环境转移到 $s_{t+1} \sim P(\cdot\mid s_t, a_t)$
 > 4. 智能体接收奖励 $r_t = R(s_t, a_t, s_{t+1})$
 > 5. 重复直到终止状态或时间步上限 $T$
 
 ## 核心概念与定义
 
-**策略（Policy）** $\pi(a|s)$：从状态到动作概率的映射。确定性策略：$a = \pi(s)$；随机性策略：$a \sim \pi(\cdot|s)$。
+**策略（Policy）** $\pi(a\mid s)$：从状态到动作概率的映射。确定性策略：$a = \pi(s)$；随机性策略：$a \sim \pi(\cdot\mid s)$。
 
 **回报（Return）**（累积折扣奖励）：
 
@@ -69,11 +69,11 @@ $$
 **贝尔曼方程（Bellman Equations）**（递归关系）：
 
 $$
-V^\pi(s) = \sum_a \pi(a|s) \sum_{s'} P(s'|s,a)\left[R(s,a,s') + \gamma V^\pi(s')\right]
+V^\pi(s) = \sum_a \pi(a\mid s) \sum_{s'} P(s'\mid s,a)\left[R(s,a,s') + \gamma V^\pi(s')\right]
 $$
 
 $$
-Q^\pi(s,a) = \sum_{s'} P(s'|s,a)\left[R(s,a,s') + \gamma \sum_{a'} \pi(a'|s') Q^\pi(s', a')\right]
+Q^\pi(s,a) = \sum_{s'} P(s'\mid s,a)\left[R(s,a,s') + \gamma \sum_{a'} \pi(a'\mid s') Q^\pi(s', a')\right]
 $$
 
 > **关键：最优策略与贝尔曼最优性**
@@ -81,11 +81,11 @@ $$
 > 最优策略 $\pi^*$ 满足：
 >
 > $$
-> V^*(s) = \max_a \sum_{s'} P(s'|s,a)\left[R(s,a,s') + \gamma V^*(s')\right]
+> V^*(s) = \max_a \sum_{s'} P(s'\mid s,a)\left[R(s,a,s') + \gamma V^*(s')\right]
 > $$
 >
 > $$
-> Q^*(s,a) = \sum_{s'} P(s'|s,a)\left[R(s,a,s') + \gamma \max_{a'} Q^*(s', a')\right]
+> Q^*(s,a) = \sum_{s'} P(s'\mid s,a)\left[R(s,a,s') + \gamma \max_{a'} Q^*(s', a')\right]
 > $$
 >
 > 一旦得到 $Q^*$，最优策略就直接是：$\pi^*(s) = \arg\max_a Q^*(s,a)$。
@@ -101,12 +101,12 @@ $$
 > **无模型（Model-Free） vs 基于模型（Model-Based）**：
 >
 > - **Model-Free**：直接从交互经验中学习策略或价值函数；无需建模环境的转移机制。对 LLM 最实用（语言的转移机制难以建模）。
-> - **Model-Based**：学习或使用环境转移模型 $P(s'|s,a)$。可以提前规划。样本效率更高，但需要准确的模型。
+> - **Model-Based**：学习或使用环境转移模型 $P(s'\mid s,a)$。可以提前规划。样本效率更高，但需要准确的模型。
 >
 > **基于价值（Value-Based） vs 基于策略（Policy-Based）**：
 >
 > - **Value-Based**：学习 $Q(s,a)$ 或 $V(s)$，并通过 $\arg\max_a Q(s,a)$ 得到策略。适合离散、小规模动作空间（如 Atari），在连续或大规模动作空间上表现不佳。
-> - **Policy-Based**：直接参数化并优化 $\pi_\theta(a|s)$。天然适合连续或高维动作空间，对 LLM 至关重要（词表 = 32K--128K 个动作）。
+> - **Policy-Based**：直接参数化并优化 $\pi_\theta(a\mid s)$。天然适合连续或高维动作空间，对 LLM 至关重要（词表 = 32K--128K 个动作）。
 > - **Actor-Critic**：两者结合——策略（actor）提议动作，价值函数（critic）评估动作。用于 LLM 的 PPO 即属于 actor-critic 方法。
 >
 > **同策略（On-Policy） vs 异策略（Off-Policy）**：
@@ -268,11 +268,11 @@ class ReplayBuffer:
 
 > **直觉：优先级经验回放（Prioritized Experience Replay，PER）**
 >
-> 在标准缓冲区中，所有经验的采样概率相等。但有些经验信息量大得多。**PER**[schaul2016prioritized]按 **TD 误差幅度**对采样概率进行加权——如果某条转移引发了巨大「惊讶」（$|\delta_t|$ 高），智能体就更频繁地采样它，从而更快修正模型。在 Atari 基准上可将学习速度加快 2--3 倍。
+> 在标准缓冲区中，所有经验的采样概率相等。但有些经验信息量大得多。**PER**[schaul2016prioritized]按 **TD 误差幅度**对采样概率进行加权——如果某条转移引发了巨大「惊讶」（$\lvert \delta_t \rvert$ 高），智能体就更频繁地采样它，从而更快修正模型。在 Atari 基准上可将学习速度加快 2--3 倍。
 
 > **警告：为什么 Q-Learning 对 LLM 不适用**
 >
-> 语言生成中的动作空间是整个词表（$|A| = 32\text{K}$--$128\text{K}$），状态空间是所有可能的 token 序列（无限）。在每个 token 位置对 128K 个动作计算 $\max_a Q(s,a)$ 是不可行的。这就是 LLM RL 使用**基于策略**方法（PPO、GRPO）的原因。
+> 语言生成中的动作空间是整个词表（$\lvert A \rvert = 32\text{K}$--$128\text{K}$），状态空间是所有可能的 token 序列（无限）。在每个 token 位置对 128K 个动作计算 $\max_a Q(s,a)$ 是不可行的。这就是 LLM RL 使用**基于策略**方法（PPO、GRPO）的原因。
 
 ## 策略梯度方法——REINFORCE
 
@@ -283,7 +283,7 @@ class ReplayBuffer:
 **策略梯度定理（Policy Gradient Theorem）**：
 
 $$
-\nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta}\left[\sum_{t=0}^T \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot G_t\right]
+\nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta}\left[\sum_{t=0}^T \nabla_\theta \log \pi_\theta(a_t\mid s_t) \cdot G_t\right]
 $$
 
 > **关键：策略梯度定理——形式化推导（5 步）**
@@ -291,48 +291,48 @@ $$
 > **第 1 步**：定义目标。我们希望最大化期望回报：
 >
 > $$
-> J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}\!\left[\sum_{t=0}^T r_t\right] = \sum_\tau P(\tau|\theta) R(\tau)
+> J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}\!\left[\sum_{t=0}^T r_t\right] = \sum_\tau P(\tau\mid\theta) R(\tau)
 > $$
 >
-> 其中 $P(\tau|\theta) = p(s_0)\prod_{t=0}^T \pi_\theta(a_t|s_t)\, p(s_{t+1}|s_t, a_t)$ 是轨迹概率。
+> 其中 $P(\tau\mid\theta) = p(s_0)\prod_{t=0}^T \pi_\theta(a_t\mid s_t)\, p(s_{t+1}\mid s_t, a_t)$ 是轨迹概率。
 >
 > **第 2 步**：求梯度。只有 $\pi_\theta$ 项依赖于 $\theta$（状态转移 $p$ 与 $\theta$ 无关）：
 >
 > $$
-> \nabla_\theta J = \sum_\tau \nabla_\theta P(\tau|\theta)\, R(\tau)
+> \nabla_\theta J = \sum_\tau \nabla_\theta P(\tau\mid\theta)\, R(\tau)
 > $$
 >
-> **第 3 步**：应用**对数求导技巧（log-derivative trick）**：$\nabla_\theta P(\tau|\theta) = P(\tau|\theta)\, \nabla_\theta \log P(\tau|\theta)$：
+> **第 3 步**：应用**对数求导技巧（log-derivative trick）**：$\nabla_\theta P(\tau\mid\theta) = P(\tau\mid\theta)\, \nabla_\theta \log P(\tau\mid\theta)$：
 >
 > $$
-> \nabla_\theta J = \mathbb{E}_{\tau \sim \pi_\theta}\!\left[\nabla_\theta \log P(\tau|\theta)\, R(\tau)\right]
+> \nabla_\theta J = \mathbb{E}_{\tau \sim \pi_\theta}\!\left[\nabla_\theta \log P(\tau\mid\theta)\, R(\tau)\right]
 > $$
 >
-> **第 4 步**：展开 $\log P(\tau|\theta)$。$\log p(s_0)$ 与 $\log p(s_{t+1}|s_t,a_t)$ 在 $\nabla_\theta$ 下消失：
+> **第 4 步**：展开 $\log P(\tau\mid\theta)$。$\log p(s_0)$ 与 $\log p(s_{t+1}\mid s_t,a_t)$ 在 $\nabla_\theta$ 下消失：
 >
 > $$
-> \nabla_\theta \log P(\tau|\theta) = \sum_{t=0}^T \nabla_\theta \log \pi_\theta(a_t|s_t)
+> \nabla_\theta \log P(\tau\mid\theta) = \sum_{t=0}^T \nabla_\theta \log \pi_\theta(a_t\mid s_t)
 > $$
 >
 > **第 5 步**：合并。未来奖励不依赖于过去动作（因果性），因此每个 $\nabla\log\pi$ 仅与未来回报 $G_t = \sum_{t'=t}^T r_{t'}$ 配对：
 >
 > $$
-> \nabla_\theta J = \mathbb{E}_{\pi_\theta}\!\left[\sum_{t=0}^T \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot G_t\right]
+> \nabla_\theta J = \mathbb{E}_{\pi_\theta}\!\left[\sum_{t=0}^T \nabla_\theta \log \pi_\theta(a_t\mid s_t) \cdot G_t\right]
 > $$
 
 > **直觉：这一结果为何优美**
 >
-> 该梯度**不需要对环境的状态转移** $p(s'|s,a)$ **求导**。对数求导技巧将其转化为一个期望，只需*运行策略并观察奖励*就能估计。把 $G_t$ 替换为优势 $\hat{A}_t = G_t - V(s_t)$ 可以在不引入偏差的前提下降低方差（因为对任何仅依赖状态的基线 $b(s)$，都有 $\mathbb{E}[\nabla\log\pi \cdot b(s)] = 0$）。
+> 该梯度**不需要对环境的状态转移** $p(s'\mid s,a)$ **求导**。对数求导技巧将其转化为一个期望，只需*运行策略并观察奖励*就能估计。把 $G_t$ 替换为优势 $\hat{A}_t = G_t - V(s_t)$ 可以在不引入偏差的前提下降低方差（因为对任何仅依赖状态的基线 $b(s)$，都有 $\mathbb{E}[\nabla\log\pi \cdot b(s)] = 0$）。
 
 **REINFORCE 算法（REINFORCE）**[williams1992simple]（Williams, 1992）：
 
 1. 在 $\pi_\theta$ 下采样完整轨迹 $\tau = (s_0, a_0, r_0, s_1, a_1, r_1, \ldots)$
 2. 为每个时间步计算回报 $G_t = \sum_{k=0}^{T-t} \gamma^k r_{t+k}$
-3. 更新：$\theta \leftarrow \theta + \alpha \sum_t \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot G_t$
+3. 更新：$\theta \leftarrow \theta + \alpha \sum_t \nabla_\theta \log \pi_\theta(a_t\mid s_t) \cdot G_t$
 
 > **直觉：REINFORCE 直觉——「奖励加权的最大似然」**
 >
-> $\nabla_\theta \log \pi_\theta(a_t|s_t)$ 是提升动作 $a_t$ 概率的方向。乘以 $G_t$ 意味着：
+> $\nabla_\theta \log \pi_\theta(a_t\mid s_t)$ 是提升动作 $a_t$ 概率的方向。乘以 $G_t$ 意味着：
 >
 > - 高奖励轨迹：提升所有所采取动作的概率（$G_t$ 为正）
 > - 低奖励轨迹：降低所采取动作的概率（扣除基线后 $G_t$ 为负）
@@ -342,7 +342,7 @@ $$
 **基线带来的方差缩减**：
 
 $$
-\nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta}\left[\sum_{t=0}^T \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot (G_t - b(s_t))\right]
+\nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta}\left[\sum_{t=0}^T \nabla_\theta \log \pi_\theta(a_t\mid s_t) \cdot (G_t - b(s_t))\right]
 $$
 
 任何与 $a_t$ 无关的基线 $b(s_t)$ 都能在保持梯度无偏的同时降低方差。最佳选择：$b(s_t) = V^\pi(s_t)$。此时 $G_t - V(s_t) \approx A^\pi(s_t, a_t)$ = 优势。
@@ -362,13 +362,13 @@ $$
 
 **结构**：
 
-- **Actor** $\pi_\theta(a|s)$：策略，提议动作。
+- **Actor** $\pi_\theta(a\mid s)$：策略，提议动作。
 - **Critic** $V_\phi(s)$ 或 $Q_\phi(s,a)$：评估状态/动作的好坏，提供低方差基线。
 
 **Actor 更新**（使用 critic 提供的优势）：
 
 $$
-\nabla_\theta J = \mathbb{E}\left[\nabla_\theta \log \pi_\theta(a_t|s_t) \cdot \hat{A}_t\right], \quad \hat{A}_t = r_t + \gamma V_\phi(s_{t+1}) - V_\phi(s_t)
+\nabla_\theta J = \mathbb{E}\left[\nabla_\theta \log \pi_\theta(a_t\mid s_t) \cdot \hat{A}_t\right], \quad \hat{A}_t = r_t + \gamma V_\phi(s_{t+1}) - V_\phi(s_t)
 $$
 
 **Critic 更新**（最小化 TD 误差）：
@@ -489,7 +489,7 @@ $$
 
 |  | Model-Free | Model-Based |
 | --- | --- | --- |
-| **所学内容** | 直接学习策略 $\pi$ 和/或价值 $V$/$Q$ | 环境模型 $\hat{P}(s'|s,a)$ |
+| **所学内容** | 直接学习策略 $\pi$ 和/或价值 $V$/$Q$ | 环境模型 $\hat{P}(s'\mid s,a)$ |
 | **规划能力** | 无规划，反应式决策 | 可以模拟未来轨迹 |
 | **样本效率** | 低（必须经历所有情况） | 高（可在想象中规划） |
 | **准确性** | 无模型偏差 | 模型误差会累积 |

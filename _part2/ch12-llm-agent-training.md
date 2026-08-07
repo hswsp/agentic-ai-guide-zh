@@ -164,14 +164,14 @@ STaR [zelikman2022star] 是一种**迭代式自我改进**方法，无需外部 
 
 **算法**：
 
-1. **生成**：对数据集 $\mathcal{D}$ 中的每个问题 $x_i$，采样一条推理轨迹 $z_i \sim \pi_\theta(\cdot | x_i)$，后跟一个答案 $\hat{y}_i$。
+1. **生成**：对数据集 $\mathcal{D}$ 中的每个问题 $x_i$，采样一条推理轨迹 $z_i \sim \pi_\theta(\cdot \mid x_i)$，后跟一个答案 $\hat{y}_i$。
 2. **过滤**：仅保留满足 $\hat{y}_i = y_i^*$（正确答案）的轨迹。定义成功集 $\mathcal{D}_{\text{pass}} = \{(x_i, z_i, y_i^*) : \hat{y}_i = y_i^*\}$。
-3. **合理化（Rationalization）**（关键创新）：对模型失败的问题，生成一条以正确答案为条件的“合理化”轨迹：$z_i^{\text{rat}} \sim \pi_\theta(\cdot | x_i, y_i^*)$。这教导模型从解*反向*推理。
+3. **合理化（Rationalization）**（关键创新）：对模型失败的问题，生成一条以正确答案为条件的“合理化”轨迹：$z_i^{\text{rat}} \sim \pi_\theta(\cdot \mid x_i, y_i^*)$。这教导模型从解*反向*推理。
 4. **微调**：在 $\mathcal{D}_{\text{pass}} \cup \mathcal{D}_{\text{rationalized}}$ 上通过 SFT 更新 $\theta$。
 5. **迭代**：用改进后的模型从步骤 1 重复。
 
 $$
-\boxed{\theta_{k+1} = \arg\min_\theta -\sum_{(x,z,y) \in \mathcal{D}_k^+} \log \pi_\theta(z, y | x)}
+\boxed{\theta_{k+1} = \arg\min_\theta -\sum_{(x,z,y) \in \mathcal{D}_k^+} \log \pi_\theta(z, y \mid x)}
 $$
 
 **收敛动力学**：每次迭代 $k$ 都会提升模型的解题率 $p_k$。若 $p_0 = 0.3$（解出 30% 的问题），经过合理化 + SFT 后 $p_1 \approx 0.5$。通常 3--5 次迭代后收敛至 $p \approx 0.7$--$0.9$。
@@ -222,7 +222,7 @@ $$
 4. **情节记忆**：过往反思的滑动窗口缓冲区 $\mathcal{M} = [r_1, r_2, \ldots, r_m]$（通常 $m \leq 3$ 以适应上下文）。
 5. **重试循环**：下一次尝试时，反思被注入到 Prompt 中：
 $$
-a_{t+1} \sim \pi\!\left(\cdot\; |\; \text{task},\; \mathcal{M},\; \text{current\_state}\right)
+a_{t+1} \sim \pi\!\left(\cdot\; \mid\; \text{task},\; \mathcal{M},\; \text{current\_state}\right)
 $$
 
 **反思示例**：*“在我上一次尝试中，我在验证输入格式之前就调用了搜索 API，导致了 400 错误。下次我应该先验证 JSON Schema，然后再发起 API 调用。”*
@@ -334,7 +334,7 @@ $$
 \text{UCB}(s, a) = \bar{Q}(s, a) + c \sqrt{\frac{\ln N(s)}{N(s, a)}}
 $$
 其中 $\bar{Q}$ = 子树平均 reward，$N$ = 访问计数，$c$ = 探索常数。
-2. **扩展**：在叶节点，通过 LLM 采样（温度 $> 0$）生成 $k$ 个候选动作：$\{a_1, \ldots, a_k\} \sim \pi_\theta(\cdot | s_{\text{leaf}})$
+2. **扩展**：在叶节点，通过 LLM 采样（温度 $> 0$）生成 $k$ 个候选动作：$\{a_1, \ldots, a_k\} \sim \pi_\theta(\cdot \mid s_{\text{leaf}})$
 3. **模拟**：对每个候选，在环境中执行该动作，然后用快速 rollout 策略（贪心解码）继续，直到终止状态或深度限制。
 4. **反向传播**：将终端 reward 沿所有祖先节点向上传播，更新 $\bar{Q}$ 和 $N$ 计数。
 5. **重复**：在固定计算预算（如 50--200 次迭代）下运行步骤 1--4。
@@ -928,7 +928,7 @@ $$
 >
 > - **状态** $s_t$：系统 Prompt + 研究问题 + 完整的动作/观测历史（工具输出、代码结果、搜索结果）。上下文窗口：128K Token。
 > - **动作** $a_t$：来自动作空间的结构化工具调用（见下文）+ 推理轨迹（CoT）。
-> - **转移** $T(s_{t+1}|s_t, a_t)$：确定性——将动作 + 工具输出附加到上下文。
+> - **转移** $T(s_{t+1}\mid s_t, a_t)$：确定性——将动作 + 工具输出附加到上下文。
 > - **Reward** $R$：基于报告质量的稀疏终端 reward（见下方 Reward 设计）。
 > - **视野**：20--100 步（典型研究轨迹）。
 > - **折扣** $\gamma = 1.0$（Episode 式；有限任务不折扣）。
@@ -1133,7 +1133,7 @@ $$
 
 带 KL 正则的 GRPO 目标：
 $$
-L_{\text{GRPO}}(\theta) = \frac{1}{N} \sum_{i=1}^N \min\!\left( \frac{\pi_\theta(o_i|q)}{\pi_{\theta_{\text{old}}}(o_i|q)} A_i,\; \text{clip}\!\left(\frac{\pi_\theta(o_i|q)}{\pi_{\theta_{\text{old}}}(o_i|q)}, 1{-}\epsilon, 1{+}\epsilon\right) A_i \right) - \beta\, D_{\text{KL}}(\pi_\theta \| \pi_{\text{ref}})
+L_{\text{GRPO}}(\theta) = \frac{1}{N} \sum_{i=1}^N \min\!\left( \frac{\pi_\theta(o_i\mid q)}{\pi_{\theta_{\text{old}}}(o_i\mid q)} A_i,\; \text{clip}\!\left(\frac{\pi_\theta(o_i\mid q)}{\pi_{\theta_{\text{old}}}(o_i\mid q)}, 1{-}\epsilon, 1{+}\epsilon\right) A_i \right) - \beta\, D_{\text{KL}}(\pi_\theta \| \pi_{\text{ref}})
 $$
 
 > **为什么 GRPO 在 Agent 训练中占优**

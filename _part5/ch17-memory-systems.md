@@ -27,7 +27,7 @@ permalink: /part5/ch17-memory-systems.html
 形式化地，我们把 Agent 建模为一个元组 $\mathcal{A} = (\pi_\theta, \mathcal{M}, \mathcal{R}, \mathcal{W})$，其中 $\pi_\theta$ 是 Policy（LLM），$\mathcal{M}$ 是记忆存储，$\mathcal{R}: \mathcal{Q} \times \mathcal{M} \to \mathcal{D}$ 是把查询映射到检索结果的检索函数，$\mathcal{W}: \mathcal{M} \times \mathcal{E} \to \mathcal{M}$ 是用新经验 $\mathcal{E}$ 更新记忆的写入函数。在每一步 $t$，Agent 观察到 $o_t$，检索相关上下文 $c_t = \mathcal{R}(o_t, \mathcal{M})$，并采取行动：
 
 $$
-a_t \sim \pi_\theta\!\left(\cdot \;\middle|\; [s_t;\, c_t;\, h_t]\right),
+a_t \sim \pi_\theta\!\left(\cdot \;\middle\vert\; [s_t;\, c_t;\, h_t]\right),
 $$
 
 其中 $s_t$ 是当前的系统 Prompt，$c_t$ 是检索到的记忆，$h_t$ 是近期的上下文历史。行动之后，Agent 可写入新信息：$\mathcal{M} \leftarrow \mathcal{W}(\mathcal{M},\, (o_t, a_t, r_t))$。
@@ -95,7 +95,7 @@ $$
 每个文档 $d_i$ 由 Embedding 模型 $\phi$ 编码：$\mathbf{v}_i = \phi(d_i) \in \mathbb{R}^{D}$。查询同样被编码：$\mathbf{q} = \phi(q)$。检索按相似度返回 top-$k$ 文档：
 
 $$
-\text{Retrieve}(q, \mathcal{M}, k) = \underset{S \subseteq [N],\, |S|=k}{\arg\max} \sum_{i \in S} \text{sim}(\mathbf{q}, \mathbf{v}_i),
+\text{Retrieve}(q, \mathcal{M}, k) = \underset{S \subseteq [N],\, \lvert S \rvert=k}{\arg\max} \sum_{i \in S} \text{sim}(\mathbf{q}, \mathbf{v}_i),
 $$
 
 其中 $\text{sim}(\cdot,\cdot)$ 通常为余弦相似度。近似最近邻（Approximate Nearest-Neighbor, ANN）索引（FAISS [johnson2019billion]、HNSW [malkov2018efficient]、ScaNN [guo2020scann]）使得 $N \sim 10^7$ 量级下仍然可行。
@@ -208,7 +208,7 @@ $$
 其中 $\tau$ 为阈值，$\text{importance}(e)$ 可以是：
 
 - **惊讶度（Surprise）：** $-\log p_\theta(e \mid \text{context})$——出乎意料的事件信息量更大。
-- **Reward 信号：** 与高 $|r_t|$（正或负）相关联的事件值得记住。
+- **Reward 信号：** 与高 $\lvert r_t \rvert$（正或负）相关联的事件值得记住。
 - **LLM 自评：** 提示模型在 1--10 的尺度上为重要性打分。
 
 **冲突检测。**
@@ -273,7 +273,7 @@ $$
 生物记忆会遗忘；人工记忆也应如此。可用策略包括：
 
 - **LRU 驱逐：** 容量超限时移除最近最少使用的条目。
-- **重要性加权的遗忘：** $p(\text{forget}\,|\,d) \propto \exp(-\text{importance}(d))$。
+- **重要性加权的遗忘：** $p(\text{forget}\,\mid\,d) \propto \exp(-\text{importance}(d))$。
 - **间隔重复（Spaced repetition）：** 反复被访问的记忆保留得更久，遵循指数遗忘曲线 [ebbinghaus1885memory]。
 
 ### 反思：元认知操作
@@ -429,9 +429,9 @@ $$
 | --- | --- | --- | --- | --- | --- |
 | 上下文内（工作记忆） | $O(L)$ Token | 0 ms | 免费 | 通过微调 | 短任务、主动推理 |
 | 稠密 RAG [lewis2020retrieval] | $O(10^7)$ 文档 | 10--50 ms | $O(1)$ Embedding | 仅编码器 | 语义检索、问答 |
-| 稀疏（BM25） [robertson2009probabilistic] | $O(10^8)$ 文档 | 1--5 ms | $O(|d|)$ 索引 | 否 | 关键词检索、法律/医疗 |
+| 稀疏（BM25） [robertson2009probabilistic] | $O(10^8)$ 文档 | 1--5 ms | $O(\lvert d \rvert)$ 索引 | 否 | 关键词检索、法律/医疗 |
 | 混合 RAG [chen2022hybrid] | $O(10^7)$ 文档 | 15--60 ms | $O(1)$ Embedding | 仅编码器 | 通用检索 |
-| 摘要 | 无上限 | 0 ms（在上下文内） | $O(|e|)$ 次 LLM 调用 | 通过微调 | 长对话、叙事 |
+| 摘要 | 无上限 | 0 ms（在上下文内） | $O(\lvert e \rvert)$ 次 LLM 调用 | 通过微调 | 长对话、叙事 |
 | 知识图谱 [lacroix2020tensor] | $O(10^9)$ 三元组 | 5--100 ms | $O(1)$ 插入 | Embedding 层 | 结构化事实、多跳 |
 | 键值记忆网络 [sukhbaatar2015end] | $O(M)$ 槽位 | $O(M)$ Attention | 一次 Gradient 更新 | 完全可训 | 端到端可微任务 |
 | MemGPT 分层 [packer2023memgpt] | 无上限 | 0--100 ms | 混合 | 通过 RL | 长周期 Agent、助手 |

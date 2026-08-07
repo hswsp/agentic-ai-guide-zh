@@ -76,10 +76,10 @@ $$
 
 **形式化刻画。**
 
-CoT 将单步预测 $p(y|x)$ 转化为多步序列生成：
+CoT 将单步预测 $p(y\mid x)$ 转化为多步序列生成：
 
 $$
-p(y|x) = \sum_{z} p(y|x, z) \cdot p(z|x) \approx p(y|x, z^*) \cdot p(z^*|x)
+p(y\mid x) = \sum_{z} p(y\mid x, z) \cdot p(z\mid x) \approx p(y\mid x, z^*) \cdot p(z^*\mid x)
 $$
 
 其中 $z^* = (z_1, z_2, \ldots, z_T)$ 是贪心推理链。对所有可能链条求和是不可计算的；标准 CoT 仅采用单一样本（贪心或温度采样）。
@@ -93,7 +93,7 @@ $$
 自洽性（Self-Consistency）[wang2023selfconsistency] 通过采样**多条独立的推理链**并对最终答案取多数投票，来缓解 CoT 单链脆弱的问题：
 
 $$
-\hat{y} = \arg\max_{y} \sum_{i=1}^{N} \mathbf{1}[y_i = y], \quad \text{where } (z_i, y_i) \sim p(\cdot | x), \; T > 0
+\hat{y} = \arg\max_{y} \sum_{i=1}^{N} \mathbf{1}[y_i = y], \quad \text{where } (z_i, y_i) \sim p(\cdot \mid x), \; T > 0
 $$
 
 **关键性质**：
@@ -130,7 +130,7 @@ $$
 
 其中：
 
-- $\mathcal{G}$：**想法生成器**——产生 $b$ 个候选的下一想法：$\{z^{(1)}, \ldots, z^{(b)}\} \sim \pi_\theta(\cdot | s)$
+- $\mathcal{G}$：**想法生成器**——产生 $b$ 个候选的下一想法：$\{z^{(1)}, \ldots, z^{(b)}\} \sim \pi_\theta(\cdot \mid s)$
 - $\mathcal{E}$：**状态评估器**——为部分解打分：$V(s) \in \{$*sure*, *maybe*, *impossible*$\}$ 或 $V(s) \in [0, 1]$
 - $\pi_\theta$：生成想法的语言模型
 - $\text{Search}$：搜索算法（BFS 或 DFS）
@@ -247,7 +247,7 @@ $$
 Best-of-N 采样（Rejection Sampling）（BoN）[nakano2021webgpt, stiennon2020learning] 是最简单的扩展方法，它利用一个**学习得到的奖励模型**在候选中进行选择：
 
 $$
-y^* = \arg\max_{y \in \{y_1, \ldots, y_N\}} R_\phi(x, y), \quad y_i \sim \pi_\theta(\cdot | x)
+y^* = \arg\max_{y \in \{y_1, \ldots, y_N\}} R_\phi(x, y), \quad y_i \sim \pi_\theta(\cdot \mid x)
 $$
 
 **按奖励模型类型的变体**：
@@ -289,7 +289,7 @@ $$
 a^* = \arg\max_a \left[ Q(s, a) + c_{\text{puct}} \cdot P(s, a) \cdot \frac{\sqrt{\sum_b N(s,b)}}{1 + N(s, a)} \right]
 $$
 
-其中 $P(s,a) = \pi_\theta(a|s)$ 是 LLM 从状态 $s$ 生成步骤 $a$ 的先验概率。这使探索偏向 LLM 本就认为可能的步骤，而 UCB 项鼓励尝试探索不足的备选方案。
+其中 $P(s,a) = \pi_\theta(a\mid s)$ 是 LLM 从状态 $s$ 生成步骤 $a$ 的先验概率。这使探索偏向 LLM 本就认为可能的步骤，而 UCB 项鼓励尝试探索不足的备选方案。
 
 > **面向数学推理的 MCTS：运行示例**
 >
@@ -330,7 +330,7 @@ $$
 束搜索——在 NMT 与文本生成中长期作为标准方法——也可以在*推理步*层面而非 Token 层面应用。我们不再跟踪前 $k$ 个 Token 序列，而是跟踪前 $k$ 个**推理前缀**：
 
 $$
-\mathcal{B}_d = \text{top-}k\left\{ (s_1, \ldots, s_d) : \sum_{i=1}^d \log \pi_\theta(s_i | s_{<i}) + \lambda \cdot V_\phi(s_1, \ldots, s_d) \right\}
+\mathcal{B}_d = \text{top-}k\left\{ (s_1, \ldots, s_d) : \sum_{i=1}^d \log \pi_\theta(s_i \mid s_{<i}) + \lambda \cdot V_\phi(s_1, \ldots, s_d) \right\}
 $$
 
 其中评分将 LLM 的对数概率（流畅性）与价值模型估计（正确性）相结合。这本质上是用学习到的价值函数取代提示式价值函数的 ToT-BFS。
@@ -423,7 +423,7 @@ $$
 对于代码问题，准确率奖励由通过测试用例决定：
 
 $$
-r_{\text{acc}}^{\text{code}}(y, \mathcal{T}) = \frac{1}{|\mathcal{T}|} \sum_{t \in \mathcal{T}} \mathbf{1}[\texttt{execute}(y, t) = \texttt{expected}(t)]
+r_{\text{acc}}^{\text{code}}(y, \mathcal{T}) = \frac{1}{\lvert \mathcal{T} \rvert} \sum_{t \in \mathcal{T}} \mathbf{1}[\texttt{execute}(y, t) = \texttt{expected}(t)]
 $$
 
 **格式奖励**
@@ -471,7 +471,7 @@ $$
 GRPO 目标对概率比做截断（与近端策略优化（Proximal Policy Optimization, PPO）相同），并对参考 Policy $\pi_{\text{ref}}$ 加上 KL 惩罚：
 
 $$
-\mathcal{L}_{\text{GRPO}}(\theta) = -\mathbb{E}_{q \sim \mathcal{D},\, \{y_i\} \sim \pi_\theta(\cdot|q)} \left[ \frac{1}{G} \sum_{i=1}^{G} \frac{1}{|y_i|} \sum_{t=1}^{|y_i|} \min\!\left( \rho_{i,t}\, \hat{A}_i,\; \text{clip}(\rho_{i,t}, 1{-}\varepsilon, 1{+}\varepsilon)\, \hat{A}_i \right) - \beta\, \mathbb{D}_{\mathrm{KL}}\!\left[\pi_\theta \,\|\, \pi_{\text{ref}}\right] \right]
+\mathcal{L}_{\text{GRPO}}(\theta) = -\mathbb{E}_{q \sim \mathcal{D},\, \{y_i\} \sim \pi_\theta(\cdot\mid q)} \left[ \frac{1}{G} \sum_{i=1}^{G} \frac{1}{\lvert y_i \rvert} \sum_{t=1}^{\lvert y_i \rvert} \min\!\left( \rho_{i,t}\, \hat{A}_i,\; \text{clip}(\rho_{i,t}, 1{-}\varepsilon, 1{+}\varepsilon)\, \hat{A}_i \right) - \beta\, \mathbb{D}_{\mathrm{KL}}\!\left[\pi_\theta \,\|\, \pi_{\text{ref}}\right] \right]
 $$
 
 其中：
@@ -479,14 +479,14 @@ $$
 - $\rho_{i,t} = \dfrac{\pi_\theta(y_{i,t} \mid q, y_{i,<t})}{\pi_{\theta_{\text{old}}}(y_{i,t} \mid q, y_{i,<t})}$ 是逐 Token 的概率比
 - $\varepsilon \in \{0.1, 0.2\}$ 是 PPO 的截断参数
 - $\beta > 0$ 控制 KL 惩罚的强度
-- $|y_i|$ 是第 $i$ 个回答的长度（长度归一化可防止偏向较短回答）
+- $\lvert y_i \rvert$ 是第 $i$ 个回答的长度（长度归一化可防止偏向较短回答）
 
 **KL 惩罚的具体形式**
 
 KL 散度项逐 Token 计算：
 
 $$
-\mathbb{D}_{\mathrm{KL}}\!\left[\pi_\theta \,\|\, \pi_{\text{ref}}\right] = \mathbb{E}_{y \sim \pi_\theta(\cdot|q)} \left[ \sum_{t=1}^{|y|} \log \frac{\pi_\theta(y_t \mid q, y_{<t})}{\pi_{\text{ref}}(y_t \mid q, y_{<t})} \right]
+\mathbb{D}_{\mathrm{KL}}\!\left[\pi_\theta \,\|\, \pi_{\text{ref}}\right] = \mathbb{E}_{y \sim \pi_\theta(\cdot\mid q)} \left[ \sum_{t=1}^{\lvert y \rvert} \log \frac{\pi_\theta(y_t \mid q, y_{<t})}{\pi_{\text{ref}}(y_t \mid q, y_{<t})} \right]
 $$
 
 在实践中，R1 使用一种 KL 的无偏估计器，通过下列近似避免在每一步都计算 $\pi_{\text{ref}}$：
@@ -789,7 +789,7 @@ STaR[zelikman2022star] 通过迭代方式自举推理能力：
 在用于推理的自博弈 RL 中，模型同时生成问题与解答：
 
 $$
-\mathcal{L}_{\text{self-play}}(\theta) = \mathbb{E}_{q \sim \pi_\theta^{\text{gen}}} \mathbb{E}_{y \sim \pi_\theta^{\text{solve}}(\cdot|q)} \left[ r(y, y^*) \right]
+\mathcal{L}_{\text{self-play}}(\theta) = \mathbb{E}_{q \sim \pi_\theta^{\text{gen}}} \mathbb{E}_{y \sim \pi_\theta^{\text{solve}}(\cdot\mid q)} \left[ r(y, y^*) \right]
 $$
 
 其中 $\pi_\theta^{\text{gen}}$ 生成问题，$\pi_\theta^{\text{solve}}$ 解答它们。生成器因产生具有挑战性但可解的问题而获得奖励。
@@ -809,7 +809,7 @@ $$
 **RLVR 目标**
 
 $$
-\mathcal{L}_{\text{RLVR}}(\theta) = -\mathbb{E}_{(q, y^*) \sim \mathcal{D}} \mathbb{E}_{y \sim \pi_\theta(\cdot|q)} \left[ \text{verify}(y, y^*) \right] + \beta \mathbb{D}_{\mathrm{KL}}\!\left[\pi_\theta \,\|\, \pi_{\text{ref}}\right]
+\mathcal{L}_{\text{RLVR}}(\theta) = -\mathbb{E}_{(q, y^*) \sim \mathcal{D}} \mathbb{E}_{y \sim \pi_\theta(\cdot\mid q)} \left[ \text{verify}(y, y^*) \right] + \beta \mathbb{D}_{\mathrm{KL}}\!\left[\pi_\theta \,\|\, \pi_{\text{ref}}\right]
 $$
 
 RLVR 相对于基于人类反馈的强化学习（Reinforcement Learning from Human Feedback, RLHF）的关键优势在于**不存在奖励模型误差**：由于奖励由确定性验证器而非学习得到的模型计算，因此不存在针对有缺陷奖励模型的奖励作弊。唯一的失败模式是模型找到了能通过验证、但并非真正正确的解（例如，利用代码评估中测试用例的弱点）。
@@ -858,7 +858,7 @@ Quiet-STaR[zelikman2024quietstar] 将推理范式扩展到*每一个 Token 位�
 对于每个 Token 位置 $t$，模型在预测下一个 Token $x_{t+1}$ 之前先生成一段隐藏思考 $z_t$：
 
 $$
-P(x_{t+1} \mid x_{\leq t}) = \mathbb{E}_{z_t \sim \pi_\theta(\cdot | x_{\leq t})} \left[ \pi_\theta(x_{t+1} \mid x_{\leq t}, z_t) \right]
+P(x_{t+1} \mid x_{\leq t}) = \mathbb{E}_{z_t \sim \pi_\theta(\cdot \mid x_{\leq t})} \left[ \pi_\theta(x_{t+1} \mid x_{\leq t}, z_t) \right]
 $$
 
 在实践中，这通过混合带思考与不带思考的预测来近似：

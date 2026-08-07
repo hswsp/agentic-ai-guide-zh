@@ -241,7 +241,7 @@ $$\text{CrossAttn}(Q_{\text{dec}}, K_{\text{enc}}, V_{\text{enc}}) = \text{softm
 
 **什么是嵌入？**
 
-嵌入是一个离散符号的学习得到的稠密向量表示。我们不再把单词 "king" 表示为大小为 $|\mathcal{V}| = 128{,}000$ 的独热向量（大部分为零），而是表示为 $\mathbb{R}^d$（例如 $d = 4096$）中一个紧凑的向量，捕捉其*含义*。
+嵌入是一个离散符号的学习得到的稠密向量表示。我们不再把单词 "king" 表示为大小为 $\lvert \mathcal{V} \rvert = 128{,}000$ 的独热向量（大部分为零），而是表示为 $\mathbb{R}^d$（例如 $d = 4096$）中一个紧凑的向量，捕捉其*含义*。
 
 关键洞察：**相似的概念得到相近的向量**。在一个训练良好的嵌入空间中：
 
@@ -253,7 +253,7 @@ $$\text{CrossAttn}(Q_{\text{dec}}, K_{\text{enc}}, V_{\text{enc}}) = \text{softm
 
 **嵌入表。**
 
-在实践中，嵌入层就是一个矩阵 $\mathbf{E} \in \mathbb{R}^{|\mathcal{V}| \times d}$，其中第 $i$ 行存储 Token $i$ 的嵌入向量：
+在实践中，嵌入层就是一个矩阵 $\mathbf{E} \in \mathbb{R}^{\lvert \mathcal{V} \rvert \times d}$，其中第 $i$ 行存储 Token $i$ 的嵌入向量：
 
 $$\text{embed}(x_t) = \mathbf{E}[x_t] \in \mathbb{R}^d$$
 
@@ -265,7 +265,7 @@ $$
 
 > **Transformer 中的嵌入表**
 >
-> - **尺寸**：$|\mathcal{V}| \times d$。对于 Llama-3：$128{,}256 \times 4{,}096 = 525$M 参数（占 8B 模型的 6.5%）。
+> - **尺寸**：$\lvert \mathcal{V} \rvert \times d$。对于 Llama-3：$128{,}256 \times 4{,}096 = 525$M 参数（占 8B 模型的 6.5%）。
 > - **初始化**：随机（Xavier/正态分布），然后通过反向传播学习。
 > - **权重共享（Weight tying）**：许多模型*共享*嵌入矩阵与输出投影头：$W_{\text{head}} = \mathbf{E}^T$。这节省参数并创建对称的编码-解码结构。
 > - **输入**：Token ID（整数）$\to$ **输出**：$\mathbb{R}^d$ 中的稠密向量。
@@ -385,7 +385,7 @@ Transformer 在构造上是置换等变的——没有位置信息，模型无�
 | 正弦（Sinusoidal） | 原始 Transformer | 不同频率的固定 $\sin/\cos$。无需学习。 |
 | 学习的绝对位置 | GPT-2[radford2019gpt2], BERT[devlin2019bert] | 每个位置的学习嵌入。受限于训练长度。 |
 | RoPE | Llama[grattafiori2024llama3], Qwen[qwen2024qwen25], Mistral[jiang2023mistral] | 将 Q、K 向量按位置相关的角度旋转。通过 NTK 感知缩放进行外推。 |
-| ALiBi | BLOOM[workshop2023bloom], MPT[mosaicml2023mpt] | 不使用位置嵌入；在注意力分数上添加线性偏置 $-m|i-j|$。简单，外推性好。 |
+| ALiBi | BLOOM[workshop2023bloom], MPT[mosaicml2023mpt] | 不使用位置嵌入；在注意力分数上添加线性偏置 $-m\lvert i-j \rvert$。简单，外推性好。 |
 
 **正弦（固定）位置编码。**
 
@@ -457,10 +457,10 @@ $$
 ALiBi[press2022train] 采取了根本不同的方法：*完全不使用位置嵌入*。取而代之，从注意力分数中减去一个静态的线性惩罚：
 
 $$
-\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^T}{\sqrt{d_k}} - m \cdot \bigl[|i-j|\bigr]_{i,j}\right) V
+\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^T}{\sqrt{d_k}} - m \cdot \bigl[\lvert i-j \rvert\bigr]_{i,j}\right) V
 $$
 
-其中 $m$ 是头特定的斜率（几何设置：对总共 $H$ 个头中的第 $h$ 个头取 $m_h = 2^{-8h/H}$）。偏置 $-m|i-j|$ 创建了一个软局部注意力窗口，其宽度因头而异。
+其中 $m$ 是头特定的斜率（几何设置：对总共 $H$ 个头中的第 $h$ 个头取 $m_h = 2^{-8h/H}$）。偏置 $-m\lvert i-j \rvert$ 创建了一个软局部注意力窗口，其宽度因头而异。
 
 **动机：**位置应使注意力偏向邻近 Token（近因先验），同时不干扰嵌入空间。通过纯粹在注意力分数空间中操作，ALiBi 避免了用位置信号污染 Token 表征。
 
@@ -660,7 +660,7 @@ $$
 将注意力权重与梯度信息结合以识别哪些被关注的 Token 实际*影响*输出[barkan2021grad]：
 
 $$
-\text{Relevance}(i) = \alpha_i \cdot \left|\frac{\partial y}{\partial h_i}\right|
+\text{Relevance}(i) = \alpha_i \cdot \left\lvert \frac{\partial y}{\partial h_i}\right\rvert
 $$
 
 这回应了"高注意力 $\neq$ 高影响"的批评（一个 Token 可以收到高注意力，但通过近零权重路径处理）。
@@ -743,14 +743,14 @@ Transformer 主干网络为每个位置产生上下文隐藏状态 $\mathbf{h}_t
 
 标准的语言建模头（Language Modeling Head, LM Head）将最终隐藏状态投影到词表 logits，并以下一个 token 的交叉熵损失进行训练：
 
-$$P(x_{t+1} | x_{\leq t}) = \text{softmax}(\mathbf{W}_{\text{head}} \cdot \mathbf{h}_t + \mathbf{b})$$
+$$P(x_{t+1} \mid x_{\leq t}) = \text{softmax}(\mathbf{W}_{\text{head}} \cdot \mathbf{h}_t + \mathbf{b})$$
 
-其中 $\mathbf{W}_{\text{head}} \in \mathbb{R}^{|\mathcal{V}| \times d}$（通常与 embedding 矩阵权重共享：$\mathbf{W}_{\text{head}} = \mathbf{E}^T$）。
+其中 $\mathbf{W}_{\text{head}} \in \mathbb{R}^{\lvert \mathcal{V} \rvert \times d}$（通常与 embedding 矩阵权重共享：$\mathbf{W}_{\text{head}} = \mathbf{E}^T$）。
 
 > **LM 头的特性**
 >
 > - **训练目标**：因果语言建模（对每个位置预测下一个 token）
-> - **损失**：$\mathcal{L}_{\text{LM}} = -\frac{1}{T}\sum_{t=1}^{T} \log P(x_t | x_{<t})$
+> - **损失**：$\mathcal{L}_{\text{LM}} = -\frac{1}{T}\sum_{t=1}^{T} \log P(x_t \mid x_{<t})$
 > - **标签**：每个 token 同时作为输入（右移一位）和目标（左移一位）
 > - **使用阶段**：在大规模语料上的预训练（万亿级 token）
 > - **关键洞察**：模型在下一 token 预测的副产品中学到通用语言理解能力
@@ -759,7 +759,7 @@ $$P(x_{t+1} | x_{\leq t}) = \text{softmax}(\mathbf{W}_{\text{head}} \cdot \mathb
 
 对于监督微调（Supervised Fine-Tuning, SFT），其架构与 LM 头*完全相同*——都是将隐藏状态线性投影到词表 logits。区别仅在于*在哪些 token 上计算损失*：
 
-$$\mathcal{L}_{\text{SFT}} = -\frac{1}{|y|}\sum_{t=1}^{|y|} \log P(y_t | x_{\text{prompt}}, y_{<t})$$
+$$\mathcal{L}_{\text{SFT}} = -\frac{1}{\lvert y \rvert}\sum_{t=1}^{\lvert y \rvert} \log P(y_t \mid x_{\text{prompt}}, y_{<t})$$
 
 > **条件生成头 -- 与 LM 头的关键区别**
 >
@@ -794,8 +794,8 @@ $$V(s_t) = \mathbf{w}_{\text{value}}^T \cdot \mathbf{h}_t + b \in \mathbb{R}$$
 
 | 预测头 | 输出 | 损失 | 阶段 | 用途 |
 | --- | --- | --- | --- | --- |
-| LM Head | $\mathbb{R}^{|\mathcal{V}|}$ | 交叉熵（所有 token） | 预训练 | 从原始文本学习语言 |
-| Conditional Head | $\mathbb{R}^{|\mathcal{V}|}$ | 交叉熵（仅回复部分） | SFT | 学习跟随指令 |
+| LM Head | $\mathbb{R}^{\lvert \mathcal{V} \rvert}$ | 交叉熵（所有 token） | 预训练 | 从原始文本学习语言 |
+| Conditional Head | $\mathbb{R}^{\lvert \mathcal{V} \rvert}$ | 交叉熵（仅回复部分） | SFT | 学习跟随指令 |
 | Value Head | $\mathbb{R}^1$ | MSE | RL (PPO) | 估计状态价值以计算优势 |
 | Reward Head | $\mathbb{R}^1$ | 成对排序 | 奖励模型训练 | 给回复质量打分 |
 
@@ -877,7 +877,7 @@ reward_score = reward_model(**inputs).logits  # 形状：(batch, 1)
 
 > **权重共享：LM 头 = embedding 矩阵的转置**
 >
-> 大多数现代 LLM 会将 LM 头的权重与输入 embedding 矩阵*共享（tie）*：`lm_head.weight = model.embed_tokens.weight`。这意味着 LM 头*并非*独立学习的一层——它直接复用了 embedding 表。好处包括：参数更少（节省 $|\mathcal{V}| \times d$）、泛化更好，并且 embedding 空间的几何结构直接决定了 token 概率。你可以在 HuggingFace 中验证这一点：对大多数模型而言，`model.lm_head.weight is model.model.embed_tokens.weight` 会返回 `True`。
+> 大多数现代 LLM 会将 LM 头的权重与输入 embedding 矩阵*共享（tie）*：`lm_head.weight = model.embed_tokens.weight`。这意味着 LM 头*并非*独立学习的一层——它直接复用了 embedding 表。好处包括：参数更少（节省 $\lvert \mathcal{V} \rvert \times d$）、泛化更好，并且 embedding 空间的几何结构直接决定了 token 概率。你可以在 HuggingFace 中验证这一点：对大多数模型而言，`model.lm_head.weight is model.model.embed_tokens.weight` 会返回 `True`。
 
 ## LLM 训练的优化理论
 
@@ -1522,7 +1522,7 @@ SFT 通过在精选的「提示——回复」对上训练，将预训练语言�
 损失与 CLM 相同，但只在**回复 Token** 上计算：
 
 $$
-\mathcal{L}_\text{SFT} = -\frac{1}{|y|}\sum_{t=1}^{|y|} \log P_\theta(y_t \mid x_\text{prompt}, y_{<t})
+\mathcal{L}_\text{SFT} = -\frac{1}{\lvert y \rvert}\sum_{t=1}^{\lvert y \rvert} \log P_\theta(y_t \mid x_\text{prompt}, y_{<t})
 $$
 
 提示 Token 提供上下文但不接收梯度（标签设为 $-100$）。
@@ -1932,14 +1932,14 @@ $$
 
 ## 文本生成：解码方法
 
-一个训练好的语言模型在每一步都会输出一个在词表上的概率分布：$P(x_t | x_{<t})$。**解码策略** 决定了我们如何从该分布中选择下一个 Token。这个选择深刻地影响输出质量、多样性和连贯性。
+一个训练好的语言模型在每一步都会输出一个在词表上的概率分布：$P(x_t \mid x_{<t})$。**解码策略** 决定了我们如何从该分布中选择下一个 Token。这个选择深刻地影响输出质量、多样性和连贯性。
 
 ### 贪心解码（Greedy Decoding）
 
 最简单的策略：总是选择概率最高的 Token。
 
 $$
-x_t = \arg\max_{v \in \mathcal{V}} P(v | x_{<t})
+x_t = \arg\max_{v \in \mathcal{V}} P(v \mid x_{<t})
 $$
 
 **直觉：** 就像在句子中总是选取最显而易见的下一个词。"The capital of France is..." $\to$ "Paris"（概率 0.92）。
@@ -1953,13 +1953,13 @@ $$
 并行维护 $B$ 个（束宽）部分假设，每一步用 top-$k$ 个 Token 扩展每个假设，并保留得分最高的 $B$ 个完整序列：
 
 $$
-\text{score}(y_{1:t}) = \sum_{i=1}^{t} \log P(y_i | y_{<i})
+\text{score}(y_{1:t}) = \sum_{i=1}^{t} \log P(y_i \mid y_{<i})
 $$
 
 配合 **长度归一化（length normalization）** 避免偏好短序列：
 
 $$
-\text{score}_{\text{norm}}(y) = \frac{1}{|y|^\alpha} \sum_{i=1}^{|y|} \log P(y_i | y_{<i}), \quad \alpha \in [0.6, 1.0]
+\text{score}_{\text{norm}}(y) = \frac{1}{\lvert y \rvert ^\alpha} \sum_{i=1}^{\lvert y \rvert} \log P(y_i \mid y_{<i}), \quad \alpha \in [0.6, 1.0]
 $$
 
 **直觉：** 就像同时在迷宫中探索多条路径，并在每个岔路口只保留 $B$ 条最有希望的路径。
@@ -1975,7 +1975,7 @@ $$
 标准束搜索会产生近似重复的束。多样化束搜索（Diverse Beam Search）[vijayakumar2018diverse] 将束划分为 $G$ 个组，并在组之间添加一个 **不相似性惩罚（dissimilarity penalty）**：
 
 $$
-\text{score}_g(y_t) = \log P(y_t | y_{<t}) - \lambda \sum_{g'<g} \Delta(y_t, Y_{g'})
+\text{score}_g(y_t) = \log P(y_t \mid y_{<t}) - \lambda \sum_{g'<g} \Delta(y_t, Y_{g'})
 $$
 
 其中 $\Delta$ 衡量与较早组已选 Token 的重叠（例如 Hamming 多样性），$\lambda$ 控制多样性强度。
@@ -1991,8 +1991,8 @@ $$
 仅从概率最高的 $k$ 个 Token 中采样，并重新分配概率质量：
 
 $$
-P'(v | x_{<t}) = \begin{cases}
-    \dfrac{P(v | x_{<t})}{\sum_{v' \in \text{Top-}k} P(v' | x_{<t})} & \text{if } v \in \text{Top-}k \\[6pt]
+P'(v \mid x_{<t}) = \begin{cases}
+    \dfrac{P(v \mid x_{<t})}{\sum_{v' \in \text{Top-}k} P(v' \mid x_{<t})} & \text{if } v \in \text{Top-}k \\[6pt]
     0 & \text{otherwise}
   \end{cases}
 $$
@@ -2008,7 +2008,7 @@ $$
 从累计概率超过 $p$ 的最小 Token 集合中采样：
 
 $$
-\text{Top-}p = \min \left\{ S \subseteq \mathcal{V} : \sum_{v \in S} P(v | x_{<t}) \geq p \right\}
+\text{Top-}p = \min \left\{ S \subseteq \mathcal{V} : \sum_{v \in S} P(v \mid x_{<t}) \geq p \right\}
 $$
 
 其中 Token 按概率降序排序，并逐个加入直到达到阈值 $p$。
@@ -2035,7 +2035,7 @@ $$
 一种较新的替代方法，它设置一个 **相对** 概率下限[nguyen2024minp]：
 
 $$
-\text{Min-}p = \left\{ v \in \mathcal{V} : P(v | x_{<t}) \geq p_{\min} \cdot \max_{v'} P(v' | x_{<t}) \right\}
+\text{Min-}p = \left\{ v \in \mathcal{V} : P(v \mid x_{<t}) \geq p_{\min} \cdot \max_{v'} P(v' \mid x_{<t}) \right\}
 $$
 
 只有概率至少为最高 Token 概率 $p_{\min}$ 倍的 Token 才会被保留。
@@ -2051,7 +2051,7 @@ $$
 在应用任何采样策略之前，将 logits 除以温度 $T$：
 
 $$
-P_T(v | x_{<t}) = \frac{\exp(z_v / T)}{\sum_{v'} \exp(z_{v'} / T)}
+P_T(v \mid x_{<t}) = \frac{\exp(z_v / T)}{\sum_{v'} \exp(z_{v'} / T)}
 $$
 
 - $T < 1$：使分布更尖锐 $\to$ 更确定、更聚焦的输出。
@@ -2066,10 +2066,10 @@ $$
 对比解码（Contrastive Decoding）[li2023contrastive] 利用一个强模型（专家）与一个弱模型（业余者）之间的差异，来放大专家独有的知识：
 
 $$
-x_t = \arg\max_{v \in \mathcal{V}(x_{<t})} \left[ \log P_{\text{expert}}(v | x_{<t}) - \log P_{\text{amateur}}(v | x_{<t}) \right]
+x_t = \arg\max_{v \in \mathcal{V}(x_{<t})} \left[ \log P_{\text{expert}}(v \mid x_{<t}) - \log P_{\text{amateur}}(v \mid x_{<t}) \right]
 $$
 
-其中 $\mathcal{V}(x_{<t}) = \{v : P_{\text{expert}}(v | x_{<t}) \geq \alpha \cdot \max_{v'} P_{\text{expert}}(v' | x_{<t})\}$ 是一个自适应的合理性约束。
+其中 $\mathcal{V}(x_{<t}) = \{v : P_{\text{expert}}(v \mid x_{<t}) \geq \alpha \cdot \max_{v'} P_{\text{expert}}(v' \mid x_{<t})\}$ 是一个自适应的合理性约束。
 
 **直觉：** 业余模型捕捉到的是泛泛的、显而易见的模式（常用词、重复）。减去其对数概率就去除了这种"泛泛信号"，留下专家独有的知识和推理。就像从录音中去除背景噪声以听见信号一样。
 
@@ -2130,13 +2130,13 @@ LLM 文本生成中各解码方法的对比。
 在每个解码步 $t$，会根据当前解析器状态计算一个 **Token 掩码（token mask）** $M_t \subseteq \mathcal{V}$。只有 $M_t$ 中的 Token 保留其原始 logits；在 softmax 之前，所有其它 Token 都被设为 $-\infty$：
 
 $$
-P'(v | x_{<t}) = \begin{cases}
-    P(v | x_{<t}) / Z & \text{if } v \in M_t \\
+P'(v \mid x_{<t}) = \begin{cases}
+    P(v \mid x_{<t}) / Z & \text{if } v \in M_t \\
     0 & \text{otherwise}
   \end{cases}
 $$
 
-其中 $Z = \sum_{v \in M_t} P(v | x_{<t})$ 用于重新归一化。由于掩码每一步都会变化（它取决于到目前为止已经生成的内容），约束是 *逐步* 强制实施的——模型在任何位置都不可能生成一个非法前缀。
+其中 $Z = \sum_{v \in M_t} P(v \mid x_{<t})$ 用于重新归一化。由于掩码每一步都会变化（它取决于到目前为止已经生成的内容），约束是 *逐步* 强制实施的——模型在任何位置都不可能生成一个非法前缀。
 
 **从模式到掩码。**
 
@@ -2534,7 +2534,7 @@ ARQ[yang2025arq] 解决了标准 Prompting 的一个根本弱点：随着上下�
 > - **非结构化剪枝**：将低于阈值的单个权重置零。可实现高稀疏度（50--90%）。需要稀疏 GEMM 内核（A100/H100 上的 2:4）。
 > - **结构化剪枝**：移除整个 attention 头、层或 FFN 神经元。无需专门内核即可直接降低 FLOPS。
 > - **SparseGPT**[frantar2023sparsegpt]：使用近似逆 Hessian 进行一次性剪枝。在 175B 模型上以极小的质量损失实现 50% 非结构化稀疏。
-> - **Wanda**[sun2024wanda]：按 $|w| \times \|x\|$（权重幅值乘以输入激活范数）剪枝。无需校准数据，效果可与 SparseGPT 竞争。
+> - **Wanda**[sun2024wanda]：按 $\lvert w \rvert \times \|x\|$（权重幅值乘以输入激活范数）剪枝。无需校准数据，效果可与 SparseGPT 竞争。
 
 > **警告：NVIDIA 2:4 结构化稀疏**
 >
@@ -2579,7 +2579,7 @@ $T^2$ 因子补偿了软化分布造成的梯度幅度下降。典型取值：$T
 
 **优点：**确定性、可复现；教师代价被摊销；完整分布信号。
 
-**缺点：**需要为每个 token 存储 $|V|$ 维向量（可通过 top-$k$ 剪枝缓解）；教师无法针对学生的失误进行调整。
+**缺点：**需要为每个 token 存储 $\lvert V \rvert$ 维向量（可通过 top-$k$ 剪枝缓解）；教师无法针对学生的失误进行调整。
 
 **在线（协同训练）蒸馏。**
 

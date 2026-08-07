@@ -258,7 +258,7 @@ Fisher 特征值高的参数对任务 A 至关重要。无约束的任务 B 梯�
 
 **机制**:在 DPO/PPO 期间,Policy $\pi_\theta$ 通过 KL 散度被惩罚以防偏离参考 $\pi_{\text{ref}}$:
 $$
-r_{\text{implicit}}(x, y) = \beta \log \frac{\pi_\theta(y|x)}{\pi_{\text{ref}}(y|x)}
+r_{\text{implicit}}(x, y) = \beta \log \frac{\pi_\theta(y\mid x)}{\pi_{\text{ref}}(y\mid x)}
 $$
 
 这条“链条”约束着模型的**输出分布** —— 它无法探索偏离参考太远的高方差推理路径。知识并未被**擦除**;而是被*抑制*了。模型仍“知道”答案,但其分布被压平,偏向安全、通用的回应。

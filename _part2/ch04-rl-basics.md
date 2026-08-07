@@ -1,7 +1,6 @@
 ---
 layout: home
 title: 大语言模型的强化学习基础
-permalink: /part2/ch04-rl-basics.html
 ---
 
 # 大语言模型的强化学习基础
@@ -41,13 +40,13 @@ permalink: /part2/ch04-rl-basics.html
 形式化地，文本生成的 MDP 定义如下：
 
 - **State** $s_t = (x, y_1, \ldots, y_{t-1})$：Prompt 与到目前为止已生成的所有 token 的拼接。
-- **Action** $a_t \in \{1, \ldots, |\mathcal{V}|\}$：从词表（32K--128K 选项）中选出下一个 token。
-- **Transition** $P(s_{t+1}|s_t, a_t)$：确定性的——只需追加所选 token。环境无随机性。
+- **Action** $a_t \in \{1, \ldots, \lvert \mathcal{V} \rvert\}$：从词表（32K--128K 选项）中选出下一个 token。
+- **Transition** $P(s_{t+1}\mid s_t, a_t)$：确定性的——只需追加所选 token。环境无随机性。
 - **Reward** $r$：通常仅在生成结束时给出（稀疏）。对 RLHF 而言是 reward 模型评分；对 RLVR 而言是最终答案的正确性。
-- **Policy** $\pi_\theta(a_t|s_t)$：大语言模型的下一 token 概率分布——正是 Softmax 输出已经计算出的东西。
+- **Policy** $\pi_\theta(a_t\mid s_t)$：大语言模型的下一 token 概率分布——正是 Softmax 输出已经计算出的东西。
 - **折扣因子** $\gamma = 1.0$：Episode 是有限的（即一条回答），因此无需折扣。
 
-这种映射之所以强大，是因为大语言模型*本身就已经是*一个 policy——其 Softmax 输出为每一个 state 定义了 $\pi_\theta(a_t|s_t)$。我们无需另行构建一个 policy 网络；只需调整权重 $\theta$，让模型为能获得更高 reward 的 token 序列赋予更高概率。
+这种映射之所以强大，是因为大语言模型*本身就已经是*一个 policy——其 Softmax 输出为每一个 state 定义了 $\pi_\theta(a_t\mid s_t)$。我们无需另行构建一个 policy 网络；只需调整权重 $\theta$，让模型为能获得更高 reward 的 token 序列赋予更高概率。
 
 ## RLHF 流水线
 

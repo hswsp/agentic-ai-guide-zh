@@ -92,7 +92,7 @@ DPO 需要 *成对* 偏好：对同一 prompt，你既需要好的也需要坏�
 $$
 \boxed{\mathcal{L}_\text{KTO} = \mathbb{E}_{y_w}\left[\lambda_w (1 - v(x, y_w))\right] + \mathbb{E}_{y_l}\left[\lambda_l \cdot v(x, y_l)\right]}
 $$
-其中 $v(x,y) = \sigma\left(\beta \log\frac{\pi_\theta(y|x)}{\pi_\text{ref}(y|x)} - z_\text{ref}\right)$，$z_\text{ref}$ 是期望 KL 散度（一个滑动 baseline）。
+其中 $v(x,y) = \sigma\left(\beta \log\frac{\pi_\theta(y\mid x)}{\pi_\text{ref}(y\mid x)} - z_\text{ref}\right)$，$z_\text{ref}$ 是期望 KL 散度（一个滑动 baseline）。
 
 > **基于前景理论的 KTO 直觉**
 >
@@ -170,7 +170,7 @@ DPO 有一个退化解：通过让 chosen 与 rejected 之间的 margin *无限�
 ### Loss 函数
 
 $$
-\boxed{\mathcal{L}_\text{IPO} = \mathbb{E}\left[\left(\log\frac{\pi_\theta(y_w|x)}{\pi_\text{ref}(y_w|x)} - \log\frac{\pi_\theta(y_l|x)}{\pi_\text{ref}(y_l|x)} - \frac{1}{2\beta}\right)^2\right]}
+\boxed{\mathcal{L}_\text{IPO} = \mathbb{E}\left[\left(\log\frac{\pi_\theta(y_w\mid x)}{\pi_\text{ref}(y_w\mid x)} - \log\frac{\pi_\theta(y_l\mid x)}{\pi_\text{ref}(y_l\mid x)} - \frac{1}{2\beta}\right)^2\right]}
 $$
 
 > **IPO vs DPO：通过目标 Margin 实现正则化**
@@ -226,9 +226,9 @@ trainer.train()
 ### Loss 函数
 
 $$
-\boxed{\mathcal{L}_\text{ORPO} = \underbrace{\mathcal{L}_\text{SFT}(y_w)}_{\text{standard NLL on chosen}} - \lambda \cdot \underbrace{\log\sigma\left(\log\frac{\text{odds}_\theta(y_w|x)}{\text{odds}_\theta(y_l|x)}\right)}_{\text{preference alignment via odds ratio}}}
+\boxed{\mathcal{L}_\text{ORPO} = \underbrace{\mathcal{L}_\text{SFT}(y_w)}_{\text{standard NLL on chosen}} - \lambda \cdot \underbrace{\log\sigma\left(\log\frac{\text{odds}_\theta(y_w\mid x)}{\text{odds}_\theta(y_l\mid x)}\right)}_{\text{preference alignment via odds ratio}}}
 $$
-其中 $\text{odds}_\theta(y|x) = \frac{P_\theta(y|x)}{1 - P_\theta(y|x)}$。
+其中 $\text{odds}_\theta(y\mid x) = \frac{P_\theta(y\mid x)}{1 - P_\theta(y\mid x)}$。
 
 > **ORPO：一次完成 SFT + 对齐**
 >
@@ -298,7 +298,7 @@ trainer.train()
 4. （可选）将选中的响应作为下一轮的 SFT 数据
 
 $$
-\boxed{\text{Best-of-N response}: \quad y^* = \arg\max_{y_i \sim \pi_\theta(\cdot|x)} r_\phi(x, y_i)}
+\boxed{\text{Best-of-N response}: \quad y^* = \arg\max_{y_i \sim \pi_\theta(\cdot\mid x)} r_\phi(x, y_i)}
 $$
 
 > **为什么 Best-of-N 是合法的"RL"方法**
@@ -313,7 +313,7 @@ $$
 >
 > 许多生产模型就是这样训练的：比 PPO 简单、几乎同样有效、完全稳定。
 >
-> **理论联系** [gao2023scaling]：Best-of-N 实现了隐式的 KL 约束 policy：$\pi_\text{BoN}(y|x) \propto \pi_\theta(y|x)^{1-1/N} \cdot r(x,y)^{1/N}$。
+> **理论联系** [gao2023scaling]：Best-of-N 实现了隐式的 KL 约束 policy：$\pi_\text{BoN}(y\mid x) \propto \pi_\theta(y\mid x)^{1-1/N} \cdot r(x,y)^{1/N}$。
 
 ### TRL 实现
 

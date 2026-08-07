@@ -613,7 +613,7 @@ $$J^i(\pi^1, \ldots, \pi^n) = \mathbb{E}_{\pi^1,\ldots,\pi^n}\left[\sum_{t=0}^{\
 
 最简单的方法：每个 Agent $i$ 将其他 Agent 视为环境的一部分，使用标准单 Agent RL（例如 PPO、REINFORCE）独立优化自己的 Policy $\pi^i$。
 
-$$\nabla_{\theta^i} J^i \approx \mathbb{E}\left[\nabla_{\theta^i} \log \pi^i(a^i_t | o^i_t) \cdot \hat{A}^i_t\right]$$
+$$\nabla_{\theta^i} J^i \approx \mathbb{E}\left[\nabla_{\theta^i} \log \pi^i(a^i_t \mid o^i_t) \cdot \hat{A}^i_t\right]$$
 
 > **非平稳性问题**
 >
@@ -629,11 +629,11 @@ $$Q^i_\phi(s, \mathbf{a}) = Q^i_\phi(s, a^1, \ldots, a^n)$$
 
 Agent $i$ 的去中心化 actor：
 
-$$\pi^i_{\theta^i}(a^i | o^i)$$
+$$\pi^i_{\theta^i}(a^i \mid o^i)$$
 
 带有集中式 critic 的策略梯度：
 
-$$\nabla_{\theta^i} J^i = \mathbb{E}\left[\nabla_{\theta^i} \log \pi^i(a^i | o^i) \cdot Q^i_\phi(s, \mathbf{a})\right]$$
+$$\nabla_{\theta^i} J^i = \mathbb{E}\left[\nabla_{\theta^i} \log \pi^i(a^i \mid o^i) \cdot Q^i_\phi(s, \mathbf{a})\right]$$
 
 CTDE 在训练时解决了非平稳性问题（集中式 critic 看到完整的联合状态），同时在推理时保留了去中心化执行（无需通信）。
 
