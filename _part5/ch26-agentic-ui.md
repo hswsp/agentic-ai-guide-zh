@@ -752,6 +752,7 @@ async def handle_approval(req: ApprovalRequest):
 
 ### Frontend：React 实现流式与工具可视化
 
+{% raw %}
 ```jsx
 // frontend/AgentChat.tsx
 import { useState, useEffect, useRef } from 'react';
@@ -940,6 +941,7 @@ export function AgentChat() {
   );
 }
 ```
+{% endraw %}
 
 > **该实现展示了什么**
 >
