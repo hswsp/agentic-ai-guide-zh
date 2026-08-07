@@ -4,9 +4,6 @@ title: 大规模系统架构与基础设施
 permalink: /part2/ch11-large-scale-system-architecture.html
 ---
 
-# 大规模系统架构与基础设施
-
-
 用基于人类反馈的强化学习（Reinforcement Learning from Human Feedback, RLHF）训练 LLM，既是一道算法题，也是一道系统工程题。与标准 SFT 不同——后者只涉及单一模型、单次前向-反向传播、扩展规律也已被充分理解——RLHF 需要*同时*加载*多个模型*（policy、reference、reward model、value head），通过复杂的 rollout-打分-训练循环协调起来，并分布到数十乃至数百块 GPU 上。本章覆盖让大规模 RLHF 训练成为可能的系统级细节：显存预算、并行策略（Data、Tensor、Pipeline、Sequence 及其组合）、生成瓶颈、解耦式架构、权重同步、容错以及生产监控。
 
 ## 4 模型显存挑战

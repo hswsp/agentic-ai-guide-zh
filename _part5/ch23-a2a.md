@@ -4,8 +4,6 @@ title: 智能体到智能体通信（Agent-to-Agent, A2A）
 permalink: /part5/ch23-a2a.html
 ---
 
-# 智能体到智能体通信（Agent-to-Agent, A2A）
-
 随着大语言模型从孤立的助手演化为由专业化 Agent 组成的协作网络，*Agent 之间如何对话*这一问题已变得与单个 Agent 内部如何推理同等重要。本章将介绍那些使多 Agent 系统能够协调、委派并共同解决任何单一 Agent 都无法独立处理的问题的协议、模式与工程实践。
 
 ## 动机：为何 Agent 必须相互通信

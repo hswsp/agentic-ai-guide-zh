@@ -4,8 +4,6 @@ title: 多智能体系统（Multi-Agent Systems）
 permalink: /part5/ch24-multi-agent-systems.html
 ---
 
-# 多智能体系统（Multi-Agent Systems）
-
 ## 动机：为什么需要多个 Agent？
 
 人工智能的历史在很多方面就是一部规模演进史。早期 AI 系统是单体式的：单一程序、单一知识库、单一推理引擎。随着问题日益复杂，研究者发现，没有任何单一 Agent——无论能力多强——能够高效地处理一个丰富、开放式任务的方方面面。这一洞见在分布式 AI 与多智能体系统（Multi-Agent System, MAS）研究中早有定论 [weiss1999multiagent, wooldridge2009introduction]，而在大语言模型时代又被赋予了新的紧迫性。

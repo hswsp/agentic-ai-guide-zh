@@ -4,9 +4,6 @@ title: DPO——直接偏好优化
 permalink: /part2/ch06-dpo.html
 ---
 
-# DPO——直接偏好优化
-
-
 ## 动机
 
 PPO 需要在显存中维持 4 个模型（policy、reference、reward 模型、value head）、复杂的 RL 基础设施，并且以不稳定著称。DPO [rafailov2023direct] 提出的问题是：*我们能否跳过 RL，直接从偏好中学习？*

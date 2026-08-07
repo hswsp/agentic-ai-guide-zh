@@ -4,9 +4,6 @@ title: 偏好优化变体
 permalink: /part2/ch08-preference-optimization-variants.html
 ---
 
-# 偏好优化变体
-
-
 本章涵盖一类用不同目标、数据假设或架构权衡来扩展或替换 DPO 的方法。每种方法都解决标准 offline DPO 的某个具体局限：分布偏移（Online DPO）、需要配对数据（KTO）、对噪声标签过拟合（IPO）、参考模型显存开销（ORPO）或训练复杂度（Best-of-N）。
 
 ## Online DPO

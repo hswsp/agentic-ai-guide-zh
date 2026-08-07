@@ -4,8 +4,6 @@ title: 总结与未来方向
 permalink: /part6/ch29-conclusion.html
 ---
 
-# 总结与未来方向
-
 ## 总结
 
 本书完整勾勒了从 Transformer 基础、面向对齐的强化学习，到自主智能体系统构建的全过程。跨越各章节，浮现出以下关键主题：

@@ -4,8 +4,6 @@ title: Agent 设计模式
 permalink: /part5/ch19-agent-design-patterns.html
 ---
 
-# Agent 设计模式
-
 构建有效的 Agent 不仅需要强大的模型和一组工具。*架构*——即如何编排 LLM、如何分解任务、控制流如何在各组件间流动——决定了 Agent 是否可靠、可调试且具备成本效益。本章介绍从 Anthropic、OpenAI、Google 以及开源社区的生产部署中沉淀出的经典设计模式。
 
 > **何时使用 Agent 而非工作流**

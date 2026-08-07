@@ -4,8 +4,6 @@ title: 检索增强生成（RAG）
 permalink: /part5/ch16-rag.html
 ---
 
-# 检索增强生成（RAG）
-
 检索增强生成（Retrieval-Augmented Generation, RAG）[lewis2020retrieval] 已成为在生产环境中部署大型语言模型时最具实际影响力的技术之一。RAG 不再仅依赖训练时编码进模型权重中的知识，而是为 LLM 配备一个动态、可更新的外部记忆——使其能够在广泛的知识密集型任务中给出准确、有据可查且可验证的响应。
 
 ## 动机与问题陈述

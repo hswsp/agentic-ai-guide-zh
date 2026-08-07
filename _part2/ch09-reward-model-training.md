@@ -4,9 +4,6 @@ title: 奖励模型训练
 permalink: /part2/ch09-reward-model-training.html
 ---
 
-# 奖励模型训练
-
-
 奖励模型是连接人类偏好与 RL 训练信号的桥梁。训练良好的奖励模型对成功的 RLHF 至关重要;训练不佳的奖励模型会导致奖励黑客攻击(reward hacking)和行为失准。本章涵盖奖励模型的理论基础、实用训练技术以及架构选择。
 
 ## Bradley-Terry 模型 —— 完整推导

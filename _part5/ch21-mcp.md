@@ -4,8 +4,6 @@ title: 模型上下文协议（Model Context Protocol, MCP）
 permalink: /part5/ch21-mcp.html
 ---
 
-# 模型上下文协议（Model Context Protocol, MCP）
-
 工具增强型语言模型的兴起带来了一个碎片化问题：每一个 Agent 框架、每一个 LLM 提供商、每一次企业部署都在发明自己的一套机制来把模型与外部工具和数据源连接起来。**模型上下文协议（Model Context Protocol, MCP）** [anthropic-mcp-2024] 由 Anthropic 于 2024 年末提出，是一个旨在彻底解决这一问题的开放标准——为 AI 应用与它们所需工具之间提供一个通用的、与厂商无关的接口。
 
 ## 动机：工具集成问题

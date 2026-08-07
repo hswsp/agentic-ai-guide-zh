@@ -4,9 +4,6 @@ title: PPO——近端策略优化
 permalink: /part2/ch05-ppo.html
 ---
 
-# PPO——近端策略优化
-
-
 ## 动机与历史
 
 **问题**：朴素的 policy gradient 更新对步长没有任何约束。仅仅一次倒霉的 batch 就可能把 policy 推入一个生成垃圾文本的区域 $\rightarrow$ 垃圾文本获得低 reward $\rightarrow$ 下一次 gradient 让情况更糟 $\rightarrow$ 不可挽回地崩溃。

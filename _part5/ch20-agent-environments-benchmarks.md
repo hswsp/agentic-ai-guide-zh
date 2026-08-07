@@ -4,8 +4,6 @@ title: Agent 环境与基准
 permalink: /part5/ch20-agent-environments-benchmarks.html
 ---
 
-# Agent 环境与基准
-
 ## 动机：为什么 Agent 需要环境
 
 对话式语言模型的评估在原则上是直截了当的：给出一个 Prompt、收集一次回复，并依据参考答案或人工评判进行打分。Agent 评估则根本不同：Agent 必须在世界中*行动*、观察后果，并在一连串步骤中调整其行为。任何单次回复都无法刻画这一点；只有结构化的*环境*才能做到。

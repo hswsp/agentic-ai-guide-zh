@@ -4,9 +4,6 @@ title: GRPO —— 组相对策略优化
 permalink: /part2/ch07-grpo.html
 ---
 
-# GRPO —— 组相对策略优化
-
-
 组相对策略优化（Group Relative Policy Optimization, GRPO） [shao2024deepseekmath] 是一种专为语言模型设计的强化学习算法，它消除了对独立 value network（critic）的需求。GRPO 由 DeepSeek 在 DeepSeekMath 工作中提出，随后在 DeepSeek-R1 [deepseek2025r1] 中被扩展到更大规模，已经迅速成为 LLM 训练中的主流 RL 方法——被大多数开源对齐框架（TRL、OpenRLHF、veRL）作为默认算法采用。
 
 其核心思想看似简单却出人意料地有效：与其训练一个神经网络去预测期望 reward（即 PPO 中的 critic），GRPO 通过对同一 prompt 生成多条响应、利用该组的 reward 统计量作为 baseline，从经验上 *估计* 这一基线。这从显存中去掉了一整个模型，将工程复杂度减半，而且——令人意外的是——往往优于 PPO，因为经验基线比训练不充分的 value function 更准确。

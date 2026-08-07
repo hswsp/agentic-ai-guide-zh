@@ -4,8 +4,6 @@ title: Agent Harness —— 上下文管理与编排
 permalink: /part5/ch18-agent-harness.html
 ---
 
-# Agent Harness —— 上下文管理与编排
-
 本节涵盖 agent harness 设计的完整技术栈：Context window 管理、Prompt 架构、工具集成、编排模式、状态管理、错误处理与生产环境关注点。最后给出框架对比和完整实现示例。
 
 ## 什么是 Agent Harness？

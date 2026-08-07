@@ -3,9 +3,6 @@ layout: home
 title: 大语言模型的强化学习基础
 ---
 
-# 大语言模型的强化学习基础
-
-
 监督微调（Supervised Fine-Tuning, SFT）教模型模仿示例，但模仿存在天花板：模型永远无法超越其训练数据的质量。强化学习突破了这一壁垒。通过生成新文本、接收 reward 反馈，并朝着获得更高 reward 的行为更新，经过 RL 训练的模型能够*发现*任何人类示范者都未曾写出的策略——产出更有帮助、更准确、且更契合人类偏好的输出 [ouyang2022training]。
 
 这是每一款前沿模型背后的机制：GPT-4 [openai2023gpt4]、Claude、Llama-3 [grattafiori2024llama3] 和 DeepSeek-R1 [deepseek2025r1] 都在 SFT 之后施加 RL，作为把一个能力强但缺乏导向的模型转化为对齐助手的关键一步。

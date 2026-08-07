@@ -4,8 +4,6 @@ title: 速查手册
 permalink: /part6/ch28-quickref.html
 ---
 
-# 速查手册
-
 本章汇总了关键公式、架构规格、API 参考以及失效模式诊断，便于开发与调试时快速查阅。
 
 ## 核心 RL 与对齐公式

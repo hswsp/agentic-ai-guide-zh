@@ -4,8 +4,6 @@ title: 面向 LLM 的系统基础
 permalink: /part1/ch02-systems-foundations.html
 ---
 
-# 面向 LLM 的系统基础
-
 ## GPU 架构——从硅片到 LLM 训练
 
 现代大型语言模型几乎完全依赖 GPU（图形处理器，Graphics Processing Unit）进行训练和服务。理解 GPU 架构对于在并行策略、内存管理、内核优化和基础设施规模等方面做出明智决策至关重要。本节针对 LLM 工作负载，系统地介绍 GPU 硬件相关知识。

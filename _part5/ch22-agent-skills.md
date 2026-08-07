@@ -4,8 +4,6 @@ title: Agent Skills
 permalink: /part5/ch22-agent-skills.html
 ---
 
-# Agent Skills
-
 随着 Agent 从单体式的 prompt-加-工具系统演化为模块化架构，一个关键的设计问题浮现出来：*Agent 的能力应如何被组织、发现与组合？*答案越来越收敛到 **skill**（技能）这一概念——一些离散、可复用的行为单元，可以在不重新训练的前提下被加载、组合与替换。
 
 这一思路由 Voyager [wang2023voyager] 推广开来：该工作展示了一个在 Minecraft 中运行的 LLM Agent 可以不断积累一个可执行代码 skill 的库，每个 skill 都经过验证并被存储以供后续复用。同样的原则也适用于生产级 Agent：skill 以可组合、可版本化的形式封装领域专长，其可扩展性远超任何单个 prompt 所能容纳。Skill 通常会包装 MCP server（见第 "MCP" 章）以获得工具访问能力，将 skill 抽象与标准化工具层连接起来。

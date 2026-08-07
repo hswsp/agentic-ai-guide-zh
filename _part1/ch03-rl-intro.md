@@ -4,8 +4,6 @@ title: 强化学习导论
 permalink: /part1/ch03-rl-intro.html
 ---
 
-# 强化学习导论
-
 强化学习（Reinforcement Learning，RL）是一种范式，其中**智能体（agent）**通过与**环境（environment）**交互、接收**奖励（rewards）**作为反馈，并优化其**策略（policy）**以最大化长期累积奖励来学习做出序贯决策[sutton2018reinforcement]。与监督学习（需要带标签的输入-输出对）不同，RL 通过*试错（trial and error）*来发现最优行为。
 
 ![强化学习概览：智能体与环境交互，接收奖励作为反馈，并通过试错更新其策略。与从带标签数据对学习的监督学习不同，RL 通过经验最大化奖励来学习应当做什么。]({{ site.baseurl }}/figures/fig_020_fig20.png)
