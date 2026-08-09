@@ -1845,10 +1845,10 @@ MoE 的核心挑战在于 **top-$k$ 选择是不可微的**——你无法通过
 
 $$
 \begin{aligned}
-  h(x) &= W_g \cdot x \tag{clean logits} \\
-  H(x) &= h(x) + \epsilon \cdot \text{Softplus}(W_{\text{noise}} \cdot x), \quad \epsilon \sim \mathcal{N}(0, 1) \tag{noisy logits} \\
+  h(x) &= W_g \cdot x && \text{(clean logits)} \\
+  H(x) &= h(x) + \epsilon \cdot \text{Softplus}(W_{\text{noise}} \cdot x), \quad \epsilon \sim \mathcal{N}(0, 1) && \text{(noisy logits)} \\
   \text{TopK}(v, k)_i &= \begin{cases} v_i & \text{if } v_i \text{ is in the top } k \\ -\infty & \text{otherwise} \end{cases} \\
-  g(x) &= \text{softmax}\big(\text{TopK}(H(x),\, k)\big) \tag{sparse gates}
+  g(x) &= \text{softmax}\big(\text{TopK}(H(x),\, k)\big) && \text{(sparse gates)}
 \end{aligned}
 $$
 
