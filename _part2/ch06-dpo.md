@@ -6,7 +6,7 @@ permalink: /part2/ch06-dpo.html
 
 ## 动机
 
-PPO 需要在显存中维持 4 个模型（policy、reference、reward 模型、value head）、复杂的 RL 基础设施，并且以不稳定著称。DPO [rafailov2023direct] 提出的问题是：*我们能否跳过 RL，直接从偏好中学习？*
+PPO 需要在显存中维持 4 个模型（policy、reference、reward 模型、value head）、复杂的 RL 基础设施，并且以不稳定著称。DPO [[159]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-rafailov2023direct)] 提出的问题是：*我们能否跳过 RL，直接从偏好中学习？*
 
 **关键洞察**：在 RLHF 目标（reward 最大化 + KL 惩罚）下的最优 policy 拥有**解析解**。由此我们可以推导出一个有监督 loss，隐式优化同一个目标。
 
@@ -364,7 +364,7 @@ $$
 
 > **超越反向 KL**
 >
-> 标准 DPO 使用反向 KL 散度作为 policy 与 reference 之间的正则项。反向 KL 是*寻峰*的：它倾向于把概率质量集中在少数高 reward 回答上。前向 KL 则是*覆盖*的：它把概率质量分散去覆盖所有合理回答。f-DPO [wang2023fdpo] 推广到任意 f-散度，允许实践者在这些行为间做权衡。
+> 标准 DPO 使用反向 KL 散度作为 policy 与 reference 之间的正则项。反向 KL 是*寻峰*的：它倾向于把概率质量集中在少数高 reward 回答上。前向 KL 则是*覆盖*的：它把概率质量分散去覆盖所有合理回答。f-DPO [[161]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2023fdpo)] 推广到任意 f-散度，允许实践者在这些行为间做权衡。
 
 f-DPO loss 用 f-散度生成器的导数替换对数比：
 
@@ -421,7 +421,7 @@ $$
 
 > **偏好数据中的噪声标签**
 >
-> 人类偏好标注是有噪声的。标注者会意见分歧、会出错，有时会把“被偏好/被拒”的标签搞反。标准 DPO 把所有标签视为 ground truth，可能导致模型对噪声过拟合。Robust DPO [chowdhury2024robustdpo] 在已知噪声模型下解析性地对 loss 去偏。
+> 人类偏好标注是有噪声的。标注者会意见分歧、会出错，有时会把“被偏好/被拒”的标签搞反。标准 DPO 把所有标签视为 ground truth，可能导致模型对噪声过拟合。Robust DPO [[162]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chowdhury2024robustdpo)] 在已知噪声模型下解析性地对 loss 去偏。
 
 假设每个标签以概率 $\epsilon$（噪声率）被翻转。去偏后的 loss 为：
 
@@ -461,7 +461,7 @@ $$
 
 > **过期 Reference 模型问题**
 >
-> 标准 DPO 在整个训练过程中使用固定的 reference 模型 $\pi_{\text{ref}}$。随着 policy $\pi_\theta$ 改进，KL 惩罚 $\beta \log(\pi_\theta/\pi_{\text{ref}})$ 不断增长，最终会主导 loss 并阻止进一步改进。TR-DPO [gorbatenko2024trdpo] 周期性地更新 reference 模型，使其跟随当前 policy。
+> 标准 DPO 在整个训练过程中使用固定的 reference 模型 $\pi_{\text{ref}}$。随着 policy $\pi_\theta$ 改进，KL 惩罚 $\beta \log(\pi_\theta/\pi_{\text{ref}})$ 不断增长，最终会主导 loss 并阻止进一步改进。TR-DPO [[163]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-gorbatenko2024trdpo)] 周期性地更新 reference 模型，使其跟随当前 policy。
 
 TR-DPO 使用指数滑动平均（EMA）更新 reference 模型：
 
@@ -504,7 +504,7 @@ $$
 
 > **DPO 的 KL 方向问题**
 >
-> DPO 是在反向 KL 约束下求解最优 policy 而推导出的。然而，由此得到的 loss 实际上在 reward 空间中优化的是一个*前向* KL 目标，这个方向是错的。EXO [ji2024exo] 通过使用反向 KL 概率匹配修正了这一点，这正是对齐在理论上正确的目标。
+> DPO 是在反向 KL 约束下求解最优 policy 而推导出的。然而，由此得到的 loss 实际上在 reward 空间中优化的是一个*前向* KL 目标，这个方向是错的。EXO [[164]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-ji2024exo)] 通过使用反向 KL 概率匹配修正了这一点，这正是对齐在理论上正确的目标。
 
 EXO 最小化模型分布与目标（reward 最优）分布之间的反向 KL：
 
@@ -549,7 +549,7 @@ $$
 
 > **DPO 的似然崩塌**
 >
-> DPO 已知的失败模式之一是*似然崩塌*：模型学到了降低被拒回答的概率，但同时也降低了被选回答的概率（因为 loss 只在意它们的*差值*）。NCA [chen2024nca] 增加了一个绝对似然项以防止这一点。
+> DPO 已知的失败模式之一是*似然崩塌*：模型学到了降低被拒回答的概率，但同时也降低了被选回答的概率（因为 loss 只在意它们的*差值*）。NCA [[165]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chen2024nca)] 增加了一个绝对似然项以防止这一点。
 
 NCA 把对齐重新表述为噪声对比估计。Loss 包含三项：
 
@@ -591,7 +591,7 @@ $$
 
 > **作为简化替代的 Hinge Loss**
 >
-> DPO 中的 log-sigmoid loss 虽然平滑，但当 margin 较大时收敛缓慢。SLiC-HF [zhao2023slichf] 使用 hinge loss：当 margin 超过阈值时为零，否则为线性。它更简单、更快，且效果出乎意料地有竞争力。
+> DPO 中的 log-sigmoid loss 虽然平滑，但当 margin 较大时收敛缓慢。SLiC-HF [[166]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhao2023slichf)] 使用 hinge loss：当 margin 超过阈值时为零，否则为线性。它更简单、更快，且效果出乎意料地有竞争力。
 
 SLiC-HF loss 为：
 
@@ -668,7 +668,7 @@ $$
 
 > **无参考模型的偏好学习**
 >
-> DPO 需要一个 reference 模型来计算隐式 reward，这会让显存翻倍并增加复杂度。SimPO [meng2024simpo] 取消了 reference 模型，转而用回答的*平均对数概率*作为隐式 reward，并通过长度归一化项防止模型偏好短回答。
+> DPO 需要一个 reference 模型来计算隐式 reward，这会让显存翻倍并增加复杂度。SimPO [[167]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-meng2024simpo)] 取消了 reference 模型，转而用回答的*平均对数概率*作为隐式 reward，并通过长度归一化项防止模型偏好短回答。
 
 SimPO 将隐式 reward 定义为：
 

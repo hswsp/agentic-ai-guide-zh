@@ -39,7 +39,7 @@ permalink: /part1/ch01-llm-architecture.html
 
 ### 字节对编码（Byte-Pair Encoding，BPE）
 
-字节对编码（Byte-Pair Encoding，BPE）[sennrich2016bpe] 是 GPT、Llama、Mistral 以及大多数现代 LLM 采用的主流分词算法。
+字节对编码（Byte-Pair Encoding，BPE）[[1]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-sennrich2016bpe)] 是 GPT、Llama、Mistral 以及大多数现代 LLM 采用的主流分词算法。
 
 > **BPE 算法**
 >
@@ -56,10 +56,10 @@ permalink: /part1/ch01-llm-architecture.html
 
 | 方法 | 使用者 | 核心思想 |
 | --- | --- | --- |
-| BPE | GPT-4[openai2023gpt4], Llama-3[grattafiori2024llama3], Mistral[jiang2023mistral] | 自底向上合并频繁对；确定性 |
-| WordPiece | BERT[devlin2019bert], DistilBERT[sanh2019distilbert] | 类似 BPE，但最大化训练数据似然 |
+| BPE | GPT-4[[2]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-openai2023gpt4)], Llama-3[[3]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-grattafiori2024llama3)], Mistral[[4]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jiang2023mistral)] | 自底向上合并频繁对；确定性 |
+| WordPiece | BERT[[5]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-devlin2019bert)], DistilBERT[[6]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-sanh2019distilbert)] | 类似 BPE，但最大化训练数据似然 |
 | Unigram LM | SentencePiece | 自顶向下：从大词表开始，按似然影响剪枝 |
-| 字节级 BPE（Byte-level BPE） | GPT-2[radford2019gpt2]+ | 在原始字节上做 BPE（不可能出现未知 Token）；256 个基础词 |
+| 字节级 BPE（Byte-level BPE） | GPT-2[[7]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-radford2019gpt2)]+ | 在原始字节上做 BPE（不可能出现未知 Token）；256 个基础词 |
 
 ### 分词最佳实践
 
@@ -157,7 +157,7 @@ print(prompt)
 
 ## Transformer 架构
 
-Transformer[vaswani2017attention] 是所有现代 LLM 的基础。理解其组件对于把握本指南中的每种优化和训练方法都至关重要。
+Transformer[[8]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-vaswani2017attention)] 是所有现代 LLM 的基础。理解其组件对于把握本指南中的每种优化和训练方法都至关重要。
 
 ### 整体结构
 
@@ -167,7 +167,7 @@ Transformer[vaswani2017attention] 是所有现代 LLM 的基础。理解其组�
 
 ### 原始的编码器-解码器 Transformer
 
-Transformer 最初被提出[vaswani2017attention] 时是一种用于序列到序列任务（机器翻译、摘要）的**编码器-解码器**架构。尽管现代 LLM 主要使用仅解码器变体（GPT 风格），理解完整架构仍然至关重要，因为交叉注意力和带掩码的自注意力——两者都起源于此——仍是基础构建模块。
+Transformer 最初被提出[[8]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-vaswani2017attention)] 时是一种用于序列到序列任务（机器翻译、摘要）的**编码器-解码器**架构。尽管现代 LLM 主要使用仅解码器变体（GPT 风格），理解完整架构仍然至关重要，因为交叉注意力和带掩码的自注意力——两者都起源于此——仍是基础构建模块。
 
 ![原始 Transformer 架构（Vaswani 等，2017）。编码器（左）通过双向自注意力处理整个输入。解码器（右）使用带掩码的自注意力以及对编码器表征的交叉注意力来自回归生成 Token。虚线框表示重复的层块（$\times N$）；灰线表示绕过每个子层的残差连接。注意：原始工作使用 **Post-Norm**（LayerNorm 在残差相加*之后*应用：$\text{LN}(\mathbf{x} + \text{SubLayer}(\mathbf{x}))$），不同于现代 LLM 使用 Pre-Norm。]({{ site.baseurl }}/figures/fig_005_transformer-original.png)
 
@@ -225,9 +225,9 @@ $$\text{CrossAttn}(Q_{\text{dec}}, K_{\text{enc}}, V_{\text{enc}}) = \text{softm
 
 | 架构 | 示例 | 使用场景 |
 | --- | --- | --- |
-| 仅解码器 | GPT-4[openai2023gpt4], Llama[grattafiori2024llama3], Mistral[jiang2023mistral], Qwen[qwen2024qwen25] | 自回归生成；在对话/推理领域占主导 |
-| 编码器-解码器 | T5[raffel2020t5], BART[lewis2020bart], Flan-T5[chung2022flan] | Seq2seq（翻译、摘要）；现在较少使用 |
-| 仅编码器 | BERT[devlin2019bert], RoBERTa[liu2019roberta] | 分类/嵌入；不用于生成 |
+| 仅解码器 | GPT-4[[2]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-openai2023gpt4)], Llama[[3]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-grattafiori2024llama3)], Mistral[[4]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jiang2023mistral)], Qwen[[9]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-qwen2024qwen25)] | 自回归生成；在对话/推理领域占主导 |
+| 编码器-解码器 | T5[[10]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-raffel2020t5)], BART[[11]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lewis2020bart)], Flan-T5[[12]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chung2022flan)] | Seq2seq（翻译、摘要）；现在较少使用 |
+| 仅编码器 | BERT[[5]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-devlin2019bert)], RoBERTa[[13]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2019roberta)] | 分类/嵌入；不用于生成 |
 
 > **警告：为什么仅解码器胜出**
 >
@@ -271,11 +271,11 @@ $$
 
 > **为什么嵌入有效**
 >
-> 嵌入表与模型其余部分端到端地一起学习。因为模型被训练去预测下一个 Token，它必须学到这样的表征：出现在相似上下文中的 Token 得到相似的向量。这就是分布假说："你应当通过一个词的伙伴来了解它"[firth1957synopsis]。嵌入层将这种统计结构压缩为稠密几何。
+> 嵌入表与模型其余部分端到端地一起学习。因为模型被训练去预测下一个 Token，它必须学到这样的表征：出现在相似上下文中的 Token 得到相似的向量。这就是分布假说："你应当通过一个词的伙伴来了解它"[[14]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-firth1957synopsis)]。嵌入层将这种统计结构压缩为稠密几何。
 
 **各向异性（anisotropy）问题。**
 
-当使用预训练嵌入（例如来自 BERT 或 GPT-2）用于下游任务（如检索 RAG 或推荐系统冷启动）时，会出现一个关键问题：学习到的表征高度**各向异性（anisotropic）**——它们占据嵌入空间中一个狭窄的锥形区域，而非均匀分布在所有方向上[ethayarajh2019contextual]。
+当使用预训练嵌入（例如来自 BERT 或 GPT-2）用于下游任务（如检索 RAG 或推荐系统冷启动）时，会出现一个关键问题：学习到的表征高度**各向异性（anisotropic）**——它们占据嵌入空间中一个狭窄的锥形区域，而非均匀分布在所有方向上[[15]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-ethayarajh2019contextual)]。
 
 ![嵌入空间中的各向同性（isotropy）与各向异性（anisotropy）。左：各向同性的嵌入均匀分布，使余弦相似度成为可靠的语义相关性度量。右：各向异性的嵌入（如 BERT 中观察到的）聚集在狭窄的锥形内，导致所有对的余弦相似度都很高，无论语义内容如何。白化（whitening）变换空间以恢复各向同性。]({{ site.baseurl }}/figures/fig_007_fig7.png)
 
@@ -287,7 +287,7 @@ $$
 
 **解决方案：白化（whitening）。**
 
-一个简单有效的解决方法是**白化（whitening）**[su2021whitening]——一种使嵌入分布变得各向同性（零均值、单位协方差）的线性变换：
+一个简单有效的解决方法是**白化（whitening）**[[16]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-su2021whitening)]——一种使嵌入分布变得各向同性（零均值、单位协方差）的线性变换：
 
 $$\tilde{\mathbf{h}} = \mathbf{D}^{-1/2} \mathbf{U}^T (\mathbf{h} - \boldsymbol{\mu})$$
 
@@ -344,15 +344,15 @@ $$\tilde{\mathbf{h}} = \mathbf{D}^{-1/2} \mathbf{U}^T (\mathbf{h} - \boldsymbol{
 
 有几类方案可以应对这种平方瓶颈：
 
-1. **具备 IO 感知的精确注意力（FlashAttention[dao2022flashattention]）**：不降低计算复杂度，但通过将注意力计算分块到能放入 SRAM 的瓦片中，消除了在 HBM 中物化 $n \times n$ 矩阵的需要。关键的是，FlashAttention 与下面的稀疏模式**正交**——它是一种执行引擎，而非注意力模式。生产系统通常将 FlashAttention 与滑动窗口或块稀疏掩码结合使用，同时获得 IO 效率和 FLOPs 减少。我们在「FlashAttention——算法与硬件感知」一节详细介绍该算法。
-2. **滑动窗口 / 局部注意力**：每个 Token 只关注最近的 $w$ 个 Token（例如 $w = 4096$）。代价变为 $O(n \cdot w)$——在 $n$ 上是线性的。被 Mistral[jiang2023mistral]（窗口 $= 4096$）和 Longformer[belagy2020longformer] 采用。以全局上下文换效率；之所以有效，是因为实践中大部分注意力是局部的。在现代技术栈中，滑动窗口掩码在 FlashAttention 内核*内部*执行。
-3. **稀疏注意力模式**：将局部窗口与周期性的全局 Token 结合（例如，每隔 512 个 Token 关注全部）。BigBird[zaheer2020bigbird] 和 LongT5[guo2022longt5] 使用此方法。以 $O(n\sqrt{n})$ 代价保留一些长程连通性。同样，FlashAttention 作为非零注意力块的底层内核。
-4. **线性注意力 / 状态空间模型**：利用结合律将 $\text{softmax}(QK^T)V$ 替换为 $\phi(Q)(\phi(K)^T V)$，或重构为递归形式（Mamba[gu2023mamba]、RWKV[peng2023rwkv]）。理论上总代价为 $O(n \cdot d^2)$。与上面方法 2--3 不同，这些是*架构上的替换*，改变了模型的表达能力——无 Softmax 的注意力本质上表达力更弱，经验上这些模型在需要精确长程检索或复杂推理的任务上仍然落后于 Transformer。
-5. **KV 缓存压缩**：在推理时，压缩或驱逐旧的 KV 对以限制内存。技术包括：H$_2$O[zhang2023h2o]（重击者预言机——只保留高注意力的 Key）、StreamingLLM[xiao2024streamingllm]（保留初始"注意力陷阱（Attention Sink）"Token + 最近窗口），以及量化 KV 缓存[liu2024kivi]。
+1. **具备 IO 感知的精确注意力（FlashAttention[[17]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-dao2022flashattention)]）**：不降低计算复杂度，但通过将注意力计算分块到能放入 SRAM 的瓦片中，消除了在 HBM 中物化 $n \times n$ 矩阵的需要。关键的是，FlashAttention 与下面的稀疏模式**正交**——它是一种执行引擎，而非注意力模式。生产系统通常将 FlashAttention 与滑动窗口或块稀疏掩码结合使用，同时获得 IO 效率和 FLOPs 减少。我们在「FlashAttention——算法与硬件感知」一节详细介绍该算法。
+2. **滑动窗口 / 局部注意力**：每个 Token 只关注最近的 $w$ 个 Token（例如 $w = 4096$）。代价变为 $O(n \cdot w)$——在 $n$ 上是线性的。被 Mistral[[4]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jiang2023mistral)]（窗口 $= 4096$）和 Longformer[[18]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-beltagy2020longformer)] 采用。以全局上下文换效率；之所以有效，是因为实践中大部分注意力是局部的。在现代技术栈中，滑动窗口掩码在 FlashAttention 内核*内部*执行。
+3. **稀疏注意力模式**：将局部窗口与周期性的全局 Token 结合（例如，每隔 512 个 Token 关注全部）。BigBird[[19]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zaheer2020bigbird)] 和 LongT5[[20]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-guo2022longt5)] 使用此方法。以 $O(n\sqrt{n})$ 代价保留一些长程连通性。同样，FlashAttention 作为非零注意力块的底层内核。
+4. **线性注意力 / 状态空间模型**：利用结合律将 $\text{softmax}(QK^T)V$ 替换为 $\phi(Q)(\phi(K)^T V)$，或重构为递归形式（Mamba[[21]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-gu2023mamba)]、RWKV[[22]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-peng2023rwkv)]）。理论上总代价为 $O(n \cdot d^2)$。与上面方法 2--3 不同，这些是*架构上的替换*，改变了模型的表达能力——无 Softmax 的注意力本质上表达力更弱，经验上这些模型在需要精确长程检索或复杂推理的任务上仍然落后于 Transformer。
+5. **KV 缓存压缩**：在推理时，压缩或驱逐旧的 KV 对以限制内存。技术包括：H$_2$O[[23]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhang2023h2o)]（重击者预言机——只保留高注意力的 Key）、StreamingLLM[[24]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-xiao2024streamingllm)]（保留初始"注意力陷阱（Attention Sink）"Token + 最近窗口），以及量化 KV 缓存[[25]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2024kivi)]。
 
 > **FlashAttention + 稀疏模式 = 两全其美**
 >
-> 一个常见误解是 FlashAttention 是稀疏注意力的*替代*。事实并非如此——它是注意力内核的 IO 优化，可以与任何注意力掩码自由组合。现代生产系统（如 Mistral、DeepSeek）使用 FlashAttention 作为滑动窗口或块稀疏掩码*底层*的执行引擎。这同时为你带来 FLOPs 的减少（来自稀疏性）和最优的内存访问模式（来自瓦片化）。RingAttention[liu2023ringattention] 将其进一步扩展到多设备场景，沿序列维度将瓦片化的计算分布到多块 GPU 上。
+> 一个常见误解是 FlashAttention 是稀疏注意力的*替代*。事实并非如此——它是注意力内核的 IO 优化，可以与任何注意力掩码自由组合。现代生产系统（如 Mistral、DeepSeek）使用 FlashAttention 作为滑动窗口或块稀疏掩码*底层*的执行引擎。这同时为你带来 FLOPs 的减少（来自稀疏性）和最优的内存访问模式（来自瓦片化）。RingAttention[[26]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2023ringattention)] 将其进一步扩展到多设备场景，沿序列维度将瓦片化的计算分布到多块 GPU 上。
 >
 > 线性注意力和状态空间模型（Mamba、RWKV）是一种真正不同的架构选择——它们为了 $O(n)$ 计算而牺牲完整的成对交互。虽然理论上优雅，它们在知识密集或长程推理任务上仍未达到 Transformer 的质量，前沿实验室继续使用精确注意力（结合 FlashAttention + 稀疏性）作为骨干。
 
@@ -370,7 +370,7 @@ $$\tilde{\mathbf{h}} = \mathbf{D}^{-1/2} \mathbf{U}^T (\mathbf{h} - \boldsymbol{
 >
 > 每个头可以学习不同的注意力模式（例如，一个头处理句法，另一个处理语义，再一个处理位置邻近性）。
 >
-> **分组查询注意力（Grouped Query Attention，GQA）**：Llama-3[grattafiori2024llama3] 使用比 Q 头更少的 K、V 头（例如，8 个 KV 头被 32 个 Q 头共享）。这将 KV 缓存大小减小 $4\times$，质量损失极小。
+> **分组查询注意力（Grouped Query Attention，GQA）**：Llama-3[[3]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-grattafiori2024llama3)] 使用比 Q 头更少的 K、V 头（例如，8 个 KV 头被 32 个 Q 头共享）。这将 KV 缓存大小减小 $4\times$，质量损失极小。
 
 ### 位置编码
 
@@ -381,13 +381,13 @@ Transformer 在构造上是置换等变的——没有位置信息，模型无�
 | 方法 | 使用者 | 核心思想 |
 | --- | --- | --- |
 | 正弦（Sinusoidal） | 原始 Transformer | 不同频率的固定 $\sin/\cos$。无需学习。 |
-| 学习的绝对位置 | GPT-2[radford2019gpt2], BERT[devlin2019bert] | 每个位置的学习嵌入。受限于训练长度。 |
-| RoPE | Llama[grattafiori2024llama3], Qwen[qwen2024qwen25], Mistral[jiang2023mistral] | 将 Q、K 向量按位置相关的角度旋转。通过 NTK 感知缩放进行外推。 |
-| ALiBi | BLOOM[workshop2023bloom], MPT[mosaicml2023mpt] | 不使用位置嵌入；在注意力分数上添加线性偏置 $-m\lvert i-j \rvert$。简单，外推性好。 |
+| 学习的绝对位置 | GPT-2[[7]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-radford2019gpt2)], BERT[[5]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-devlin2019bert)] | 每个位置的学习嵌入。受限于训练长度。 |
+| RoPE | Llama[[3]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-grattafiori2024llama3)], Qwen[[9]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-qwen2024qwen25)], Mistral[[4]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jiang2023mistral)] | 将 Q、K 向量按位置相关的角度旋转。通过 NTK 感知缩放进行外推。 |
+| ALiBi | BLOOM[[27]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-workshop2023bloom)], MPT[[28]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-mosaicml2023mpt)] | 不使用位置嵌入；在注意力分数上添加线性偏置 $-m\lvert i-j \rvert$。简单，外推性好。 |
 
 **正弦（固定）位置编码。**
 
-原始 Transformer[vaswani2017attention] 中提出，该方法在几何间隔的频率上使用固定的正弦函数：
+原始 Transformer[[8]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-vaswani2017attention)] 中提出，该方法在几何间隔的频率上使用固定的正弦函数：
 
 $$
 \text{PE}(pos, 2i) = \sin\!\Bigl(\frac{pos}{10000^{2i/d}}\Bigr), \qquad
@@ -404,7 +404,7 @@ $$
 
 **学习的绝对位置嵌入。**
 
-被 GPT-2[radford2019gpt2] 和 BERT[devlin2019bert] 采用：一个可学习的嵌入矩阵 $\mathbf{E}_{\text{pos}} \in \mathbb{R}^{L_{\max} \times d}$ 被加到 Token 嵌入上：
+被 GPT-2[[7]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-radford2019gpt2)] 和 BERT[[5]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-devlin2019bert)] 采用：一个可学习的嵌入矩阵 $\mathbf{E}_{\text{pos}} \in \mathbb{R}^{L_{\max} \times d}$ 被加到 Token 嵌入上：
 
 $$
 h_0^{(pos)} = \text{TokenEmbed}(x_{pos}) + \mathbf{E}_{\text{pos}}[pos]
@@ -418,7 +418,7 @@ $$
 
 **旋转位置编码（Rotary Position Embedding，RoPE）。**
 
-RoPE[su2024roformer] 通过在 2D 子空间中*旋转* Query 和 Key 向量来编码位置：
+RoPE[[29]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-su2024roformer)] 通过在 2D 子空间中*旋转* Query 和 Key 向量来编码位置：
 
 $$
 \text{RoPE}(x_m, m) = \begin{pmatrix} x_m^{(1)} \\ x_m^{(2)} \\ \vdots \\ x_m^{(d-1)} \\ x_m^{(d)} \end{pmatrix}
@@ -438,7 +438,7 @@ $$
 
 **动机：**在无需显式偏置项的情况下实现相对位置编码，同时保持与线性注意力和 KV 缓存的兼容性。
 
-**优点：**天然相对；无额外参数；与高效推理兼容；可以通过 NTK 感知缩放[peng2023yarn] 或 YaRN（调整 $\theta$ 基数或插值频率）扩展到更长的上下文。
+**优点：**天然相对；无额外参数；与高效推理兼容；可以通过 NTK 感知缩放[[30]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-peng2023yarn)] 或 YaRN（调整 $\theta$ 基数或插值频率）扩展到更长的上下文。
 
 **缺点：**每次注意力操作的计算略多（旋转 + 交错）；外推需要显式的缩放策略；在 2D 子空间中的旋转施加了一种结构，对所有任务未必最优。
 
@@ -448,11 +448,11 @@ $$
 >
 > - **位置插值（Position interpolation）：**将位置按 $L/L'$ 缩放，使所有位置落在 $[0, L]$ 内。简单但压缩了分辨率。
 > - **NTK 感知缩放：**增大 $\theta$ 基数（例如 $10000 \to 10000 \cdot (L'/L)^{d/(d-2)}$），有效地拉伸高频成分，同时保留低频成分。
-> - **YaRN**[peng2023yarn]：将 NTK 缩放与注意力温度校正 $t = 0.1 \ln(s) + 1$ 结合，以补偿更长距离上熵的增加。
+> - **YaRN**[[30]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-peng2023yarn)]：将 NTK 缩放与注意力温度校正 $t = 0.1 \ln(s) + 1$ 结合，以补偿更长距离上熵的增加。
 
 **ALiBi（带线性偏置的注意力，Attention with Linear Biases）。**
 
-ALiBi[press2022train] 采取了根本不同的方法：*完全不使用位置嵌入*。取而代之，从注意力分数中减去一个静态的线性惩罚：
+ALiBi[[31]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-press2022train)] 采取了根本不同的方法：*完全不使用位置嵌入*。取而代之，从注意力分数中减去一个静态的线性惩罚：
 
 $$
 \text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^T}{\sqrt{d_k}} - m \cdot \bigl[\lvert i-j \rvert\bigr]_{i,j}\right) V
@@ -478,24 +478,24 @@ $$
 
 **扩展到极长上下文（100K--1M+ Token）。**
 
-现代前沿模型（Claude[anthropic2024claude3] 拥有 200K--1M 上下文、Gemini 1.5[geminiteam2024gemini15] 达到 1M+、GPT-4[openai2023gpt4] 128K）需要在远超训练长度时仍然忠实的位置编码。当今的主流解决方案：
+现代前沿模型（Claude[[32]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-anthropic2024claude3)] 拥有 200K--1M 上下文、Gemini 1.5[[33]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-geminiteam2024gemini15)] 达到 1M+、GPT-4[[2]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-openai2023gpt4)] 128K）需要在远超训练长度时仍然忠实的位置编码。当今的主流解决方案：
 
 1. **带频率缩放的 RoPE**：将 RoPE 扩展到训练长度之外的标准方法。无需重新训练，对基础频率 $\theta$ 进行重新缩放：
 
    $$\theta'_i = \theta_i \cdot \left(\frac{L_{\text{target}}}{L_{\text{train}}}\right)^{2i/d}$$
 
    变体包括：
-   - **线性缩放**（位置插值）[chen2023extending]：简单地将位置索引除以因子 $s$。便宜但在高扩展比时降低质量。
-   - **NTK 感知缩放**[peng2023yarn]：缩放基础频率 $\theta = 10000 \to 10000 \cdot s^{d/(d-2)}$。保留高频（局部）信息的同时扩展低频（全局）范围。
-   - **YaRN**[peng2023yarn]（Yet another RoPE extensioN）：将 NTK 缩放与注意力温度校正以及在一个小型长上下文语料上的微调结合。Llama-3 用它将 8K 训练扩展到 128K 部署。
-   - **动态 NTK（Dynamic NTK）**[peng2023yarn]：在推理时根据实际序列长度即时调整缩放因子。无需固定扩展比——模型随上下文增长而适应。
+   - **线性缩放**（位置插值）[[34]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chen2023extending)]：简单地将位置索引除以因子 $s$。便宜但在高扩展比时降低质量。
+   - **NTK 感知缩放**[[30]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-peng2023yarn)]：缩放基础频率 $\theta = 10000 \to 10000 \cdot s^{d/(d-2)}$。保留高频（局部）信息的同时扩展低频（全局）范围。
+   - **YaRN**[[30]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-peng2023yarn)]（Yet another RoPE extensioN）：将 NTK 缩放与注意力温度校正以及在一个小型长上下文语料上的微调结合。Llama-3 用它将 8K 训练扩展到 128K 部署。
+   - **动态 NTK（Dynamic NTK）**[[30]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-peng2023yarn)]：在推理时根据实际序列长度即时调整缩放因子。无需固定扩展比——模型随上下文增长而适应。
 2. **在长数据上继续预训练**：即使使用 RoPE 缩放，模型也能从在长文档上的短期继续预训练阶段（1--5B Token）中受益。这教会模型真正地*使用*远距离上下文，而不仅是在位置上容忍它。Llama-3.1 使用渐进式计划：8K $\to$ 64K $\to$ 128K。
-3. **Ring Attention / 分块并行**[liu2023ringattention]：对于超出单 GPU 内存的序列（1M+ Token），Ring Attention 以环形拓扑将序列分布在 GPU 之间。每块 GPU 持有一个块并在环上传递 KV 块，计算局部注意力瓦片。这使内存能够随 GPU 数量线性扩展，同时保留精确注意力。
+3. **Ring Attention / 分块并行**[[26]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2023ringattention)]：对于超出单 GPU 内存的序列（1M+ Token），Ring Attention 以环形拓扑将序列分布在 GPU 之间。每块 GPU 持有一个块并在环上传递 KV 块，计算局部注意力瓦片。这使内存能够随 GPU 数量线性扩展，同时保留精确注意力。
 4. **混合架构**：一些系统将大多数层的局部滑动窗口（例如 4K）与选定层（如每 4 层一次）的全注意力结合。这为大部分计算提供 $O(n \cdot w)$ 代价，同时维持全局信息流。
 
 > **警告：长上下文 $\neq$ 长上下文利用**
 >
-> 拥有 1M 上下文长度的模型并*不*必然能有效利用所有 1M Token。"迷失中间（Lost in the Middle）"现象[liu2024lost] 表明，模型倾向于聚焦于长上下文的开始和结尾，对中间的信息利用不足。有效的长上下文利用需要位置编码支持*和*在奖励长程检索的任务上进行训练。
+> 拥有 1M 上下文长度的模型并*不*必然能有效利用所有 1M Token。"迷失中间（Lost in the Middle）"现象[[35]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2024lost)] 表明，模型倾向于聚焦于长上下文的开始和结尾，对中间的信息利用不足。有效的长上下文利用需要位置编码支持*和*在奖励长程检索的任务上进行训练。
 
 ### 前馈网络（MLP）
 
@@ -507,12 +507,12 @@ $$
 
 其中 $W_1 \in \mathbb{R}^{d \times 4d}$，$W_2 \in \mathbb{R}^{4d \times d}$。现代 LLM 使用：
 
-- **SwiGLU 激活**：$\text{FFN}(x) = W_2 (\text{Swish}(W_1 x) \odot W_3 x)$——被 Llama[grattafiori2024llama3]、Mistral[jiang2023mistral] 采用。需要 3 个权重矩阵，但带来更好的性能。
+- **SwiGLU 激活**：$\text{FFN}(x) = W_2 (\text{Swish}(W_1 x) \odot W_3 x)$——被 Llama[[3]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-grattafiori2024llama3)]、Mistral[[4]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jiang2023mistral)] 采用。需要 3 个权重矩阵，但带来更好的性能。
 - 隐藏维度通常为 $8/3 \times d$（取整到 256 的倍数以适配 Tensor Core 效率）。
 
 > **FFN 作为存储器**
 >
-> 近期工作[geva2021transformer] 表明 FFN 层充当一种*键值存储器*：$W_1$ 的行是 Key（要匹配的模式），$W_2$ 的列是 Value（要输出的信息）。FFN 基于当前隐藏状态"检索"存储的知识。
+> 近期工作[[36]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-geva2021transformer)] 表明 FFN 层充当一种*键值存储器*：$W_1$ 的行是 Key（要匹配的模式），$W_2$ 的列是 Value（要输出的信息）。FFN 基于当前隐藏状态"检索"存储的知识。
 
 ### 层归一化（Layer Normalization）
 
@@ -520,7 +520,7 @@ $$
 
 **LayerNorm 如何工作。**
 
-给定一个隐藏状态向量 $\mathbf{x} \in \mathbb{R}^d$（单个 Token 的表征），LayerNorm[ba2016layernorm] 计算：
+给定一个隐藏状态向量 $\mathbf{x} \in \mathbb{R}^d$（单个 Token 的表征），LayerNorm[[37]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-ba2016layernorm)] 计算：
 
 $$\text{LayerNorm}(\mathbf{x}) = \gamma \odot \frac{\mathbf{x} - \mu}{\sqrt{\sigma^2 + \epsilon}} + \beta$$
 
@@ -535,7 +535,7 @@ $$\text{LayerNorm}(\mathbf{x}) = \gamma \odot \frac{\mathbf{x} - \mu}{\sqrt{\sig
 
 **RMSNorm——现代简化版。**
 
-均方根归一化（Root Mean Square Normalization，RMSNorm）[zhang2019rmsnorm] 去掉了均值中心化步骤，仅按均方根归一化：
+均方根归一化（Root Mean Square Normalization，RMSNorm）[[38]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhang2019rmsnorm)] 去掉了均值中心化步骤，仅按均方根归一化：
 
 $$\text{RMSNorm}(\mathbf{x}) = \gamma \odot \frac{\mathbf{x}}{\text{RMS}(\mathbf{x})}, \qquad \text{RMS}(\mathbf{x}) = \sqrt{\frac{1}{d}\sum_{i=1}^{d} x_i^2}$$
 
@@ -545,7 +545,7 @@ $$\text{RMSNorm}(\mathbf{x}) = \gamma \odot \frac{\mathbf{x}}{\text{RMS}(\mathbf
 >
 > - **Post-LN**（原始 Transformer）：$h + \text{LayerNorm}(\text{Attn}(h))$。需要仔细的 warmup；训练可能不稳定。
 > - **Pre-LN**（GPT-2+，所有现代 LLM）：$h + \text{Attn}(\text{LayerNorm}(h))$。稳定训练；允许更高的学习率。
-> - **RMSNorm**（Llama[grattafiori2024llama3], Mistral[jiang2023mistral]）：不带均值中心化的简化 LayerNorm：$\text{RMSNorm}(x) = x / \text{RMS}(x) \cdot \gamma$。稍快，同等质量。
+> - **RMSNorm**（Llama[[3]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-grattafiori2024llama3)], Mistral[[4]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jiang2023mistral)]）：不带均值中心化的简化 LayerNorm：$\text{RMSNorm}(x) = x / \text{RMS}(x) \cdot \gamma$。稍快，同等质量。
 
 > **为什么归一化对深度网络很重要**
 >
@@ -559,12 +559,12 @@ $$\text{RMSNorm}(\mathbf{x}) = \gamma \odot \frac{\mathbf{x}}{\text{RMS}(\mathbf
 
 | 模型 | 参数 | 层数 | $d$ | 头数 | KV 头数 | 上下文 |
 | --- | --- | --- | --- | --- | --- | --- |
-| Llama-3.1 8B[grattafiori2024llama3] | 8B | 32 | 4096 | 32 | 8 | 128K |
-| Llama-3.1 405B[grattafiori2024llama3] | 405B | 126 | 16384 | 128 | 8 | 128K |
-| Llama-4 Maverick[meta2025llama4] | 400B (17B 活跃) | 48 | 5120 | 40 | 8 | 1M |
-| Mistral Large 2[jiang2024mistrallarge2] | 123B | 88 | 12288 | 96 | 8 | 128K |
-| Qwen-2.5 72B[qwen2024qwen25] | 72B | 80 | 8192 | 64 | 8 | 128K |
-| DeepSeek-V3[deepseekv3] | 671B (37B 活跃) | 61 | 7168 | 128 | MLA | 128K |
+| Llama-3.1 8B[[3]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-grattafiori2024llama3)] | 8B | 32 | 4096 | 32 | 8 | 128K |
+| Llama-3.1 405B[[3]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-grattafiori2024llama3)] | 405B | 126 | 16384 | 128 | 8 | 128K |
+| Llama-4 Maverick[[39]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-meta2025llama4)] | 400B (17B 活跃) | 48 | 5120 | 40 | 8 | 1M |
+| Mistral Large 2[[40]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jiang2024mistrallarge2)] | 123B | 88 | 12288 | 96 | 8 | 128K |
+| Qwen-2.5 72B[[9]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-qwen2024qwen25)] | 72B | 80 | 8192 | 64 | 8 | 128K |
+| DeepSeek-V3[[41]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-deepseekv3)] | 671B (37B 活跃) | 61 | 7168 | 128 | MLA | 128K |
 
 *注*：标注"活跃"参数的模型使用混合专家（Mixture-of-Experts，MoE）架构——总参数表示模型容量，而活跃参数反映每个 Token 的计算代价。DeepSeek-V3 使用多头潜注意力（Multi-head Latent Attention，MLA）而非标准 GQA，将 KV 压缩到低秩潜空间中。
 
@@ -576,7 +576,7 @@ $$\text{RMSNorm}(\mathbf{x}) = \gamma \odot \frac{\mathbf{x}}{\text{RMS}(\mathbf
 
 **现象。**
 
-Xiao 等[xiao2024efficient] 发现 Transformer 模型对序列中的*第一个 Token* 分配了不成比例的高注意力分数——无论其语义内容如何。即使第一个 Token 是无意义的 `<BOS>` 标记，所有层中的注意力头都持续地关注它，有时占总注意力质量的 20--50%。
+Xiao 等[[42]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-xiao2024efficient)] 发现 Transformer 模型对序列中的*第一个 Token* 分配了不成比例的高注意力分数——无论其语义内容如何。即使第一个 Token 是无意义的 `<BOS>` 标记，所有层中的注意力头都持续地关注它，有时占总注意力质量的 20--50%。
 
 **为什么会发生。**
 
@@ -594,7 +594,7 @@ $$
 
 **解决方案。**
 
-- **StreamingLLM**[xiao2024efficient]：始终在 KV 缓存中保留前 $k$ 个 Token（"注意力陷阱"）以及最近的滑动窗口。在有界内存下实现无限长度生成。
+- **StreamingLLM**[[42]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-xiao2024efficient)]：始终在 KV 缓存中保留前 $k$ 个 Token（"注意力陷阱"）以及最近的滑动窗口。在有界内存下实现无限长度生成。
 - **设计上的陷阱 Token**：一些模型（如 Mistral）在训练期间预置专门的陷阱 Token，明确用于吸收残余注意力。
 - **Softmax 替代**：用 ReLU 注意力或 Sigmoid 门控替换 Softmax，使零注意力可以表示而无需倾倒目标。
 
@@ -602,11 +602,11 @@ $$
 
 **现象。**
 
-随着序列长度 $n$ 增长，每个 Query 必须将其注意力预算分配到更多 Key 上。每个 Token 的平均注意力权重以 $O(1/n)$ 下降，使得模型越来越难以集中在少数真正相关的位置上——这个问题被称为*注意力稀释（attention dilution）*或*注意力扩散（attention diffusion）*[liu2024lost]。
+随着序列长度 $n$ 增长，每个 Query 必须将其注意力预算分配到更多 Key 上。每个 Token 的平均注意力权重以 $O(1/n)$ 下降，使得模型越来越难以集中在少数真正相关的位置上——这个问题被称为*注意力稀释（attention dilution）*或*注意力扩散（attention diffusion）*[[35]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2024lost)]。
 
 **"迷失中间（Lost in the Middle）"效应。**
 
-Liu 等[liu2024lost] 表明 LLM 表现出 U 形检索曲线：放在长上下文*开始*或*结尾*的信息被可靠地检索，但*中间*的信息常常被忽略。这是注意力稀释叠加 RoPE/ALiBi 位置偏差的直接后果：
+Liu 等[[35]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2024lost)] 表明 LLM 表现出 U 形检索曲线：放在长上下文*开始*或*结尾*的信息被可靠地检索，但*中间*的信息常常被忽略。这是注意力稀释叠加 RoPE/ALiBi 位置偏差的直接后果：
 
 **为什么会发生。**
 
@@ -617,8 +617,8 @@ Liu 等[liu2024lost] 表明 LLM 表现出 U 形检索曲线：放在长上下文
 **缓解策略。**
 
 - **显式检索**：将相关上下文放在提示的开始或结尾；使用 RAG 来避免依赖中间位置。
-- **长上下文训练**：在关键信息位置多样化的长文档上训练[fu2024data]。
-- **层次化注意力**：如 Mamba[gu2024mamba] 或 RWKV 等完全避免 $O(n^2)$ 注意力瓶颈的架构。
+- **长上下文训练**：在关键信息位置多样化的长文档上训练[[43]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-fu2024data)]。
+- **层次化注意力**：如 Mamba[[44]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-gu2024mamba)] 或 RWKV 等完全避免 $O(n^2)$ 注意力瓶颈的架构。
 - **地标 Token（Landmark tokens）**：在上下文中插入可检索的标记，作为注意力的"路标"。
 - **温度缩放**：一些实现将注意力 logits 按 $\log n$ 缩放，以抵消长序列中的稀释。
 
@@ -628,10 +628,10 @@ Liu 等[liu2024lost] 表明 LLM 表现出 U 形检索曲线：放在长上下文
 
 | 模式 | 描述 | 影响 |
 | --- | --- | --- |
-| **注意力头专门化** | 不同头学习不同角色：句法头、共指头、位置头[voita2019analyzing] | 并非所有头都同等重要；很多可以被剪枝 |
-| **归纳头（Induction heads）** | 实现 [A][B]...[A] $\to$ [B] 复制的头[olsson2022context] | 对上下文学习至关重要；在 2 层及以上的模型中涌现 |
+| **注意力头专门化** | 不同头学习不同角色：句法头、共指头、位置头[[45]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-voita2019analyzing)] | 并非所有头都同等重要；很多可以被剪枝 |
+| **归纳头（Induction heads）** | 实现 [A][B]...[A] $\to$ [B] 复制的头[[46]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-olsson2022context)] | 对上下文学习至关重要；在 2 层及以上的模型中涌现 |
 | **注意力塌缩（Attention collapse）** | 在深度网络中，注意力分布可能收敛（所有头关注相同位置） | 损害表达力；通过注意力多样性损失来解决 |
-| **检索头（Retrieval heads）** | 特定头专门从上下文中检索事实信息[wu2024retrieval] | 解释了为何剪枝某些头会导致幻觉激增 |
+| **检索头（Retrieval heads）** | 特定头专门从上下文中检索事实信息[[47]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wu2024retrieval)] | 解释了为何剪枝某些头会导致幻觉激增 |
 
 ### 为可解释性而进行注意力可视化
 
@@ -641,11 +641,11 @@ Liu 等[liu2024lost] 表明 LLM 表现出 U 形检索曲线：放在长上下文
 
 **原始注意力图。**
 
-最简单的方法：为每个头和每层将 $n \times n$ 注意力矩阵 $A = \text{softmax}(QK^\top/\sqrt{d})$ 绘制为热图。BertViz[vig2019bertviz] 等工具可以渲染交互式的多头可视化。
+最简单的方法：为每个头和每层将 $n \times n$ 注意力矩阵 $A = \text{softmax}(QK^\top/\sqrt{d})$ 绘制为热图。BertViz[[48]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-vig2019bertviz)] 等工具可以渲染交互式的多头可视化。
 
 **注意力展开（Attention rollout）。**
 
-单层的原始注意力是有误导性的，因为信息通过残差连接流经*所有*层。Abnar 和 Zuidema[abnar2020quantifying] 提出了*注意力展开（attention rollout）*：将各层的注意力矩阵相乘以近似从输入到输出的总信息流：
+单层的原始注意力是有误导性的，因为信息通过残差连接流经*所有*层。Abnar 和 Zuidema[[49]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-abnar2020quantifying)] 提出了*注意力展开（attention rollout）*：将各层的注意力矩阵相乘以近似从输入到输出的总信息流：
 
 $$
 R^{(l)} = A^{(l)} \cdot R^{(l-1)}, \quad R^{(0)} = I
@@ -655,7 +655,7 @@ $$
 
 **梯度加权的注意力。**
 
-将注意力权重与梯度信息结合以识别哪些被关注的 Token 实际*影响*输出[barkan2021grad]：
+将注意力权重与梯度信息结合以识别哪些被关注的 Token 实际*影响*输出[[50]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-barkan2021grad)]：
 
 $$
 \text{Relevance}(i) = \alpha_i \cdot \left\lvert \frac{\partial y}{\partial h_i}\right\rvert
@@ -665,7 +665,7 @@ $$
 
 > **警告：注意力不是解释**
 >
-> Jain 和 Wallace[jain2019attention] 表明，注意力权重往往与基于梯度的特征重要性不相关，对抗性的注意力分布可以产生相同的输出。将注意力可视化作为一种*假设生成器*，而非忠实的解释。对于因果归因，优先选择基于梯度的方法、探测（probing）或机制可解释性。
+> Jain 和 Wallace[[51]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jain2019attention)] 表明，注意力权重往往与基于梯度的特征重要性不相关，对抗性的注意力分布可以产生相同的输出。将注意力可视化作为一种*假设生成器*，而非忠实的解释。对于因果归因，优先选择基于梯度的方法、探测（probing）或机制可解释性。
 
 #### 使用稀疏自编码器（Sparse Autoencoder，SAE）的机制可解释性
 
@@ -675,7 +675,7 @@ Transformer MLP 和残差流中的单个神经元通常是*多义的（polyseman
 
 **稀疏自编码器（Sparse Autoencoder，SAE）。**
 
-Cunningham 等[cunningham2023sparse] 和 Bricken 等[bricken2023monosemanticity] 证明，在模型激活上训练稀疏自编码器（Sparse Autoencoder，SAE）可以将多义表征分解为*单义特征（monosemantic features）*——每个对应单一概念的可解释方向：
+Cunningham 等[[52]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-cunningham2023sparse)] 和 Bricken 等[[53]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-bricken2023monosemanticity)] 证明，在模型激活上训练稀疏自编码器（Sparse Autoencoder，SAE）可以将多义表征分解为*单义特征（monosemantic features）*——每个对应单一概念的可解释方向：
 
 $$
 h = W_{\text{dec}} \cdot \text{ReLU}(W_{\text{enc}} \cdot x + b_{\text{enc}}) + b_{\text{dec}}
@@ -685,10 +685,10 @@ $$
 
 **SAE 可解释性的关键发现：**
 
-- 特征是*单义的*：每个编码一个人类可解释的概念（"Python 代码"、"提及金门大桥"、"第一人称叙述"）[bricken2023monosemanticity]。
-- 特征是*可操控的*：将某个特征的激活钳制为高/低直接控制模型行为（例如，强制"金门大桥"特征开启会使模型在每个回复中都提到它）[templeton2024scaling]。
+- 特征是*单义的*：每个编码一个人类可解释的概念（"Python 代码"、"提及金门大桥"、"第一人称叙述"）[[53]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-bricken2023monosemanticity)]。
+- 特征是*可操控的*：将某个特征的激活钳制为高/低直接控制模型行为（例如，强制"金门大桥"特征开启会使模型在每个回复中都提到它）[[54]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-templeton2024scaling)]。
 - 特征可组合：复杂行为从简单特征的组合中涌现。
-- SAE 可扩展：Templeton 等[templeton2024scaling] 在 Claude 3 Sonnet 上训练了多达 34M 个特征的 SAE，找到了与安全相关的概念（欺骗、谄媚、危险请求）的可解释特征。
+- SAE 可扩展：Templeton 等[[54]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-templeton2024scaling)] 在 Claude 3 Sonnet 上训练了多达 34M 个特征的 SAE，找到了与安全相关的概念（欺骗、谄媚、危险请求）的可解释特征。
 
 > **SAE 训练配方**
 >
@@ -700,7 +700,7 @@ $$
 
 #### 自然语言自编码器（Anthropic，2026）
 
-虽然 SAE 将激活分解为可解释的*向量*，其特征仍需人工检查最大激活样本才能理解。Anthropic 的自然语言自编码器（Natural Language Autoencoders，NLAE）[anthropic2026nla] 采取了根本不同的方法：用*自然语言描述*替代稀疏瓶颈，使可解释性自动化。
+虽然 SAE 将激活分解为可解释的*向量*，其特征仍需人工检查最大激活样本才能理解。Anthropic 的自然语言自编码器（Natural Language Autoencoders，NLAE）[[55]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-anthropic2026nla)] 采取了根本不同的方法：用*自然语言描述*替代稀疏瓶颈，使可解释性自动化。
 
 **NLAE 如何工作。**
 
@@ -889,7 +889,7 @@ reward_score = reward_model(**inputs).logits  # 形状：(batch, 1)
 
 $$\theta_{t+1} = \theta_t - \eta \nabla_\theta \mathcal{L}(\theta_t)$$
 
-其中 $\eta > 0$ 是**学习率（Learning Rate）**——也就是步长。这就是**梯度下降（Gradient Descent）**[rumelhart1986learning]。
+其中 $\eta > 0$ 是**学习率（Learning Rate）**——也就是步长。这就是**梯度下降（Gradient Descent）**[[56]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-rumelhart1986learning)]。
 
 ![梯度下降：从随机初始化 $\theta_0$ 开始，每一步都将参数沿降低损失的方向移动，步长由学习率 $\eta$ 控制。该过程会向某个（局部）最小值收敛。]({{ site.baseurl }}/figures/fig_009_fig9.png)
 
@@ -899,7 +899,7 @@ $$\theta_{t+1} = \theta_t - \eta \nabla_\theta \mathcal{L}(\theta_t)$$
 
 **随机梯度下降（Stochastic Gradient Descent，SGD）。**
 
-解决办法是：用一个小的随机数据子集（**小批量，mini-batch**）来估计梯度[robbins1951stochastic]：
+解决办法是：用一个小的随机数据子集（**小批量，mini-batch**）来估计梯度[[57]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-robbins1951stochastic)]：
 
 $$
 \nabla_\theta \mathcal{L}(\theta) \approx \frac{1}{B}\sum_{i=1}^{B} \nabla_\theta \ell(\theta; x_i)
@@ -935,7 +935,7 @@ $$
 
 ### Adam --- 自适应矩估计（Adaptive Moment Estimation）
 
-Adam[kingma2015adam] 为每个参数维护梯度一阶矩（均值）与二阶矩（非中心化方差）的估计。
+Adam[[58]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kingma2015adam)] 为每个参数维护梯度一阶矩（均值）与二阶矩（非中心化方差）的估计。
 
 > **Adam 更新方程**
 >
@@ -976,7 +976,7 @@ Adam[kingma2015adam] 为每个参数维护梯度一阶矩（均值）与二阶�
 
 ### AdamW --- 解耦权重衰减（Decoupled Weight Decay, AdamW）
 
-AdamW[loshchilov2019adamw] 修正了权重衰减与自适应优化器交互时一个细微但重要的问题。
+AdamW[[59]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-loshchilov2019adamw)] 修正了权重衰减与自适应优化器交互时一个细微但重要的问题。
 
 > **为何在 Adam 中 L2 正则 $\neq$ 权重衰减**
 >
@@ -1053,7 +1053,7 @@ $$
 
 **(d) WSD --- 预热-稳定-衰减（Warmup-Stable-Decay, WSD）。**
 
-大规模预训练的新标准[hu2024minicpm, grattafiori2024llama3]。包含三个阶段：
+大规模预训练的新标准[[60]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hu2024minicpm), [3]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-grattafiori2024llama3)]。包含三个阶段：
 
 1. **预热：**线性升至 $\eta_{\max}$（占总步数的 1--5%）
 2. **稳定：**在训练的大部分时间保持恒定的 $\eta_{\max}$
@@ -1170,7 +1170,7 @@ for batch in train_dataloader:
 
 > **实践要点**
 >
-> - **权重衰减排除**：bias 项和 LayerNorm 权重不应被正则化——它们参数很少，对其加正则反而损害性能 [loshchilov2019adamw]。
+> - **权重衰减排除**：bias 项和 LayerNorm 权重不应被正则化——它们参数很少，对其加正则反而损害性能 [[59]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-loshchilov2019adamw)]。
 > - **预热比例**：通常为总步数的 5--10%；预热不足配合高学习率会使早期训练不稳定。
 > - **梯度累积**：在显存受限时模拟更大批量；裁剪作用于*累积后*的梯度。
 > - **BF16 vs. FP16**：在 Ampere+ GPU 上优先 `bf16=True`（更宽的动态范围可免去损失缩放）；老硬件回退到 `fp16=True`。
@@ -1337,7 +1337,7 @@ for batch in train_dataloader:
 
 ## FlashAttention——算法与硬件感知
 
-FlashAttention[dao2022flashattention, dao2023flashattention2]是自 Transformer 本身以来深度学习领域最具影响力的算法创新之一。它不改变 Attention 的数学结果——计算出的输出与原始 Attention *完全相同*——但它重构了内存访问模式，让 GPU 上容量有限的高速 SRAM 承担所有重活，从而将高带宽内存（HBM）占用从 $O(n^2)$ 降至 $O(n)$，并在典型工作负载上带来 2--4$\times$ 的端到端实际墙钟时间加速。
+FlashAttention[[17]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-dao2022flashattention), [61]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-dao2023flashattention2)]是自 Transformer 本身以来深度学习领域最具影响力的算法创新之一。它不改变 Attention 的数学结果——计算出的输出与原始 Attention *完全相同*——但它重构了内存访问模式，让 GPU 上容量有限的高速 SRAM 承担所有重活，从而将高带宽内存（HBM）占用从 $O(n^2)$ 降至 $O(n)$，并在典型工作负载上带来 2--4$\times$ 的端到端实际墙钟时间加速。
 
 ### 标准 Attention 的内存问题
 
@@ -1419,7 +1419,7 @@ $$
 
 ### FlashAttention 2——更好的并行性
 
-FlashAttention 2[dao2023flashattention2] 做出了三项关键改进：
+FlashAttention 2[[61]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-dao2023flashattention2)] 做出了三项关键改进：
 
 1. **减少非矩阵乘法 FLOPs：** 原版 FA 在内循环中存在不必要的重缩放操作。FA2 重构循环以最小化这些操作。在 A100 上，Tensor Core 矩阵乘法比标量运算快约 16$\times$，因此即便内循环中只有少量非矩阵乘法工作，也会成为延迟瓶颈。
 2. **序列维度上更好的并行性：** FA1 仅在 batch 和 head 上并行。FA2 还在 query 序列维度上并行，使长序列、小批量场景下的 GPU 利用率显著提升。
@@ -1427,7 +1427,7 @@ FlashAttention 2[dao2023flashattention2] 做出了三项关键改进：
 
 ### FlashAttention 3——Hopper 架构
 
-FlashAttention 3[shah2024flashattention3] 专为 H100 设计，并利用了三项 Hopper 特有的特性：
+FlashAttention 3[[62]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shah2024flashattention3)] 专为 H100 设计，并利用了三项 Hopper 特有的特性：
 
 - **TMA（Tensor Memory Accelerator，张量内存加速器）：** H100 有一个专用硬件单元用于在 HBM 和 SRAM 之间进行异步批量数据搬移。FA3 利用 TMA 让数据加载与计算重叠，从而隐藏内存延迟。
 - **Warp 专用化（Warp-specialization）：** FA3 给不同的 warp 分配不同角色（生产者 warp 通过 TMA 加载数据；消费者 warp 计算 MMA）。这是一种软件流水线技术，使内存系统和 Tensor Core 同时保持繁忙。
@@ -1437,7 +1437,7 @@ FA3 在 FP16 Attention 上可达 **H100 理论峰值的 75%**，相比之下 FA2
 
 ### FlashAttention 4——Blackwell 架构
 
-FlashAttention 4[zadouri2026flashattention4] 面向 NVIDIA 的 Blackwell GPU（B200/GB200），这类 GPU 将 Tensor Core 吞吐量提高到 2.25 PFLOP/s（BF16），但非矩阵乘法单元（指数运算、共享内存带宽）的扩展速度较慢。这种*非对称的硬件扩展*意味着瓶颈发生了转移：在 Blackwell 上，Attention 的限制因素不再是矩阵乘法，而是 Softmax 指数运算以及围绕它们的共享内存流量。
+FlashAttention 4[[63]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zadouri2026flashattention4)] 面向 NVIDIA 的 Blackwell GPU（B200/GB200），这类 GPU 将 Tensor Core 吞吐量提高到 2.25 PFLOP/s（BF16），但非矩阵乘法单元（指数运算、共享内存带宽）的扩展速度较慢。这种*非对称的硬件扩展*意味着瓶颈发生了转移：在 Blackwell 上，Attention 的限制因素不再是矩阵乘法，而是 Softmax 指数运算以及围绕它们的共享内存流量。
 
 FA4 通过四项关键技术来应对这一问题：
 
@@ -1464,7 +1464,7 @@ FA4 通过四项关键技术来应对这一问题：
 
 ## 预训练：最佳实践
 
-预训练是 LLM 开发中代价最高的阶段——消耗数百万 GPU 小时，需要对数据、算力和超参数进行精心编排。本节提炼 Llama-3[grattafiori2024llama3]、Chinchilla[hoffmann2022chinchilla] 和 GPT-4[openai2023gpt4] 的关键经验。
+预训练是 LLM 开发中代价最高的阶段——消耗数百万 GPU 小时，需要对数据、算力和超参数进行精心编排。本节提炼 Llama-3[[3]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-grattafiori2024llama3)]、Chinchilla[[64]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hoffmann2022chinchilla)] 和 GPT-4[[2]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-openai2023gpt4)] 的关键经验。
 
 ### 训练目标
 
@@ -1474,7 +1474,7 @@ $$
 \mathcal{L}_\text{CLM} = -\frac{1}{T}\sum_{t=1}^T \log P_\theta(x_t \mid x_{<t})
 $$
 
-这个简单的目标——在足够的数据和规模下——无需显式监督就能产生涌现能力（上下文学习、推理、指令遵循）[brown2020language]。
+这个简单的目标——在足够的数据和规模下——无需显式监督就能产生涌现能力（上下文学习、推理、指令遵循）[[65]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-brown2020language)]。
 
 ### 数据流水线
 
@@ -1482,13 +1482,13 @@ $$
 >
 > - **规模**：前沿模型为 1--15 万亿 Token（Llama-3：15T Token）
 > - **来源**：网页抓取（80%）、代码（10%）、书籍/论文（5%）、精选数据（5%）
-> - **去重**：MinHash + 精确子串去重可降低记忆化[lee2022deduplicating]
+> - **去重**：MinHash + 精确子串去重可降低记忆化[[66]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lee2022deduplicating)]
 > - **质量过滤**：基于困惑度的分类器、启发式过滤器（长度、语种识别、毒性）
 > - **数据混合**：跨域温度加权采样；为推理能力提升代码与数学的权重
 
 ### 扩展律
 
-Hoffmann 等[hoffmann2022chinchilla]表明，算力最优的训练需要平衡模型大小 $N$ 和数据大小 $D$：$N_\text{opt} \propto C^{0.50}$，$D_\text{opt} \propto C^{0.50}$。70B 模型的算力最优点约在 1.4T Token。实际中，模型通常被*过训练*（Token 数超过 Chinchilla 最优值），因为推理成本随模型大小而非训练 Token 数扩展——较小的过训练模型部署成本更低。
+Hoffmann 等[[64]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hoffmann2022chinchilla)]表明，算力最优的训练需要平衡模型大小 $N$ 和数据大小 $D$：$N_\text{opt} \propto C^{0.50}$，$D_\text{opt} \propto C^{0.50}$。70B 模型的算力最优点约在 1.4T Token。实际中，模型通常被*过训练*（Token 数超过 Chinchilla 最优值），因为推理成本随模型大小而非训练 Token 数扩展——较小的过训练模型部署成本更低。
 
 ### 关键超参数
 
@@ -1527,7 +1527,7 @@ $$
 
 ### 数据质量：LIMA 原则
 
-Zhou 等[zhou2023lima]证明，1,000 个精心策划的样例可以匹敌在 50K+ 嘈杂样例上训练的模型。关键要求：
+Zhou 等[[67]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhou2023lima)]证明，1,000 个精心策划的样例可以匹敌在 50K+ 嘈杂样例上训练的模型。关键要求：
 
 - **多样性**：涵盖问答、摘要、代码、数学、创意写作、多轮对话
 - **正确性**：每条回复必须事实准确且格式良好
@@ -1563,7 +1563,7 @@ trainer.train()
 
 标准的 HuggingFace 训练存在显著的性能浪费。多个库为 SFT 工作负载提供了即插即用的效率提升：
 
-**Liger Kernel[hsu2024liger]。**
+**Liger Kernel[[68]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hsu2024liger)]。**
 
 LinkedIn 开源的一组 **Triton 融合内核**，在训练时替换标准的 PyTorch 算子。关键融合包括：
 
@@ -1573,7 +1573,7 @@ LinkedIn 开源的一组 **Triton 融合内核**，在训练时替换标准的 P
 
 **效果**：仅需一行集成代码（`apply_liger_kernel_to_llama()`）即可获得 20% 的吞吐量提升和最高 60% 的内存降低。兼容 FSDP、DeepSpeed 和 LoRA。
 
-**Unsloth[unsloth2024]。**
+**Unsloth[[69]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-unsloth2024)]。**
 
 一个专注于微调的库，将**自定义 CUDA/Triton 内核**与激进的内存优化相结合：
 
@@ -1583,7 +1583,7 @@ LinkedIn 开源的一组 **Triton 融合内核**，在训练时替换标准的 P
 
 **效果**：比原版 HuggingFace + PEFT 快 2--5$\times$，显存占用降低 60--70%。对单 GPU 与消费级硬件工作流尤为重要。
 
-**torchtune[torchtune2024]。**
+**torchtune[[70]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-torchtune2024)]。**
 
 Meta 的原生 PyTorch 微调库（2025 年开发逐步收尾），其设计围绕**可组合性**而非单体抽象：
 
@@ -1609,7 +1609,7 @@ SFT 训练指南。
 | 实践 | 细节 |
 | --- | --- |
 | 打包（Packing） | 将多个短样例拼接为一个序列（用 EOS 分隔）。避免填充浪费。 |
-| NEFTune[jain2024neftune] | 在 Embedding 上添加均匀噪声（$\alpha=5$）。零代价提升 MT-Bench 5--15%。 |
+| NEFTune[[71]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jain2024neftune)] | 在 Embedding 上添加均匀噪声（$\alpha=5$）。零代价提升 MT-Bench 5--15%。 |
 | 对话模板 | 始终使用模型原生模板。模板不匹配会降低质量。 |
 | Epoch 数 | 大数据集 2--3 个；小型（$<$10K）精选集最多 5 个。过训练会导致格式记忆化。 |
 
@@ -1619,7 +1619,7 @@ SFT 训练指南。
 
 ## LoRA 与参数高效微调
 
-对 70B 模型进行全量微调需要存储 70B 可训练参数及其优化器状态（560+ GB 内存）。低秩适配（Low-Rank Adaptation，LoRA）[hu2021lora]提供了一种仅用 $<$1% 参数即可微调、并达到相当质量的方法。
+对 70B 模型进行全量微调需要存储 70B 可训练参数及其优化器状态（560+ GB 内存）。低秩适配（Low-Rank Adaptation，LoRA）[[72]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hu2021lora)]提供了一种仅用 $<$1% 参数即可微调、并达到相当质量的方法。
 
 ### LoRA 的核心洞察
 
@@ -1638,7 +1638,7 @@ SFT 训练指南。
 
 > **低秩为何有效**
 >
-> Aghajanyan 等[aghajanyan2020intrinsic]表明，微调发生在一个非常低维的子空间——微调任务的「内在维度（intrinsic dimensionality）」远小于模型的参数量。一个 175B 模型的微调任务内在维度可能 $<$10,000。LoRA 直接利用了这一点：秩 $r$ 把每个权重矩阵的更新约束在 $r$ 维子空间内。
+> Aghajanyan 等[[73]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-aghajanyan2020intrinsic)]表明，微调发生在一个非常低维的子空间——微调任务的「内在维度（intrinsic dimensionality）」远小于模型的参数量。一个 175B 模型的微调任务内在维度可能 $<$10,000。LoRA 直接利用了这一点：秩 $r$ 把每个权重矩阵的更新约束在 $r$ 维子空间内。
 
 ![LoRA 将权重更新 $\Delta W$ 分解为两个小矩阵 $B \times A$。原始权重 $W$ 保持冻结；只有 $B$ 和 $A$ 接收梯度。推理时，乘积 $BA$ 可以零开销地合并到 $W$ 中。]({{ site.baseurl }}/figures/fig_011_lora-decomposition.png)
 
@@ -1655,7 +1655,7 @@ SFT 训练指南。
 > - **固定 $\alpha$，扫描 $r$**：有效更新幅度无论秩为何都保持在 $\sim\alpha$ 附近。可以尝试 $r \in \{8, 16, 32, 64\}$ 而无需重新调学习率。
 > - **常见做法**：设 $\alpha = r$（即 $\alpha/r = 1$）或 $\alpha = 2r$（即 $\alpha/r = 2$）。这是缩放因子为小整数的便捷默认。
 > - **为什么不直接调 LR？** 可以，但 $\alpha/r$ 提供了一个*与秩无关*的旋钮。团队可以在不同秩的实验间共享 LR 配方。
-> - **rsLoRA 洞察**[kalajdzievski2023rslora]：在高秩（$r \geq 64$）下，经验证据表明 $\alpha/\sqrt{r}$ 比 $\alpha/r$ 更稳定，因为 $BA$ 的方差按 $\sqrt{r}$ 而非 $r$ 缩放。
+> - **rsLoRA 洞察**[[74]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kalajdzievski2023rslora)]：在高秩（$r \geq 64$）下，经验证据表明 $\alpha/\sqrt{r}$ 比 $\alpha/r$ 更稳定，因为 $BA$ 的方差按 $\sqrt{r}$ 而非 $r$ 缩放。
 
 ### LoRA 超参数
 
@@ -1686,19 +1686,19 @@ LoRA 变体及其创新。
 
 | 方法 | 关键创新 | 适用场景 |
 | --- | --- | --- |
-| **QLoRA**[dettmers2023qlora] | 4-bit 量化基座 + BF16 的 LoRA。NF4 数据类型 + 双重量化。 | 在单张 48GB GPU 上微调 70B。 |
-| **DoRA**[liu2024dora] | 将 $W$ 分解为幅度与方向；LoRA 只更新方向。 | 推理任务的泛化更好。 |
-| **LoRA+**[hayou2024loraplus] | 为 $A$/$B$ 使用不同的 LR。 | 免费的 2% 提升；无额外成本。 |
-| **AdaLoRA**[zhang2023adalora] | 跨层动态秩预算（基于 SVD 的重要性）。 | 算力预算非常紧张时。 |
-| **rsLoRA**[kalajdzievski2023rslora] | 用 $\alpha/\sqrt{r}$ 而非 $\alpha/r$ 缩放。在高秩下稳定。 | 使用 $r \geq 64$ 时。 |
-| **VeRA**[kopiczko2024vera] | 共享冻结的随机 $A, B$；只训练对角缩放。 | 极致的参数效率。 |
+| **QLoRA**[[75]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-dettmers2023qlora)] | 4-bit 量化基座 + BF16 的 LoRA。NF4 数据类型 + 双重量化。 | 在单张 48GB GPU 上微调 70B。 |
+| **DoRA**[[76]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2024dora)] | 将 $W$ 分解为幅度与方向；LoRA 只更新方向。 | 推理任务的泛化更好。 |
+| **LoRA+**[[77]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hayou2024loraplus)] | 为 $A$/$B$ 使用不同的 LR。 | 免费的 2% 提升；无额外成本。 |
+| **AdaLoRA**[[78]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhang2023adalora)] | 跨层动态秩预算（基于 SVD 的重要性）。 | 算力预算非常紧张时。 |
+| **rsLoRA**[[74]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kalajdzievski2023rslora)] | 用 $\alpha/\sqrt{r}$ 而非 $\alpha/r$ 缩放。在高秩下稳定。 | 使用 $r \geq 64$ 时。 |
+| **VeRA**[[79]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kopiczko2024vera)] | 共享冻结的随机 $A, B$；只训练对角缩放。 | 极致的参数效率。 |
 | **LoRA-FA** | 初始化后冻结 $A$；只训练 $B$。将 LoRA 内存减半。 | 内存受限场景。 |
 
 #### 关键扩展详解
 
 **DoRA——权重分解低秩适配（Weight-Decomposed Low-Rank Adaptation，DoRA）。**
 
-DoRA[liu2024dora]观察到，全量微调倾向于改变权重向量的*方向*多于幅度。标准 LoRA 把二者混在一起。DoRA 将每个权重列分解为幅度 $m = \|W\|_\text{col}$ 和方向 $\hat{V} = W / \|W\|_\text{col}$，然后只对方向应用 LoRA：
+DoRA[[76]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2024dora)]观察到，全量微调倾向于改变权重向量的*方向*多于幅度。标准 LoRA 把二者混在一起。DoRA 将每个权重列分解为幅度 $m = \|W\|_\text{col}$ 和方向 $\hat{V} = W / \|W\|_\text{col}$，然后只对方向应用 LoRA：
 
 $$
 W' = m \odot \hat{V}', \quad \hat{V}' = \frac{W + BA}{\|W + BA\|_\text{col}}
@@ -1708,7 +1708,7 @@ $$
 
 **LoRA+——非对称学习率。**
 
-Hayou 等[hayou2024loraplus]表明，LoRA 中的矩阵 $A$ 和 $B$ 拥有不同的最优学习率。由于 $B$ 初始化为零，它与从 $\mathcal{N}(0, \sigma^2)$ 初始化的 $A$ 处于截然不同的状态。设置 $\eta_B \approx 16 \times \eta_A$ 可提升收敛速度并将最终质量提高约 2%——一个仅需一行配置改动的免费收益：
+Hayou 等[[77]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hayou2024loraplus)]表明，LoRA 中的矩阵 $A$ 和 $B$ 拥有不同的最优学习率。由于 $B$ 初始化为零，它与从 $\mathcal{N}(0, \sigma^2)$ 初始化的 $A$ 处于截然不同的状态。设置 $\eta_B \approx 16 \times \eta_A$ 可提升收敛速度并将最终质量提高约 2%——一个仅需一行配置改动的免费收益：
 
 ```python
 # PEFT 中的 LoRA+：为每个矩阵设置不同的学习率
@@ -1722,7 +1722,7 @@ optimizer_grouped_parameters = [
 
 **VeRA——基于向量的随机矩阵适配（Vector-based Random Matrix Adaptation，VeRA）。**
 
-VeRA[kopiczko2024vera]把参数效率推向极致：它不学习 $A$ 和 $B$，而是将它们*冻结*为所有层之间共享的随机矩阵，仅训练两个对角缩放向量 $d_b \in \mathbb{R}^r$ 和 $d_a \in \mathbb{R}^d$：
+VeRA[[79]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kopiczko2024vera)]把参数效率推向极致：它不学习 $A$ 和 $B$，而是将它们*冻结*为所有层之间共享的随机矩阵，仅训练两个对角缩放向量 $d_b \in \mathbb{R}^r$ 和 $d_a \in \mathbb{R}^d$：
 
 $$
 \Delta W = B \cdot \text{diag}(d_b) \cdot A \cdot \text{diag}(d_a)
@@ -1781,12 +1781,12 @@ LoRA 主导了现代实践，但并非唯一的参数高效方法。为完整起
 
 | 方法 | 机制 | 优点 / 缺点 | 现状 |
 | --- | --- | --- | --- |
-| **LoRA**[hu2021lora]（及变体） | 在现有权重上添加低秩矩阵 | 推理时可合并（零开销）；支持完善；适用于所有架构 | **标准** |
-| **Adapters**[houlsby2019adapters] | 在层之间插入小型瓶颈 MLP | 模块化；可堆叠；增加推理延迟（额外的串行层） | 很少使用 |
-| **前缀微调**[li2021prefix] | 在每层 K/V 前拼接可学习的「虚拟 Token」 | 不修改权重；对生成任务有效；占用上下文长度 | 小众 |
-| **提示微调**[lester2021prompt] | 在输入前拼接可学习的软提示 Embedding | 参数极少（$<$0.01%）；复杂任务上弱于 LoRA | 小众 |
-| **IA3**[liu2022ia3] | 用学到的向量对 K、V 和 FFN 激活进行重缩放 | 参数比 LoRA 更少；可合并；容量有限 | 已弃用 |
-| **BitFit**[zaken2022bitfit] | 只训练偏置项 | 参数接近于零；在简单任务上意外有效；表达力有限 | 历史方法 |
+| **LoRA**[[72]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hu2021lora)]（及变体） | 在现有权重上添加低秩矩阵 | 推理时可合并（零开销）；支持完善；适用于所有架构 | **标准** |
+| **Adapters**[[80]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-houlsby2019adapters)] | 在层之间插入小型瓶颈 MLP | 模块化；可堆叠；增加推理延迟（额外的串行层） | 很少使用 |
+| **前缀微调**[[81]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-li2021prefix)] | 在每层 K/V 前拼接可学习的「虚拟 Token」 | 不修改权重；对生成任务有效；占用上下文长度 | 小众 |
+| **提示微调**[[82]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lester2021prompt)] | 在输入前拼接可学习的软提示 Embedding | 参数极少（$<$0.01%）；复杂任务上弱于 LoRA | 小众 |
+| **IA3**[[83]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2022ia3)] | 用学到的向量对 K、V 和 FFN 激活进行重缩放 | 参数比 LoRA 更少；可合并；容量有限 | 已弃用 |
+| **BitFit**[[84]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zaken2022bitfit)] | 只训练偏置项 | 参数接近于零；在简单任务上意外有效；表达力有限 | 历史方法 |
 
 > **为什么 LoRA 胜出**
 >
@@ -1794,7 +1794,7 @@ LoRA 主导了现代实践，但并非唯一的参数高效方法。为完整起
 
 ## 专家混合模型（Mixture of Experts，MoE）
 
-专家混合模型[shazeer2017outrageously, jiang2024mixtral] 通过对每个 Token 只激活参数的一个子集，从而在不按比例增加计算成本的情况下扩展模型容量。
+专家混合模型[[85]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shazeer2017outrageously), [86]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jiang2024mixtral)] 通过对每个 Token 只激活参数的一个子集，从而在不按比例增加计算成本的情况下扩展模型容量。
 
 ### 架构
 
@@ -1839,7 +1839,7 @@ MoE 的核心挑战在于 **top-$k$ 选择是不可微的**——你无法通过
 > - *选择决策本身*（挑选哪 $k$ 个）的梯度为零
 > - 如果没有技巧，路由器可能会卡住：一个从未被选中的专家 $\rightarrow$ 永远得不到梯度信号 $\rightarrow$ 永远不会被选中
 
-**方法 1：噪声 Top-K 门控（Noisy Top-K Gating）[shazeer2017outrageously]。**
+**方法 1：噪声 Top-K 门控（Noisy Top-K Gating）[[85]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shazeer2017outrageously)]。**
 
 在进行 top-$k$ 选择 *之前*，向路由器的 logits 添加可学习的高斯噪声：
 
@@ -1859,7 +1859,7 @@ $$
 
 **方法 2：Gumbel-Softmax 技巧（Gumbel-Softmax Trick，用于可微的离散采样）。**
 
-来自变分推断文献的另一种方法[jang2017categorical]。**Gumbel-Max 技巧（Gumbel-Max trick）** 提供了从类别分布中精确采样的方式：
+来自变分推断文献的另一种方法[[87]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jang2017categorical)]。**Gumbel-Max 技巧（Gumbel-Max trick）** 提供了从类别分布中精确采样的方式：
 
 $$
   z = \arg\max_i \left[ \log \pi_i + G_i \right], \quad G_i \sim \text{Gumbel}(0,1)
@@ -1882,8 +1882,8 @@ $$
 
 > **实际中使用的是哪种方法？**
 >
-> - **Sparsely-Gated MoE[shazeer2017outrageously]、Mixtral[jiang2024mixtral]、DeepSeek-V2[deepseekv2]**：使用带高斯噪声的噪声 Top-K。简单、有效，在大规模上得到了充分验证。
-> - **Switch Transformer[fedus2022switch]**：简化为不带噪声的 Top-1（仅依赖负载均衡损失）。
+> - **Sparsely-Gated MoE[[85]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shazeer2017outrageously)]、Mixtral[[86]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jiang2024mixtral)]、DeepSeek-V2[[88]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-deepseekv2)]**：使用带高斯噪声的噪声 Top-K。简单、有效，在大规模上得到了充分验证。
+> - **Switch Transformer[[89]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-fedus2022switch)]**：简化为不带噪声的 Top-1（仅依赖负载均衡损失）。
 > - **研究型 / 小规模 MoE**：一些工作使用 Gumbel-Softmax 实现完全可微的路由，尤其是当学习路由本身就是研究目标时。
 > - **关键见解**：两种方法都通过噪声注入解决了同一个问题（让离散选择可训练）。高斯噪声更简单；Gumbel 噪声在类别采样上有更强的理论保证。
 
@@ -1891,11 +1891,11 @@ $$
 
 | 模型 | 总参数量 | 激活参数量 | 专家 | 创新点 |
 | --- | --- | --- | --- | --- |
-| Switch Transformer[fedus2022switch] | 1.6T | 100B | 128, Top-1 | 首个大规模 MoE；简化的路由 |
-| Mixtral 8x7B[jiang2024mixtral] | 47B | 13B | 8, Top-2 | 开放权重；质量媲美 Llama-2 70B |
-| DeepSeek-V2[deepseekv2] | 236B | 21B | 160, Top-6 | 带共享 + 路由专家的 DeepSeekMoE |
-| Qwen-MoE[qwen2024qwen25] | 14.3B | 2.7B | 60, Top-4 | 为提升效率而设计的细粒度专家 |
-| DBRX[databricks2024dbrx] | 132B | 36B | 16, Top-4 | 每块 4 个专家的细粒度结构 |
+| Switch Transformer[[89]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-fedus2022switch)] | 1.6T | 100B | 128, Top-1 | 首个大规模 MoE；简化的路由 |
+| Mixtral 8x7B[[86]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jiang2024mixtral)] | 47B | 13B | 8, Top-2 | 开放权重；质量媲美 Llama-2 70B |
+| DeepSeek-V2[[88]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-deepseekv2)] | 236B | 21B | 160, Top-6 | 带共享 + 路由专家的 DeepSeekMoE |
+| Qwen-MoE[[9]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-qwen2024qwen25)] | 14.3B | 2.7B | 60, Top-4 | 为提升效率而设计的细粒度专家 |
+| DBRX[[90]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-databricks2024dbrx)] | 132B | 36B | 16, Top-4 | 每块 4 个专家的细粒度结构 |
 
 ## LLM 训练中的多样性
 
@@ -1926,7 +1926,7 @@ $$
 | 频率惩罚（Frequency penalty） | 惩罚重复出现的 Token，强制在一次回复内产生词汇多样性。 |
 | 数据去重 | 从训练数据中移除近似重复样本，防止对特定模式的过拟合。 |
 | 多领域混合 | 跨领域的温度加权采样确保了广泛的覆盖。 |
-| 口头化采样（Verbalized sampling） | 提示模型显式地用语言表达出对回复的概率分布[zhang2025verbalized]。见「GRPO 变体与扩展」一节。 |
+| 口头化采样（Verbalized sampling） | 提示模型显式地用语言表达出对回复的概率分布[[91]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhang2025verbalized)]。见「GRPO 变体与扩展」一节。 |
 
 ## 文本生成：解码方法
 
@@ -1970,7 +1970,7 @@ $$
 
 ### 多样化束搜索（Diverse Beam Search）
 
-标准束搜索会产生近似重复的束。多样化束搜索（Diverse Beam Search）[vijayakumar2018diverse] 将束划分为 $G$ 个组，并在组之间添加一个 **不相似性惩罚（dissimilarity penalty）**：
+标准束搜索会产生近似重复的束。多样化束搜索（Diverse Beam Search）[[92]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-vijayakumar2018diverse)] 将束划分为 $G$ 个组，并在组之间添加一个 **不相似性惩罚（dissimilarity penalty）**：
 
 $$
 \text{score}_g(y_t) = \log P(y_t \mid y_{<t}) - \lambda \sum_{g'<g} \Delta(y_t, Y_{g'})
@@ -2030,7 +2030,7 @@ $$
 
 ### Min-$p$ 采样
 
-一种较新的替代方法，它设置一个 **相对** 概率下限[nguyen2024minp]：
+一种较新的替代方法，它设置一个 **相对** 概率下限[[93]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-nguyen2024minp)]：
 
 $$
 \text{Min-}p = \left\{ v \in \mathcal{V} : P(v \mid x_{<t}) \geq p_{\min} \cdot \max_{v'} P(v' \mid x_{<t}) \right\}
@@ -2061,7 +2061,7 @@ $$
 
 ### 对比解码（Contrastive Decoding）
 
-对比解码（Contrastive Decoding）[li2023contrastive] 利用一个强模型（专家）与一个弱模型（业余者）之间的差异，来放大专家独有的知识：
+对比解码（Contrastive Decoding）[[94]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-li2023contrastive)] 利用一个强模型（专家）与一个弱模型（业余者）之间的差异，来放大专家独有的知识：
 
 $$
 x_t = \arg\max_{v \in \mathcal{V}(x_{<t})} \left[ \log P_{\text{expert}}(v \mid x_{<t}) - \log P_{\text{amateur}}(v \mid x_{<t}) \right]
@@ -2150,10 +2150,10 @@ $$
 
 **关键库。**
 
-- **Outlines**[willard2023outlines]：将 JSON 模式和正则表达式编译为交织的、由 FSM 引导的生成。支持任何提供 logits 接口的模型。
+- **Outlines**[[95]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-willard2023outlines)]：将 JSON 模式和正则表达式编译为交织的、由 FSM 引导的生成。支持任何提供 logits 接口的模型。
 - **lm-format-enforcer**[https://github.com/noamgat/lm-format-enforcer]：类似的 FSM 方法，重点放在与服务框架（vLLM、TGI）的集成上。
 - **Guidance**[https://github.com/guidance-ai/guidance]（Microsoft）：将受限生成与控制流（循环、条件）交织在一起，可实现超越扁平模式的复杂结构化输出。
-- **XGrammar**[dong2024xgrammar]：基于下推自动机的引擎，支持完整的上下文无关文法（不仅限于正则语言），被 MLC-LLM 和 vLLM 用于语法模式的解码。
+- **XGrammar**[[96]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-dong2024xgrammar)]：基于下推自动机的引擎，支持完整的上下文无关文法（不仅限于正则语言），被 MLC-LLM 和 vLLM 用于语法模式的解码。
 
 **权衡。**
 
@@ -2173,17 +2173,17 @@ Prompt 工程是一门设计 LLM 输入的学科，目标是在不修改模型�
 
 ### 上下文学习（In-Context Learning，ICL）
 
-上下文学习[brown2020language] 是大语言模型一项令人瞩目的能力：在推理时仅凭 Prompt 中提供的示例就能学习任务，完全无需梯度更新。模型从输入-输出对的模式中隐式推断任务，并泛化到新的输入上。
+上下文学习[[65]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-brown2020language)] 是大语言模型一项令人瞩目的能力：在推理时仅凭 Prompt 中提供的示例就能学习任务，完全无需梯度更新。模型从输入-输出对的模式中隐式推断任务，并泛化到新的输入上。
 
 > **为什么上下文学习有效**
 >
-> - **隐式贝叶斯推断**：模型在预训练时见过数百万种任务。Prompt 示例在模型学到的分布中*定位*到相关任务[xie2022explanation]。
-> - **归纳头（Induction heads）**：特定的 attention 头学会复制模式（"A 之于 B，如 C 之于 "），从而实现上下文泛化[olsson2022context]。
-> - **任务向量（Task vectors）**：ICL 在残差流中创建隐式的任务表示，引导生成朝向所演示的格式与内容[todd2024function]。
+> - **隐式贝叶斯推断**：模型在预训练时见过数百万种任务。Prompt 示例在模型学到的分布中*定位*到相关任务[[97]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-xie2022explanation)]。
+> - **归纳头（Induction heads）**：特定的 attention 头学会复制模式（"A 之于 B，如 C 之于 "），从而实现上下文泛化[[46]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-olsson2022context)]。
+> - **任务向量（Task vectors）**：ICL 在残差流中创建隐式的任务表示，引导生成朝向所演示的格式与内容[[98]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-todd2024function)]。
 
 **扩展行为。**
 
-ICL 主要在参数量约 1B 以上的模型中涌现，并随模型规模呈对数线性提升[brown2020language]。较小的模型可以记住示例，但难以在同一上下文窗口内泛化到新的输入。
+ICL 主要在参数量约 1B 以上的模型中涌现，并随模型规模呈对数线性提升[[65]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-brown2020language)]。较小的模型可以记住示例，但难以在同一上下文窗口内泛化到新的输入。
 
 ### 零样本提示（Zero-Shot Prompting）
 
@@ -2204,7 +2204,7 @@ ICL 主要在参数量约 1B 以上的模型中涌现，并随模型规模呈对
 
 - 模型在预训练/SFT 阶段大量见过的任务（翻译、摘要、情感分析）
 - 指令明确、输出格式无歧义
-- 指令微调模型（如 ChatGPT、Claude、Llama-3-Instruct）在零样本任务上显著优于基座模型[ouyang2022training]
+- 指令微调模型（如 ChatGPT、Claude、Llama-3-Instruct）在零样本任务上显著优于基座模型[[99]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-ouyang2022training)]
 
 **零样本何时失效：**
 
@@ -2212,7 +2212,7 @@ ICL 主要在参数量约 1B 以上的模型中涌现，并随模型规模呈对
 
 ### 少样本提示（Few-Shot Prompting）
 
-少样本提示[brown2020language] 在实际查询之前提供 $k$ 个输入-输出示例（即 "shots"）。它是上下文学习最常见的形式，也仍然是最有效的提示策略之一。
+少样本提示[[65]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-brown2020language)] 在实际查询之前提供 $k$ 个输入-输出示例（即 "shots"）。它是上下文学习最常见的形式，也仍然是最有效的提示策略之一。
 
 > **示例：少样本命名实体识别**
 >
@@ -2232,14 +2232,14 @@ ICL 主要在参数量约 1B 以上的模型中涌现，并随模型规模呈对
 **少样本示例的关键设计原则：**
 
 1. **多样性**：覆盖预期输入的范围（不同长度、边界情况、类别）。
-2. **顺序**：将较难或更具代表性的示例放在最后（近因偏差，recency bias）[lu2022fantastically]。
+2. **顺序**：将较难或更具代表性的示例放在最后（近因偏差，recency bias）[[100]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lu2022fantastically)]。
 3. **标签平衡**：分类任务中要包含所有类别的示例，以避免多数类偏差。
 4. **格式一致性**：每个示例都必须遵循*完全*相同的结构。模型会模仿这种模式。
-5. **相关性**：选用与目标查询语义相近的示例可获得最佳效果[liu2022makes]。
+5. **相关性**：选用与目标查询语义相近的示例可获得最佳效果[[101]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2022makes)]。
 
 **需要多少个示例？**
 
-性能通常会从 0 个示例提升到 4--8 个示例，然后趋于平稳。超过约 20 个示例后收益微乎其微，反而有占满上下文窗口的风险。Min 等人[min2022rethinking] 表明，示例的*格式*与*标签空间*比标签正确性更重要——即使随机标签也有帮助（不过正确标签帮助更大）。
+性能通常会从 0 个示例提升到 4--8 个示例，然后趋于平稳。超过约 20 个示例后收益微乎其微，反而有占满上下文窗口的风险。Min 等人[[102]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-min2022rethinking)] 表明，示例的*格式*与*标签空间*比标签正确性更重要——即使随机标签也有帮助（不过正确标签帮助更大）。
 
 ### 指令跟随类 Prompt
 
@@ -2273,7 +2273,7 @@ ICL 主要在参数量约 1B 以上的模型中涌现，并随模型规模呈对
 
 **System Prompt 与 User Prompt 的对比。**
 
-现代聊天 API 将*系统* Prompt（持久指令、角色定义）与*用户*消息（每轮输入）分离。多数模型对 system prompt 赋予更高的 attention 优先级，是放置角色定义、约束和输出格式说明的天然位置[openai2023gpt4]。
+现代聊天 API 将*系统* Prompt（持久指令、角色定义）与*用户*消息（每轮输入）分离。多数模型对 system prompt 赋予更高的 attention 优先级，是放置角色定义、约束和输出格式说明的天然位置[[2]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-openai2023gpt4)]。
 
 ### 结构化输出 Prompt（JSON/XML）
 
@@ -2299,7 +2299,7 @@ ICL 主要在参数量约 1B 以上的模型中涌现，并随模型规模呈对
 **获得可靠结构化输出的技巧：**
 
 - **Schema 优先**：在输入*之前*展示精确的 JSON schema，模型会将其当作模板。
-- **约束解码（Constrained decoding）**：使用基于语法的采样（如 Outlines[willard2023outlines]、Guidance）在 token 级别保证 JSON 语法合法。
+- **约束解码（Constrained decoding）**：使用基于语法的采样（如 Outlines[[95]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-willard2023outlines)]、Guidance）在 token 级别保证 JSON 语法合法。
 - **XML 标签**：对于嵌套或多段输出，XML 标签（如 `<thinking>...</thinking>`）提供无歧义的分隔符，模型能可靠地遵循。
 - **Pydantic/TypeScript 类型**：提供类型定义有助于模型理解字段约束（OpenAI 的 function calling 内部就使用 JSON Schema）。
 
@@ -2350,7 +2350,7 @@ ICL 主要在参数量约 1B 以上的模型中涌现，并随模型规模呈对
 
 ### 思维链（Chain-of-Thought，CoT）Prompting
 
-思维链 Prompting[wei2022chain] 要求模型在给出最终答案之前先生成中间推理步骤。这一简单技术在需要多步推理的任务上（算术、逻辑、常识推断与代码生成）能带来显著的性能提升。
+思维链 Prompting[[103]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wei2022chain)] 要求模型在给出最终答案之前先生成中间推理步骤。这一简单技术在需要多步推理的任务上（算术、逻辑、常识推断与代码生成）能带来显著的性能提升。
 
 **CoT 为何奏效：**
 
@@ -2362,12 +2362,12 @@ ICL 主要在参数量约 1B 以上的模型中涌现，并随模型规模呈对
 >
 > | 方法 | 说明 |
 > | --- | --- |
-> | 零样本 CoT（Zero-Shot CoT）[kojima2022large] | 在任意 Prompt 末尾追加 "Let's think step by step" |
-> | 少样本 CoT（Few-shot CoT）[wei2022chain] | 提供带显式推理链的示例 |
-> | 自一致性（Self-Consistency）[wang2023selfconsistency] | 采样 $N$ 条 CoT 路径；对最终答案做多数投票 |
-> | 思维树（Tree of Thoughts）[yao2023tree] | 探索多条推理分支并支持回溯 |
-> | Plan-and-Solve[wang2023planandsolve] | 先规划步骤，再逐步执行 |
-> | ReAct[yao2023react] | 交替进行 Reasoning 与 Acting（工具调用） |
+> | 零样本 CoT（Zero-Shot CoT）[[104]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kojima2022large)] | 在任意 Prompt 末尾追加 "Let's think step by step" |
+> | 少样本 CoT（Few-shot CoT）[[103]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wei2022chain)] | 提供带显式推理链的示例 |
+> | 自一致性（Self-Consistency）[[105]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2023selfconsistency)] | 采样 $N$ 条 CoT 路径；对最终答案做多数投票 |
+> | 思维树（Tree of Thoughts）[[106]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yao2023tree)] | 探索多条推理分支并支持回溯 |
+> | Plan-and-Solve[[107]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2023planandsolve)] | 先规划步骤，再逐步执行 |
+> | ReAct[[108]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yao2023react)] | 交替进行 Reasoning 与 Acting（工具调用） |
 
 > **示例：零样本思维链**
 >
@@ -2386,7 +2386,7 @@ ICL 主要在参数量约 1B 以上的模型中涌现，并随模型规模呈对
 
 **自一致性（Self-Consistency）。**
 
-Wang 等人[wang2023selfconsistency] 表明，采样多条思维链推理路径并对最终答案做多数投票，能显著优于单路径 CoT。直觉是：正确的推理路径往往收敛于同一答案，而错误通常各有不同。这是用算力（生成 $N$ 个样本）换取准确率——在延迟不如正确性重要时非常实用。
+Wang 等人[[105]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2023selfconsistency)] 表明，采样多条思维链推理路径并对最终答案做多数投票，能显著优于单路径 CoT。直觉是：正确的推理路径往往收敛于同一答案，而错误通常各有不同。这是用算力（生成 $N$ 个样本）换取准确率——在延迟不如正确性重要时非常实用。
 
 **CoT 何时反而有害。**
 
@@ -2396,7 +2396,7 @@ CoT 并非普遍有益。对于简单任务（单步分类、检索、格式化�
 
 **检索增强生成（Retrieval-Augmented Generation，RAG）。**
 
-RAG[lewis2020retrieval] 不再只依赖模型的参数化记忆，而是检索相关文档并将其纳入 Prompt：
+RAG[[109]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lewis2020retrieval)] 不再只依赖模型的参数化记忆，而是检索相关文档并将其纳入 Prompt：
 
 ```text
 Context (retrieved): [document chunks]
@@ -2418,7 +2418,7 @@ Answer based ONLY on the provided context.
 
 **宪法 AI（Constitutional AI）/ 自我批评（Self-Critique）。**
 
-Bai 等人[bai2022constitutional] 引入了一类 Prompt：让模型根据一组原则批评并修订自己的输出：
+Bai 等人[[110]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-bai2022constitutional)] 引入了一类 Prompt：让模型根据一组原则批评并修订自己的输出：
 
 ```text
 [Generate initial response]
@@ -2431,13 +2431,13 @@ Revision: Rewrite the response addressing the critique.
 
 与手工编写 Prompt 不同，近期工作开始自动化 Prompt 设计：
 
-- **APE**[zhou2023large]：使用 LLM 自动生成并打分候选 Prompt。
-- **DSPy**[khattab2023dspy]：将声明式的任务描述编译为优化过的 Prompt 流水线，并带有学习到的少样本示例。
-- **OPRO**[yang2024large]：将 Prompt 优化视为优化问题，使用 LLM 作为优化器。
+- **APE**[[111]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhou2023large)]：使用 LLM 自动生成并打分候选 Prompt。
+- **DSPy**[[112]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-khattab2023dspy)]：将声明式的任务描述编译为优化过的 Prompt 流水线，并带有学习到的少样本示例。
+- **OPRO**[[113]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yang2024large)]：将 Prompt 优化视为优化问题，使用 LLM 作为优化器。
 
 **专注推理查询（Attentive Reasoning Queries，ARQ）。**
 
-ARQ[yang2025arq] 解决了标准 Prompting 的一个根本弱点：随着上下文变长，模型越来越容易 "丢失" Prompt 中段的关键信息（即 *lost-in-the-middle* 效应）。ARQ 通过将复杂查询分解为若干聚焦的子查询来缓解这一问题，每个子查询都旨在将模型的 attention 引向上下文的特定部分：
+ARQ[[114]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yang2025arq)] 解决了标准 Prompting 的一个根本弱点：随着上下文变长，模型越来越容易 "丢失" Prompt 中段的关键信息（即 *lost-in-the-middle* 效应）。ARQ 通过将复杂查询分解为若干聚焦的子查询来缓解这一问题，每个子查询都旨在将模型的 attention 引向上下文的特定部分：
 
 1. **查询分解**：将用户问题拆解为原子级的子问题，每个聚焦一个狭窄方面。
 2. **专注检索**：对每个子查询，仅检索或高亮与之相关的上下文片段——迫使模型聚焦于它。
@@ -2506,13 +2506,13 @@ ARQ[yang2025arq] 解决了标准 Prompting 的一个根本弱点：随着上下�
 
 | 方法 | 位宽 | 类型 | 核心思想 |
 | --- | --- | --- | --- |
-| **GPTQ**[frantar2023gptq] | 4-bit | PTQ，仅权重 | 基于 optimal brain surgeon 进行逐层量化，最小化 $\|WX - \hat{W}X\|^2$。 |
-| **AWQ**[lin2024awq] | 4-bit | PTQ，仅权重 | 保护显著权重（与大激活相对应）。1% 的权重承担 99% 的重要性。 |
-| **GGUF**[gerganov2023gguf] | 2--8 bit | PTQ，仅权重 | 面向 CPU 优化的格式（llama.cpp）。按 block 量化，支持多种类型。 |
+| **GPTQ**[[115]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-frantar2023gptq)] | 4-bit | PTQ，仅权重 | 基于 optimal brain surgeon 进行逐层量化，最小化 $\|WX - \hat{W}X\|^2$。 |
+| **AWQ**[[116]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lin2024awq)] | 4-bit | PTQ，仅权重 | 保护显著权重（与大激活相对应）。1% 的权重承担 99% 的重要性。 |
+| **GGUF**[[117]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-gerganov2023gguf)] | 2--8 bit | PTQ，仅权重 | 面向 CPU 优化的格式（llama.cpp）。按 block 量化，支持多种类型。 |
 | **FP8** (E4M3) | 8-bit | 训练 + 推理 | H100 原生支持。相比 BF16 提供 2$\times$ 吞吐。 |
-| **SmoothQuant**[xiao2023smoothquant] | W8A8 | PTQ，权重+激活 | 在量化前将激活离群值平滑迁移到权重。使 INT8 GEMM 可行。 |
-| **QAT**[liu2023llmqat] | 4-bit | QAT | 使用模拟量化进行训练。质量最高但成本昂贵。 |
-| **AQLM**[egiazarian2024aqlm] | 2-bit | PTQ，加性码字 | 通过学习到的加性量化码本实现极端压缩。 |
+| **SmoothQuant**[[118]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-xiao2023smoothquant)] | W8A8 | PTQ，权重+激活 | 在量化前将激活离群值平滑迁移到权重。使 INT8 GEMM 可行。 |
+| **QAT**[[119]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2023llmqat)] | 4-bit | QAT | 使用模拟量化进行训练。质量最高但成本昂贵。 |
+| **AQLM**[[120]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-egiazarian2024aqlm)] | 2-bit | PTQ，加性码字 | 通过学习到的加性量化码本实现极端压缩。 |
 
 > **何时进行量化**
 >
@@ -2531,8 +2531,8 @@ ARQ[yang2025arq] 解决了标准 Prompting 的一个根本弱点：随着上下�
 >
 > - **非结构化剪枝**：将低于阈值的单个权重置零。可实现高稀疏度（50--90%）。需要稀疏 GEMM 内核（A100/H100 上的 2:4）。
 > - **结构化剪枝**：移除整个 attention 头、层或 FFN 神经元。无需专门内核即可直接降低 FLOPS。
-> - **SparseGPT**[frantar2023sparsegpt]：使用近似逆 Hessian 进行一次性剪枝。在 175B 模型上以极小的质量损失实现 50% 非结构化稀疏。
-> - **Wanda**[sun2024wanda]：按 $\lvert w \rvert \times \|x\|$（权重幅值乘以输入激活范数）剪枝。无需校准数据，效果可与 SparseGPT 竞争。
+> - **SparseGPT**[[121]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-frantar2023sparsegpt)]：使用近似逆 Hessian 进行一次性剪枝。在 175B 模型上以极小的质量损失实现 50% 非结构化稀疏。
+> - **Wanda**[[122]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-sun2024wanda)]：按 $\lvert w \rvert \times \|x\|$（权重幅值乘以输入激活范数）剪枝。无需校准数据，效果可与 SparseGPT 竞争。
 
 > **警告：NVIDIA 2:4 结构化稀疏**
 >
@@ -2540,7 +2540,7 @@ ARQ[yang2025arq] 解决了标准 Prompting 的一个根本弱点：随着上下�
 
 ### 知识蒸馏（Knowledge Distillation）
 
-知识蒸馏[hinton2015distilling] 将一个大型*教师*模型已学到的行为迁移到一个更小、更便宜的*学生*模型中。核心思想是：教师在 token 上的输出分布所携带的信号远比单纯的硬标签丰富——揭示了类间相似性、置信度校准与不确定性，学生可以加以利用。
+知识蒸馏[[123]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hinton2015distilling)] 将一个大型*教师*模型已学到的行为迁移到一个更小、更便宜的*学生*模型中。核心思想是：教师在 token 上的输出分布所携带的信号远比单纯的硬标签丰富——揭示了类间相似性、置信度校准与不确定性，学生可以加以利用。
 
 **温度缩放（Temperature Scaling）的 Softmax。**
 
@@ -2635,7 +2635,7 @@ $T^2$ 因子补偿了软化分布造成的梯度幅度下降。典型取值：$T
 
 ## 投机解码（Speculative Decoding）方法
 
-投机解码[leviathan2023fast] 通过同时预测多个 token，然后在目标模型的一次前向传递中对其进行验证，来加速自回归生成。它产生与标准解码**完全相同的输出分布**（无质量损失），同时实现 2--3$\times$ 加速。
+投机解码[[124]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-leviathan2023fast)] 通过同时预测多个 token，然后在目标模型的一次前向传递中对其进行验证，来加速自回归生成。它产生与标准解码**完全相同的输出分布**（无质量损失），同时实现 2--3$\times$ 加速。
 
 ### 核心原理
 
@@ -2656,13 +2656,13 @@ $T^2$ 因子补偿了软化分布造成的梯度幅度下降。典型取值：$T
 
 | 方法 | 草稿来源 | 加速比 | 核心思想 |
 | --- | --- | --- | --- |
-| **标准方案**[leviathan2023fast] | 小模型（1--7B） | 2--3$\times$ | 独立的草稿模型生成候选。简单但需要同时加载 2 个模型。 |
-| **Medusa**[cai2024medusa] | 并行 LM 头 | 2--3$\times$ | 在目标模型上增加 $k$ 个额外的预测头。每个分别预测 $+1, +2, \ldots, +k$ 位置的 token。 |
-| **Eagle**[li2024eagle] | 特征层级 | 2.5--3.5$\times$ | 轻量解码器根据目标模型的隐藏状态生成草稿 token。接受率高于 Medusa。 |
-| **Eagle-2**[li2024eagle] | 上下文感知 | 3--4$\times$ | 基于置信度扩展的动态草稿树。当前最先进的接受率。 |
+| **标准方案**[[124]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-leviathan2023fast)] | 小模型（1--7B） | 2--3$\times$ | 独立的草稿模型生成候选。简单但需要同时加载 2 个模型。 |
+| **Medusa**[[125]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-cai2024medusa)] | 并行 LM 头 | 2--3$\times$ | 在目标模型上增加 $k$ 个额外的预测头。每个分别预测 $+1, +2, \ldots, +k$ 位置的 token。 |
+| **Eagle**[[126]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-li2024eagle)] | 特征层级 | 2.5--3.5$\times$ | 轻量解码器根据目标模型的隐藏状态生成草稿 token。接受率高于 Medusa。 |
+| **Eagle-2**[[126]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-li2024eagle)] | 上下文感知 | 3--4$\times$ | 基于置信度扩展的动态草稿树。当前最先进的接受率。 |
 | **N-gram Lookup** | N-gram 缓存 | 1.5--2$\times$ | 将 Prompt 的 n-gram 与已生成文本进行匹配。零成本；对重复输出极佳。 |
-| **Lookahead**[fu2024lookahead] | Jacobi 迭代 | 2--2.5$\times$ | 并行 Jacobi 解码配合 n-gram 验证。无需草稿模型；使用目标模型自身。 |
-| **多 token 预测**[gloeckle2024multi] | 修改架构 | 2--3$\times$ | 训练模型原生地在每步预测多个 token（Meta 在 Llama 中的方案）。 |
+| **Lookahead**[[127]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-fu2024lookahead)] | Jacobi 迭代 | 2--2.5$\times$ | 并行 Jacobi 解码配合 n-gram 验证。无需草稿模型；使用目标模型自身。 |
+| **多 token 预测**[[128]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-gloeckle2024multi)] | 修改架构 | 2--3$\times$ | 训练模型原生地在每步预测多个 token（Meta 在 Llama 中的方案）。 |
 
 ### Medusa 多头推测解码
 
@@ -2762,7 +2762,7 @@ llm = LLM(
 
 ## 幻觉检测
 
-LLM 会生成流畅但可能事实错误的文本——这种现象称为**幻觉**（hallucination）[ji2023hallucination]。本节介绍在模型层面（不依赖外部检索或多智能体校验）的基本检测方法。
+LLM 会生成流畅但可能事实错误的文本——这种现象称为**幻觉**（hallucination）[[129]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-ji2023hallucination)]。本节介绍在模型层面（不依赖外部检索或多智能体校验）的基本检测方法。
 
 ### 幻觉的类型
 
@@ -2778,15 +2778,15 @@ LLM 会生成流畅但可能事实错误的文本——这种现象称为**幻�
 
 | 方法 | 机制 | 信号 |
 | --- | --- | --- |
-| Token 级熵 | 生成时的高熵表示不确定[kadavath2022language] | $H(P(x_t)) > \tau$ |
+| Token 级熵 | 生成时的高熵表示不确定[[130]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kadavath2022language)] | $H(P(x_t)) > \tau$ |
 | 序列对数概率 | 输出的平均对数概率较低提示存在虚构 | $\frac{1}{T}\sum_t \log P(x_t)$ |
-| 一致性采样 | 生成 $N$ 个回复；一致性低 $=$ 可能幻觉[manakul2023selfcheckgpt] | 矛盾率 |
-| 语义熵（Semantic Entropy） | 对语义（而非字符串）聚类；语义熵高 $=$ 不确定[kuhn2023semantic] | 聚类多样性 |
-| DoLA | 对比后层与前层的 logits；放大事实知识[chuang2024dola] | 层间差异 |
+| 一致性采样 | 生成 $N$ 个回复；一致性低 $=$ 可能幻觉[[131]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-manakul2023selfcheckgpt)] | 矛盾率 |
+| 语义熵（Semantic Entropy） | 对语义（而非字符串）聚类；语义熵高 $=$ 不确定[[132]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kuhn2023semantic)] | 聚类多样性 |
+| DoLA | 对比后层与前层的 logits；放大事实知识[[133]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chuang2024dola)] | 层间差异 |
 
 **语义熵（Semantic Entropy）。**
 
-Kuhn 等人[kuhn2023semantic] 观察到 token 级熵并不可靠（同义改写包含不同 token 但意义相同）。他们改为生成多个回复，按语义等价（通过 NLI）聚类，并在语义聚类上计算熵：
+Kuhn 等人[[132]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kuhn2023semantic)] 观察到 token 级熵并不可靠（同义改写包含不同 token 但意义相同）。他们改为生成多个回复，按语义等价（通过 NLI）聚类，并在语义聚类上计算熵：
 
 $$
 SE = -\sum_{c \in \text{clusters}} P(c) \log P(c)
@@ -2796,11 +2796,11 @@ $$
 
 **SelfCheckGPT。**
 
-Manakul 等人[manakul2023selfcheckgpt] 通过检查自一致性来检测幻觉：生成多个回复并验证主回复中的陈述是否被其他回复支持。若模型 "自相矛盾"，则该陈述很可能是幻觉。无需外部知识。
+Manakul 等人[[131]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-manakul2023selfcheckgpt)] 通过检查自一致性来检测幻觉：生成多个回复并验证主回复中的陈述是否被其他回复支持。若模型 "自相矛盾"，则该陈述很可能是幻觉。无需外部知识。
 
 **按层对比解码（Decoding by Contrasting Layers，DoLA）。**
 
-Chuang 等人[chuang2024dola] 观察到事实知识在 Transformer 较深的层中浮现，而较早的层保留更多通用/不确定的表示。DoLA 在每个解码步上对比较深（"成熟"）层与较早（"未成熟"）层的 logits 分布：
+Chuang 等人[[133]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chuang2024dola)] 观察到事实知识在 Transformer 较深的层中浮现，而较早的层保留更多通用/不确定的表示。DoLA 在每个解码步上对比较深（"成熟"）层与较早（"未成熟"）层的 logits 分布：
 
 $$
 \text{DoLA}(x_t) = \text{softmax}\!\bigl(\log P_{\text{late}}(x_t) - \log P_{\text{early}}(x_t)\bigr)
@@ -2823,9 +2823,9 @@ LLM 安全威胁类别。
 | 类别 | 描述与示例 |
 | --- | --- |
 | **有害内容** | 生成有毒、暴力或非法的指令（生物武器、CSAM） |
-| **偏见与歧视** | 延续刻板印象；在不同人口群体间的不公正对待[gallegos2024bias] |
-| **隐私侵犯** | 泄露训练数据中的 PII；记忆攻击[carlini2021extracting] |
-| **越狱（Jailbreaking）** | 绕过安全护栏的对抗性 Prompt[zou2023universal] |
+| **偏见与歧视** | 延续刻板印象；在不同人口群体间的不公正对待[[134]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-gallegos2024bias)] |
+| **隐私侵犯** | 泄露训练数据中的 PII；记忆攻击[[135]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-carlini2021extracting)] |
+| **越狱（Jailbreaking）** | 绕过安全护栏的对抗性 Prompt[[136]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zou2023universal)] |
 | **虚假信息** | 生成令人信服但虚假的陈述（规模化的幻觉） |
 | **双重用途** | 合法能力（编程、化学）被武器化用于伤害 |
 
@@ -2839,10 +2839,10 @@ LLM 安全威胁类别。
 >
 > - **数据过滤**：从预训练语料中剔除有毒、有偏见以及含 PII 的文本
 > - **安全 SFT**：在恰当拒答的示例上训练（"我无法帮你做这件事，因为……"）
-> - **宪法 AI（Constitutional AI）**[bai2022constitutional]：基于原则进行自我批评（Self-Critique）；模型依照一部规则宪法修订自身输出
+> - **宪法 AI（Constitutional AI）**[[110]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-bai2022constitutional)]：基于原则进行自我批评（Self-Critique）；模型依照一部规则宪法修订自身输出
 > - **安全奖励模型**：基于安全标注配对训练独立的 RM；在 RLHF 中通过加权和与 helpfulness RM 结合
 > - **护栏（Guardrails）**：在服务时拦截有害请求/回复的输入/输出分类器
-> - **红队测试（Red teaming）**[perez2022red]：系统性的对抗评估，在部署前发现失效模式
+> - **红队测试（Red teaming）**[[137]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-perez2022red)]：系统性的对抗评估，在部署前发现失效模式
 
 ### 有用性与安全性的权衡
 
@@ -2854,12 +2854,12 @@ LLM 安全威胁类别。
 > \max_\theta \; \mathbb{E}[R_\text{helpful}] \quad \text{subject to} \quad \mathbb{E}[R_\text{safety}] \geq \tau
 > $$
 >
-> 在实践中，这通过加权奖励实现：$R = \alpha R_\text{helpful} + (1-\alpha) R_\text{safety}$，并仔细调整 $\alpha$（通常 0.6--0.8）。Meta 的 Llama-3 报告称使用独立的安全与有用性奖励模型，并采用基于 margin 的加权[grattafiori2024llama3]。
+> 在实践中，这通过加权奖励实现：$R = \alpha R_\text{helpful} + (1-\alpha) R_\text{safety}$，并仔细调整 $\alpha$（通常 0.6--0.8）。Meta 的 Llama-3 报告称使用独立的安全与有用性奖励模型，并采用基于 margin 的加权[[3]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-grattafiori2024llama3)]。
 
 ### 评测
 
 - **安全基准**：ToxiGen、RealToxicityPrompts、BBQ（偏见）、CrowS-Pairs
-- **越狱鲁棒性**：GCG 攻击[zou2023universal]、多轮越狱、编码型 Prompt
+- **越狱鲁棒性**：GCG 攻击[[136]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zou2023universal)]、多轮越狱、编码型 Prompt
 - **过度拒答率**：度量无害 Prompt 上的假阳性拒答（目标 $<$5%）
 - **红队评估**：由领域专家（生物安全、网络安全）执行的人类对抗性测试
 

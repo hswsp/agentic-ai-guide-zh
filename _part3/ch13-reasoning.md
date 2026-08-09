@@ -23,7 +23,7 @@ permalink: /part3/ch13-reasoning.html
 
 ### 思维链：涌现行为 vs 训练得到的能力
 
-思维链（Chain-of-Thought，CoT）推理最初是在足够大的语言模型中被观察到的一种*涌现*能力[wei2022chain]：当用逐步示例进行 Prompt 时，大型模型（通常 $\geq$ 100B 参数）会自发地产生中间推理步骤，并由此提升准确率。这引出了一个基本问题：CoT 是规模带来的涌现性质，还是可以被显式训练？
+思维链（Chain-of-Thought，CoT）推理最初是在足够大的语言模型中被观察到的一种*涌现*能力[[103]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wei2022chain)]：当用逐步示例进行 Prompt 时，大型模型（通常 $\geq$ 100B 参数）会自发地产生中间推理步骤，并由此提升准确率。这引出了一个基本问题：CoT 是规模带来的涌现性质，还是可以被显式训练？
 
 正如 DeepSeek-R1 及相关工作所表明的，答案是**两者皆是**——但有若干重要的微妙之处：
 
@@ -56,15 +56,15 @@ $$
 
 ### 思维链（CoT）
 
-思维链 Prompt[wei2022chain] 是所有测试时扩展方法的基础。模型不再直接输出答案，而是生成中间推理步骤，将复杂问题分解为可处理的子问题。
+思维链 Prompt[[103]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wei2022chain)] 是所有测试时扩展方法的基础。模型不再直接输出答案，而是生成中间推理步骤，将复杂问题分解为可处理的子问题。
 
 **零样本 CoT。**
 
-Kojima 等[kojima2022large] 证明，仅在 Prompt 末尾追加「Let's think step by step」就能在没有任何示例的情况下激发推理行为。这一简单触发器可以激活足够大模型（$\geq$ 100B 参数）中的潜在推理能力。
+Kojima 等[[104]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kojima2022large)] 证明，仅在 Prompt 末尾追加「Let's think step by step」就能在没有任何示例的情况下激发推理行为。这一简单触发器可以激活足够大模型（$\geq$ 100B 参数）中的潜在推理能力。
 
 **少样本 CoT。**
 
-Wei 等[wei2022chain] 表明，提供少量带有显式推理轨迹的示例能够让较小的模型也有效地进行推理：
+Wei 等[[103]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wei2022chain)] 表明，提供少量带有显式推理轨迹的示例能够让较小的模型也有效地进行推理：
 
 $$
 \text{Prompt} = [(x_1, z_1, y_1), (x_2, z_2, y_2), \ldots, (x_k, z_k, y_k), (x_{\text{test}}, \texttt{?})]
@@ -88,7 +88,7 @@ $$
 
 ### 自洽性（多数投票）
 
-自洽性（Self-Consistency）[wang2023selfconsistency] 通过采样**多条独立的推理链**并对最终答案取多数投票，来缓解 CoT 单链脆弱的问题：
+自洽性（Self-Consistency）[[105]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2023selfconsistency)] 通过采样**多条独立的推理链**并对最终答案取多数投票，来缓解 CoT 单链脆弱的问题：
 
 $$
 \hat{y} = \arg\max_{y} \sum_{i=1}^{N} \mathbf{1}[y_i = y], \quad \text{where } (z_i, y_i) \sim p(\cdot \mid x), \; T > 0
@@ -99,7 +99,7 @@ $$
 - 使用温度 $T > 0$ 的采样以产生多样的链条（通常 $T = 0.7$--$1.0$）
 - 链条之间无交互——完全可并行化
 - 准确率随 $N$ 单调提升（$N \approx 40$ 之后收益递减）
-- 在 GSM8K 上：CoT = 56.5\%，Self-Consistency（$N$=40）= 74.4\%（使用 PaLM-540B[chowdhery2022palm]）
+- 在 GSM8K 上：CoT = 56.5\%，Self-Consistency（$N$=40）= 74.4\%（使用 PaLM-540B[[209]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chowdhery2022palm)]）
 - 等价于**使用结果奖励的 Best-of-N**（多数投票充当隐式的 ORM）
 
 > **多数投票为何有效**
@@ -108,7 +108,7 @@ $$
 
 ### 思维树（ToT）
 
-思维树（Tree-of-Thoughts，ToT）[yao2024tree] 将 CoT 从**线性链**推广为**树形结构**，使模型能够探索多条推理路径、评估中间状态，并从前景不佳的分支回溯。这为推理过程引入了刻意的规划。
+思维树（Tree-of-Thoughts，ToT）[[222]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yao2024tree)] 将 CoT 从**线性链**推广为**树形结构**，使模型能够探索多条推理路径、评估中间状态，并从前景不佳的分支回溯。这为推理过程引入了刻意的规划。
 
 **核心抽象。**
 
@@ -197,7 +197,7 @@ $$
 
 ### 思维图（GoT）
 
-思维图（Graph-of-Thoughts，GoT）[besta2024graph] 将 ToT 从树推广到**有向无环图（DAG）**，引入了一项关键能力：**合并**来自不同分支的部分解。这让模型可以把多条推理路径中的洞见综合到一个精炼的解答中。
+思维图（Graph-of-Thoughts，GoT）[[223]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-besta2024graph)] 将 ToT 从树推广到**有向无环图（DAG）**，引入了一项关键能力：**合并**来自不同分支的部分解。这让模型可以把多条推理路径中的洞见综合到一个精炼的解答中。
 
 **关键操作。**
 
@@ -242,7 +242,7 @@ $$
 
 ### 结合奖励模型的 Best-of-N
 
-Best-of-N 采样（Rejection Sampling）（BoN）[nakano2021webgpt, stiennon2020learning] 是最简单的扩展方法，它利用一个**学习得到的奖励模型**在候选中进行选择：
+Best-of-N 采样（Rejection Sampling）（BoN）[[184]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-nakano2021webgpt), [224]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-stiennon2020learning)] 是最简单的扩展方法，它利用一个**学习得到的奖励模型**在候选中进行选择：
 
 $$
 y^* = \arg\max_{y \in \{y_1, \ldots, y_N\}} R_\phi(x, y), \quad y_i \sim \pi_\theta(\cdot \mid x)
@@ -271,7 +271,7 @@ $$
 
 ### 面向推理的蒙特卡洛树搜索（MCTS）
 
-蒙特卡洛树搜索（MCTS）[kocsis2006bandit, silver2016mastering] 将 ToT 的结构化探索与**学习到的价值估计**及**访问计数统计**结合起来，从而最优地分配推理算力。MCTS 最初为博弈而设计（AlphaGo[silver2016mastering]），后被 AlphaProof[alphaproof2024]、rStar[qi2024mutual] 等系统改造用于 LLM 推理。
+蒙特卡洛树搜索（MCTS）[[225]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kocsis2006bandit), [154]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-silver2016mastering)] 将 ToT 的结构化探索与**学习到的价值估计**及**访问计数统计**结合起来，从而最优地分配推理算力。MCTS 最初为博弈而设计（AlphaGo[[154]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-silver2016mastering)]），后被 AlphaProof[[226]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-alphaproof2024)]、rStar[[227]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-qi2024mutual)] 等系统改造用于 LLM 推理。
 
 **算法（针对 LLM 推理改造）。**
 
@@ -320,7 +320,7 @@ $$
 | 价值估计 | LLM Prompt（"sure/maybe/impossible"） | 学习得到的价值网络 + Rollout 统计 |
 | 探索方式 | 固定束宽；不回访 | UCB 自适应地把预算分配给有前途的节点 |
 | 算力分配 | 各深度层均匀 | 聚焦：在更难的子问题上做更多模拟 |
-| 训练集成 | 无训练；纯 Prompt | 可将 MCTS 策略蒸馏回基础模型[silver2016mastering] |
+| 训练集成 | 无训练；纯 Prompt | 可将 MCTS 策略蒸馏回基础模型[[154]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-silver2016mastering)] |
 | 最适用于 | 分支简单的问题（24 点） | 需要深度探索的复杂问题（证明、代码） |
 
 ### 推理步级的束搜索
@@ -347,21 +347,21 @@ $$
 - **外部验证**：运行代码、符号化地校验数学
 - **评判模型**：由一个独立模型识别错误
 
-代表性方法：**Self-Refine**[madaan2023selfrefine]（迭代自我反馈）、**Reflexion**[shinn2023reflexion]（通过存入记忆的反思实现的语言化 RL）以及 **LATS**[zhou2024lats]（树搜索 + 基于反思的剪枝）。
+代表性方法：**Self-Refine**[[228]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-madaan2023selfrefine)]（迭代自我反馈）、**Reflexion**[[212]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shinn2023reflexion)]（通过存入记忆的反思实现的语言化 RL）以及 **LATS**[[213]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhou2024lats)]（树搜索 + 基于反思的剪枝）。
 
 ### 方法对比与选型指南
 
 | 方法 | 结构 | LLM 调用 | 可并行 | 需要 RM？ | 最适用于 |
 | --- | --- | --- | --- | --- | --- |
-| CoT[wei2022chain] | 链 | 1 | N/A | 否 | 简单—中等难度问题 |
-| Self-Consistency[wang2023selfconsistency] | 并行链 | $N$ | ✓ 完全 | 否（多数投票） | 答案离散的数学题 |
+| CoT[[103]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wei2022chain)] | 链 | 1 | N/A | 否 | 简单—中等难度问题 |
+| Self-Consistency[[105]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2023selfconsistency)] | 并行链 | $N$ | ✓ 完全 | 否（多数投票） | 答案离散的数学题 |
 | Best-of-N + ORM | 并行链 | $N$ + 1 | ✓ 完全 | 是（ORM） | 有良好 RM 的通用任务 |
 | Best-of-N + PRM | 并行链 | $N$ + $N{\cdot}K$ | ✓ 完全 | 是（PRM） | 复杂多步推理 |
-| ToT[yao2024tree] | 树（BFS/DFS） | $O(kbd)$ | 部分 | LLM 作判官 | 结构化搜索问题 |
-| GoT[besta2024graph] | DAG | $O(kbd)$ | 部分 | LLM 作判官 | 可分解的问题 |
-| MCTS[kocsis2006bandit] | 树 + 价值 | $O(N_{\text{sim}} \cdot d)$ | 部分 | 是（价值网络） | 困难证明、编程 |
-| Self-Refine[madaan2023selfrefine] | 线性（迭代） | $2T$ | 否 | 自我评判 | 开放式生成 |
-| LATS[zhou2024lats] | 树 + 反思 | $O(N \cdot d)$ | 部分 | LLM 作判官 | Agent 任务 |
+| ToT[[222]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yao2024tree)] | 树（BFS/DFS） | $O(kbd)$ | 部分 | LLM 作判官 | 结构化搜索问题 |
+| GoT[[223]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-besta2024graph)] | DAG | $O(kbd)$ | 部分 | LLM 作判官 | 可分解的问题 |
+| MCTS[[225]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kocsis2006bandit)] | 树 + 价值 | $O(N_{\text{sim}} \cdot d)$ | 部分 | 是（价值网络） | 困难证明、编程 |
+| Self-Refine[[228]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-madaan2023selfrefine)] | 线性（迭代） | $2T$ | 否 | 自我评判 | 开放式生成 |
+| LATS[[213]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhou2024lats)] | 树 + 反思 | $O(N \cdot d)$ | 部分 | LLM 作判官 | Agent 任务 |
 
 > **何时选用哪种方法**
 >
@@ -374,11 +374,11 @@ $$
 
 > **推理模型中的隐式测试时扩展**
 >
-> 现代推理模型（DeepSeek-R1[deepseek2025r1]、OpenAI o1/o3[openai2024o1, openai2025o3]）通过生成长思维链来执行**隐式测试时扩展**。它们的「思考」Token 起到了类似 MCTS Rollout 的作用：模型探索多种思路、回溯（"Wait, let me reconsider..."）、验证中间步骤，并在更难的子问题上分配更多 Token。R1/o1 训练的关键洞见是：GRPO/RL 让模型在*一次生成内*就执行这种隐式搜索，从而无需外部编排（ToT Prompt、MCTS 基础设施）。模型自身即成为搜索算法。
+> 现代推理模型（DeepSeek-R1[[156]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-deepseek2025r1)]、OpenAI o1/o3[[229]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-openai2024o1), [230]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-openai2025o3)]）通过生成长思维链来执行**隐式测试时扩展**。它们的「思考」Token 起到了类似 MCTS Rollout 的作用：模型探索多种思路、回溯（"Wait, let me reconsider..."）、验证中间步骤，并在更难的子问题上分配更多 Token。R1/o1 训练的关键洞见是：GRPO/RL 让模型在*一次生成内*就执行这种隐式搜索，从而无需外部编排（ToT Prompt、MCTS 基础设施）。模型自身即成为搜索算法。
 
 ## DeepSeek-R1
 
-DeepSeek-R1[deepseek2025r1] 是首个在主要基准上达到或超越 OpenAI o1 的完全开源大型推理模型。其训练流程在技术上完全透明，已成为基于 RL 的推理的事实参考实现。
+DeepSeek-R1[[156]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-deepseek2025r1)] 是首个在主要基准上达到或超越 OpenAI o1 的完全开源大型推理模型。其训练流程在技术上完全透明，已成为基于 RL 的推理的事实参考实现。
 
 ### 两阶段训练流程
 
@@ -446,7 +446,7 @@ $$
 
 ### R1 中的 GRPO 公式
 
-GRPO[shao2024deepseekmath] 是一种策略梯度方法，它通过对一*组*采样回答估计优势，从而避免训练独立的价值网络。对于一个问题 $q$，GRPO 从当前 Policy $\pi_\theta$ 采样 $G$ 个回答 $\{y_1, y_2, \ldots, y_G\}$，并相对组均值计算优势。
+GRPO[[168]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shao2024deepseekmath)] 是一种策略梯度方法，它通过对一*组*采样回答估计优势，从而避免训练独立的价值网络。对于一个问题 $q$，GRPO 从当前 Policy $\pi_\theta$ 采样 $G$ 个回答 $\{y_1, y_2, \ldots, y_G\}$，并相对组均值计算优势。
 
 **分组采样与优势归一化**
 
@@ -525,7 +525,7 @@ R1 的一项重要实践贡献在于证明：**推理能力可以通过在 R1 �
 
 ## OpenAI o1/o3 系列
 
-OpenAI 的 o1[openai2024o1]（2024 年 9 月发布）以及后续的 o3/o4-mini[openai2025o3] 模型代表了推理模型开发的商业前沿。尽管完整的技术细节仍属专有，但已公开的系统卡（system card）、技术报告和实证观察为理解其方法论提供了充足的线索。
+OpenAI 的 o1[[229]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-openai2024o1)]（2024 年 9 月发布）以及后续的 o3/o4-mini[[230]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-openai2025o3)] 模型代表了推理模型开发的商业前沿。尽管完整的技术细节仍属专有，但已公开的系统卡（system card）、技术报告和实证观察为理解其方法论提供了充足的线索。
 
 ### 带隐藏推理 Token 的思维链 RL
 
@@ -539,7 +539,7 @@ o1 最具标志性的架构选择是使用**隐藏推理 Token（hidden reasonin
 
 ### 过程奖励模型与结果奖励模型
 
-OpenAI 的方法据信在结果奖励之外还使用了**过程奖励模型（Process Reward Model, PRM）**[lightman2023lets]，这与 DeepSeek-R1 仅采用结果奖励的方式形成对比。这一推断基于 OpenAI 已发表的 PRM 研究（PRM800K 数据集，"Let's Verify Step by Step"）以及 o1 系统卡中对推理链 RL 训练的描述，尽管 o1/o3 的精确训练配方并未公开披露。
+OpenAI 的方法据信在结果奖励之外还使用了**过程奖励模型（Process Reward Model, PRM）**[[231]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lightman2023lets)]，这与 DeepSeek-R1 仅采用结果奖励的方式形成对比。这一推断基于 OpenAI 已发表的 PRM 研究（PRM800K 数据集，"Let's Verify Step by Step"）以及 o1 系统卡中对推理链 RL 训练的描述，尽管 o1/o3 的精确训练配方并未公开披露。
 
 **结果奖励模型（ORM）**
 
@@ -609,7 +609,7 @@ $$
 
 ## QwQ 与 Qwen 推理模型
 
-阿里巴巴 Qwen 团队开发了一系列推理模型（QwQ-32B[qwen2024qwq]、Qwen3[qwen2025qwen3]），与 DeepSeek-R1 一同代表了开源前沿。其方法在若干关键方面有所不同。
+阿里巴巴 Qwen 团队开发了一系列推理模型（QwQ-32B[[232]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-qwen2024qwq)]、Qwen3[[233]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-qwen2025qwen3)]），与 DeepSeek-R1 一同代表了开源前沿。其方法在若干关键方面有所不同。
 
 ### 多阶段 RL 流水线
 
@@ -664,7 +664,7 @@ RL 训练奖励基于最终答案计算，但模型会学会策略性地使用�
 
 ### 用于推理的蒙特卡洛树搜索
 
-蒙特卡洛树搜索（Monte Carlo Tree Search, MCTS）为将推理视作树搜索提供了一个有原则的框架。在 AlphaProof[alphaproof2024] 等相关系统中，MCTS 作用于推理步骤而非棋类走子。
+蒙特卡洛树搜索（Monte Carlo Tree Search, MCTS）为将推理视作树搜索提供了一个有原则的框架。在 AlphaProof[[226]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-alphaproof2024)] 等相关系统中，MCTS 作用于推理步骤而非棋类走子。
 
 **状态与动作空间**
 
@@ -713,7 +713,7 @@ $$
 
 **Math-Shepherd：自动化 PRM 训练**
 
-Math-Shepherd[wang2024mathshepherd] 提出了一种无需人工步骤级标注、自动训练 PRM 的方法。其核心洞见是使用**基于结果的估计（outcome-based estimation）**：如果存在从 $s_k$ 出发的某一补全能够到达正确答案，则将步骤 $s_k$ 标注为正确。
+Math-Shepherd[[234]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2024mathshepherd)] 提出了一种无需人工步骤级标注、自动训练 PRM 的方法。其核心洞见是使用**基于结果的估计（outcome-based estimation）**：如果存在从 $s_k$ 出发的某一补全能够到达正确答案，则将步骤 $s_k$ 标注为正确。
 
 形式化地，对于部分解 $(s_1, \ldots, s_k)$：
 
@@ -747,7 +747,7 @@ $$
 
 **多数投票（自洽性，Self-Consistency）**
 
-测试时扩展（Test-Time Scaling）最简单的形式是多数投票[wang2023selfconsistency]：生成 $N$ 个解并返回最常见的答案：
+测试时扩展（Test-Time Scaling）最简单的形式是多数投票[[105]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2023selfconsistency)]：生成 $N$ 个解并返回最常见的答案：
 
 $$
 y^* = \arg\max_{a} \sum_{i=1}^{N} \mathbf{1}[y_i = a]
@@ -773,7 +773,7 @@ $$
 
 **STaR：自学推理者（Self-Taught Reasoner）**
 
-STaR[zelikman2022star] 通过迭代方式自举推理能力：
+STaR[[211]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zelikman2022star)] 通过迭代方式自举推理能力：
 
 1. 为问题集生成推理链
 2. 保留导向正确答案的推理链（拒绝采样）
@@ -794,7 +794,7 @@ $$
 
 ### 可验证奖励的强化学习（RLVR）
 
-可验证奖励的强化学习（Reinforcement Learning from Verifiable Rewards, RLVR）[lambert2024tulu3] 是一个使用**真值验证（ground-truth verification）**作为奖励信号的框架，适用于任何可以自动检查正确性的领域。
+可验证奖励的强化学习（Reinforcement Learning from Verifiable Rewards, RLVR）[[235]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lambert2024tulu3)] 是一个使用**真值验证（ground-truth verification）**作为奖励信号的框架，适用于任何可以自动检查正确性的领域。
 
 **可验证领域**
 
@@ -823,7 +823,7 @@ RLVR 相对于基于人类反馈的强化学习（Reinforcement Learning from Hu
 
 ### 旅程学习（Journey Learning）
 
-旅程学习（Journey Learning）[qin2024o1journey] 主张在**完整推理轨迹**上训练，包括失败的尝试和纠正，而不仅仅是成功的最终解。
+旅程学习（Journey Learning）[[236]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-qin2024o1journey)] 主张在**完整推理轨迹**上训练，包括失败的尝试和纠正，而不仅仅是成功的最终解。
 
 **动机**
 
@@ -849,7 +849,7 @@ $$
 
 ### Quiet-STaR：在每个 Token 上推理
 
-Quiet-STaR[zelikman2024quietstar] 将推理范式扩展到*每一个 Token 位置*：模型不仅在最终答案之前生成一条推理链，而是在每个 Token 位置都生成一段「思考（thought）」。
+Quiet-STaR[[218]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zelikman2024quietstar)] 将推理范式扩展到*每一个 Token 位置*：模型不仅在最终答案之前生成一条推理链，而是在每个 Token 位置都生成一段「思考（thought）」。
 
 **形式化**
 
@@ -881,7 +881,7 @@ $$
 
 ## 推理的扩展律
 
-近期工作[snell2024scaling, wu2024empirical] 已经证实测试时计算量与推理性能之间存在可预测的扩展关系，将经典扩展律[kaplan2020scaling] 延伸到了推理阶段。
+近期工作[[237]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-snell2024scaling), [238]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wu2024empirical)] 已经证实测试时计算量与推理性能之间存在可预测的扩展关系，将经典扩展律[[239]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kaplan2020scaling)] 延伸到了推理阶段。
 
 ### 训练计算量与测试时计算量的权衡
 

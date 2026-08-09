@@ -1186,7 +1186,7 @@ FlashAttention 对 attention 有帮助是因为 attention 严重受限于显存�
 
 ### Q：LoRA 为什么有效？什么理论洞见支持低秩更新？
 
-**答**：Aghajanyan 等人 [aghajanyan2020intrinsic] 表明，微调是在一个非常低的*内在维度（intrinsic dimensionality）*上进行的——某个微调任务的有效参数空间远远小于模型的总参数量。175B 模型在给定任务上的内在维度可能 $<$10,000。
+**答**：Aghajanyan 等人 [[73]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-aghajanyan2020intrinsic)] 表明，微调是在一个非常低的*内在维度（intrinsic dimensionality）*上进行的——某个微调任务的有效参数空间远远小于模型的总参数量。175B 模型在给定任务上的内在维度可能 $<$10,000。
 
 LoRA 直接利用了这一点：通过将更新约束到秩 $r$（$W' = W + BA$，$B \in \mathbb{R}^{d \times r}$），它将每个权重矩阵的学习限制在一个 $r$ 维子空间内。由于真实的任务子空间是低维的，这几乎没有任何损失，同时将可训练参数减少 100--1000$\times$。
 

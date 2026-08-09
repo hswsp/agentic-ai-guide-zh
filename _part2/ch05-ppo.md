@@ -10,8 +10,8 @@ permalink: /part2/ch05-ppo.html
 
 **解决方案的演进**：
 
-1. **TRPO** [schulman2015trust]（2015）：对新旧 policy 之间的 KL 散度施加约束。效果完美，但需要昂贵的二阶优化（Fisher 信息矩阵、共轭梯度）。
-2. **PPO**（2017） [schulman2017proximal]：用一个简单的一阶 clipped 目标实现类似的稳定性。实现复杂度低了 10$\times$，效果几乎一样，且能轻松扩展到分布式训练。
+1. **TRPO** [[148]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-schulman2015trust)]（2015）：对新旧 policy 之间的 KL 散度施加约束。效果完美，但需要昂贵的二阶优化（Fisher 信息矩阵、共轭梯度）。
+2. **PPO**（2017） [[149]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-schulman2017proximal)]：用一个简单的一阶 clipped 目标实现类似的稳定性。实现复杂度低了 10$\times$，效果几乎一样，且能轻松扩展到分布式训练。
 
 ## Clipped 目标
 
@@ -321,7 +321,7 @@ $$
 
 ## TRL 实现
 
-HuggingFace 的 TRL 库 [vonwerra2022trl] 提供了面向大语言模型的所有主流 RL 方法的生产级实现。
+HuggingFace 的 TRL 库 [[160]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-vonwerra2022trl)] 提供了面向大语言模型的所有主流 RL 方法的生产级实现。
 
 ```python
 from trl import PPOConfig, PPOTrainer, AutoModelForCausalLMWithValueHead

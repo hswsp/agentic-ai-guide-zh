@@ -30,7 +30,7 @@ permalink: /part5/ch20-agent-environments-benchmarks.html
 
 > **把环境视为 LLM 的 RL "Gym"**
 >
-> 正如 OpenAI Gym [brockman2016openai] 标准化了 RL 算法与模拟控制任务之间的接口，Agent 环境标准化了基于 LLM 的 Agent 与其必须解决的各类任务之间的接口。这一类比相当贴切：`reset()` 初始化新的 Episode，`step(action)` 推进世界状态并返回观察和奖励，`render()` 产生当前状态的人类可读视图。
+> 正如 OpenAI Gym [[332]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-brockman2016openai)] 标准化了 RL 算法与模拟控制任务之间的接口，Agent 环境标准化了基于 LLM 的 Agent 与其必须解决的各类任务之间的接口。这一类比相当贴切：`reset()` 初始化新的 Episode，`step(action)` 推进世界状态并返回观察和奖励，`render()` 产生当前状态的人类可读视图。
 
 ## 环境设计原则
 
@@ -87,19 +87,19 @@ Episode 可以采用若干结构：
 
 近期工作挑战了"Episode 长度必须在训练前固定"的假设：
 
-- **时程课程。** AELA [yoo2025aela] 从短 Episode 开始，并随 Agent 能力的提升（以 Policy 熵的收敛来度量）逐渐扩展时程。前期的短 Episode 每个训练样本能暴露更多样化的初始状态。
-- **截断作为 RL 惩罚。** DLER [liu2025dler] 表明，对于推理模型，最简单的长度控制——硬截断——只要配合批级别的奖励归一化和动态采样，就能很好地工作，从而避免被截断的 rollout 丢失奖励信号。
-- **学习停止。** 模型本身可以学习何时停止推理，而非依赖固定预算。[liu2025answerstop] 提出三种策略：当连续推理步骤收敛到同一答案时停止；提升"思考结束" Token 的概率；或在隐状态激活上训练一个轻量分类器以预测最优停止点。
-- **部分 rollout 回收。** APRIL [april2025] 超额发起 rollout 请求，一旦达到目标 Batch 数即终止；未完成的回复被回收作为后续步骤的热启动前缀，从而消除了少数慢样本阻塞整个 Batch 的长尾停顿（吞吐提升 20--35\%）。TLT [hu2025tlt] 针对同一瓶颈，通过即时训练一个自适应草稿模型来对掉队样本进行投机解码（端到端加速 1.7$\times$，无损）。
+- **时程课程。** AELA [[333]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yoo2025aela)] 从短 Episode 开始，并随 Agent 能力的提升（以 Policy 熵的收敛来度量）逐渐扩展时程。前期的短 Episode 每个训练样本能暴露更多样化的初始状态。
+- **截断作为 RL 惩罚。** DLER [[334]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2025dler)] 表明，对于推理模型，最简单的长度控制——硬截断——只要配合批级别的奖励归一化和动态采样，就能很好地工作，从而避免被截断的 rollout 丢失奖励信号。
+- **学习停止。** 模型本身可以学习何时停止推理，而非依赖固定预算。[[335]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2025answerstop)] 提出三种策略：当连续推理步骤收敛到同一答案时停止；提升"思考结束" Token 的概率；或在隐状态激活上训练一个轻量分类器以预测最优停止点。
+- **部分 rollout 回收。** APRIL [[336]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-april2025)] 超额发起 rollout 请求，一旦达到目标 Batch 数即终止；未完成的回复被回收作为后续步骤的热启动前缀，从而消除了少数慢样本阻塞整个 Batch 的长尾停顿（吞吐提升 20--35\%）。TLT [[337]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hu2025tlt)] 针对同一瓶颈，通过即时训练一个自适应草稿模型来对掉队样本进行投机解码（端到端加速 1.7$\times$，无损）。
 
 ### 难度课程与自适应环境
 
 静态基准测量 Agent 能力的一个固定快照。自适应环境更进一步：在线监控 Agent 表现并调整任务难度，使 Agent 保持在"最近发展区"——难到足以从中学习，易到偶尔能成功。相关技术包括：
 
-- **程序化生成**：从参数化分布中采样任务；根据近期成功率调整难度参数。Prioritized Level Replay [jiang2021plr] 通过估计的学习潜力（如 GAE 幅值）对每个生成关卡打分，并更频繁地回放高价值关卡。
-- **自博弈 / 对抗式环境设计**：PAIRED [dennis2020paired] 训练一个对手提出能最大化"主角"与"反派" Agent 之间*悔值（regret）*的环境，从而无需手工设计难度时间表即可产生复杂度逐步上升的自然课程。
-- **后见之明重标注**：用 Agent *实际*达到的目标重新标注失败轨迹，使失败也能提供学习信号（Hindsight Experience Replay, HER）[andrychowicz2017hindsight]。
-- **面向 LLM 的难度定向数据筛选**：在 RLVR 训练中，并非所有问题都提供等量信号。近期工作优先选择中等难度的问题——即模型成功率大致在 30--70\% 之间的题目——因为它们能提供最高的梯度信息量 [wang2025dataefficiency]。ADCL [liu2025adcl] 随着模型提升而周期性地重新估计难度，避免课程过时。
+- **程序化生成**：从参数化分布中采样任务；根据近期成功率调整难度参数。Prioritized Level Replay [[338]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jiang2021plr)] 通过估计的学习潜力（如 GAE 幅值）对每个生成关卡打分，并更频繁地回放高价值关卡。
+- **自博弈 / 对抗式环境设计**：PAIRED [[339]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-dennis2020paired)] 训练一个对手提出能最大化"主角"与"反派" Agent 之间*悔值（regret）*的环境，从而无需手工设计难度时间表即可产生复杂度逐步上升的自然课程。
+- **后见之明重标注**：用 Agent *实际*达到的目标重新标注失败轨迹，使失败也能提供学习信号（Hindsight Experience Replay, HER）[[310]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-andrychowicz2017hindsight)]。
+- **面向 LLM 的难度定向数据筛选**：在 RLVR 训练中，并非所有问题都提供等量信号。近期工作优先选择中等难度的问题——即模型成功率大致在 30--70\% 之间的题目——因为它们能提供最高的梯度信息量 [[340]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2025dataefficiency)]。ADCL [[341]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2025adcl)] 随着模型提升而周期性地重新估计难度，避免课程过时。
 
 ## Agent 环境的类型
 
@@ -121,11 +121,11 @@ Episode 可以采用若干结构：
 
 Web 环境向 Agent 提供一个浏览器，并要求其在真实或模拟网站上完成任务。
 
-**WebArena** [zhou2024webarena] 提供一个自托管测试平台，包含四个功能性 Web 应用——电商商城、社交论坛、GitLab 实例和 CMS——外加一个地图服务，共计 812 个长时程任务。Agent 通过浏览器自动化 API 进行交互；任务涉及多步导航、表单填写和信息检索。人类性能约 78\%；最先进的 LLM Agent 仅在 35--45\% 左右。
+**WebArena** [[255]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhou2024webarena)] 提供一个自托管测试平台，包含四个功能性 Web 应用——电商商城、社交论坛、GitLab 实例和 CMS——外加一个地图服务，共计 812 个长时程任务。Agent 通过浏览器自动化 API 进行交互；任务涉及多步导航、表单填写和信息检索。人类性能约 78\%；最先进的 LLM Agent 仅在 35--45\% 左右。
 
-**VisualWebArena** [koh2024visualwebarena] 在 WebArena 基础上扩展，加入需要解读网页图像的视觉落地任务。观察为截图配合可访问性树；Agent 必须在两种模态中落地其动作。
+**VisualWebArena** [[342]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-koh2024visualwebarena)] 在 WebArena 基础上扩展，加入需要解读网页图像的视觉落地任务。观察为截图配合可访问性树；Agent 必须在两种模态中落地其动作。
 
-**Mind2Web** [deng2024mind2web] 是一个大规模数据集，涵盖 137 个真实网站上的 2,000 个任务，通过人类示范收集。与 WebArena 不同，Mind2Web 聚焦于对未见网站的泛化，是更困难的分布外测试。
+**Mind2Web** [[343]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-deng2024mind2web)] 是一个大规模数据集，涵盖 137 个真实网站上的 2,000 个任务，通过人类示范收集。与 WebArena 不同，Mind2Web 聚焦于对未见网站的泛化，是更困难的分布外测试。
 
 > **WebArena 任务示例**
 >
@@ -146,9 +146,9 @@ Web 环境向 Agent 提供一个浏览器，并要求其在真实或模拟网站
 
 计算机使用环境（Computer Use）让 Agent 控制一个完整的桌面操作系统，通过截图和/或可访问性 API 进行观察。
 
-**OSWorld** [xie2024osworld] 跨三种操作系统（Ubuntu、Windows、macOS）测试桌面自动化，涵盖 369 个任务，覆盖各类生产力应用（LibreOffice、VS Code、Chrome、GIMP 等）。Agent 通过截图观察，并以 `pyautogui` 风格的鼠标键盘命令行动。人-Agent 差距相当悬殊：标注者在约 72\% 的任务上成功，而最强 LLM Agent 仅能达到 $\sim$18\%，凸显了像素级 GUI 控制的难度。
+**OSWorld** [[344]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-xie2024osworld)] 跨三种操作系统（Ubuntu、Windows、macOS）测试桌面自动化，涵盖 369 个任务，覆盖各类生产力应用（LibreOffice、VS Code、Chrome、GIMP 等）。Agent 通过截图观察，并以 `pyautogui` 风格的鼠标键盘命令行动。人-Agent 差距相当悬殊：标注者在约 72\% 的任务上成功，而最强 LLM Agent 仅能达到 $\sim$18\%，凸显了像素级 GUI 控制的难度。
 
-**WindowsAgentArena** [bonatti2024windows] 专门聚焦于 Windows 11，包含 19 个应用上的 154 个任务，强调企业工作流：Excel 公式、PowerPoint 编辑、Outlook 邮件管理。
+**WindowsAgentArena** [[345]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-bonatti2024windows)] 专门聚焦于 Windows 11，包含 19 个应用上的 154 个任务，强调企业工作流：Excel 公式、PowerPoint 编辑、Outlook 邮件管理。
 
 > **截图瓶颈**
 >
@@ -158,9 +158,9 @@ Web 环境向 Agent 提供一个浏览器，并要求其在真实或模拟网站
 
 软件工程（Software Engineering, SWE）环境要求 Agent 解决真实世界的编程任务：修 bug、实现功能、写测试。
 
-**SWE-bench** [jimenez2024swebench] 取材自 12 个广泛使用的 Python 项目（Django、Flask、scikit-learn 等）的 2,294 个真实 pull request。每个实例将一段 issue 描述与一份预留的测试套件配对，仅在应用正确补丁后测试才通过。Agent 必须理解仓库结构、定位相关代码、实施修复并用测试套件加以验证。**SWE-bench Verified** 子集（500 个 issue）经过人工正确性校验，是标准评估目标。
+**SWE-bench** [[254]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jimenez2024swebench)] 取材自 12 个广泛使用的 Python 项目（Django、Flask、scikit-learn 等）的 2,294 个真实 pull request。每个实例将一段 issue 描述与一份预留的测试套件配对，仅在应用正确补丁后测试才通过。Agent 必须理解仓库结构、定位相关代码、实施修复并用测试套件加以验证。**SWE-bench Verified** 子集（500 个 issue）经过人工正确性校验，是标准评估目标。
 
-**SWE-agent** [yang2024sweagent] 既是基准环境也是 Agent 框架。它引入了*Agent-计算机接口（Agent-Computer Interface, ACI）*：一组为 LLM Agent 优化的 Shell 命令（如 `search_file`、`open`、`edit`），相比原始 bash 降低了动作空间复杂度。
+**SWE-agent** [[220]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yang2024sweagent)] 既是基准环境也是 Agent 框架。它引入了*Agent-计算机接口（Agent-Computer Interface, ACI）*：一组为 LLM Agent 优化的 Shell 命令（如 `search_file`、`open`、`edit`），相比原始 bash 降低了动作空间复杂度。
 
 > **SWE-bench 工作流**
 >
@@ -174,34 +174,34 @@ Web 环境向 Agent 提供一个浏览器，并要求其在真实或模拟网站
 
 科研环境推动 Agent 走向自主知识生成：阅读论文、形成假设、设计实验、解读结果。
 
-**PaperQA2** [lala2023paperqa] 是一个检索增强 Agent，通过搜索 PDF 语料库、抽取相关段落、综合出带引用的答案来回答科学问题。它既是文献依据型推理的工具，也是其基准。
+**PaperQA2** [[346]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lala2023paperqa)] 是一个检索增强 Agent，通过搜索 PDF 语料库、抽取相关段落、综合出带引用的答案来回答科学问题。它既是文献依据型推理的工具，也是其基准。
 
-**AI Scientist** [lu2024aiscientist] 是一个端到端的科研自动化系统：给定一个研究方向，Agent 即生成假设、撰写并运行实验、解读结果、产出论文初稿。该环境包含一个 Python 执行沙箱、文献搜索 API 和 LaTeX 编译器。
+**AI Scientist** [[347]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lu2024aiscientist)] 是一个端到端的科研自动化系统：给定一个研究方向，Agent 即生成假设、撰写并运行实验、解读结果、产出论文初稿。该环境包含一个 Python 执行沙箱、文献搜索 API 和 LaTeX 编译器。
 
-**MLAgentBench** [huang2024mlagentbench] 在机器学习工程任务上评估 Agent：在算力预算内提升给定数据集上的模型精度。Agent 可读取数据、编写训练脚本、运行实验并迭代。
+**MLAgentBench** [[348]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-huang2024mlagentbench)] 在机器学习工程任务上评估 Agent：在算力预算内提升给定数据集上的模型精度。Agent 可读取数据、编写训练脚本、运行实验并迭代。
 
 ### 游戏与仿真环境
 
 游戏提供了丰富的长时程环境，具有定义良好的奖励信号且无真实世界后果。
 
-**NetHack** [kuttler2020nethack] 是一款程序化生成的 roguelike 游戏，状态空间巨大，要求长期规划、物品管理以及对意外事件的适应。NetHack Learning Environment（NLE）提供了 Gym 兼容接口。
+**NetHack** [[349]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kuttler2020nethack)] 是一款程序化生成的 roguelike 游戏，状态空间巨大，要求长期规划、物品管理以及对意外事件的适应。NetHack Learning Environment（NLE）提供了 Gym 兼容接口。
 
-**Voyager / Minecraft** [wang2023voyager] 把 Minecraft 引擎用作一个开放式环境。Voyager 引入了难度逐级上升的任务课程（采集木材 $\to$ 制造工具 $\to$ 建造庇护所 $\to$ 探索下界）以及一个跨 Episode 累积可复用代码片段的技能库。
+**Voyager / Minecraft** [[216]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2023voyager)] 把 Minecraft 引擎用作一个开放式环境。Voyager 引入了难度逐级上升的任务课程（采集木材 $\to$ 制造工具 $\to$ 建造庇护所 $\to$ 探索下界）以及一个跨 Episode 累积可复用代码片段的技能库。
 
-**GAIA** [mialon2023gaia] 提出 466 个问题，要求链式工具使用——Web 搜索、代码执行、文件解析——并按所需推理步数划分为三个难度等级。该基准鲜明地暴露出人类能力（约 92\% 准确率）与当前 LLM Agent（GPT-4 配合插件发布初期约 15\%，后续系统约 30\%）之间的鸿沟。
+**GAIA** [[350]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-mialon2023gaia)] 提出 466 个问题，要求链式工具使用——Web 搜索、代码执行、文件解析——并按所需推理步数划分为三个难度等级。该基准鲜明地暴露出人类能力（约 92\% 准确率）与当前 LLM Agent（GPT-4 配合插件发布初期约 15\%，后续系统约 30\%）之间的鸿沟。
 
 ### 多 Agent 环境
 
 多 Agent 环境涉及两个或更多 LLM Agent 之间以及与共享世界的交互。
 
-- **协商（Negotiation）**：具有私有效用函数的 Agent 必须通过对话达成交易。经典环境包括 DealOrNoDeal [lewis2017dealornodeal] 和 CaSiNo [chawla2021casino]。
+- **协商（Negotiation）**：具有私有效用函数的 Agent 必须通过对话达成交易。经典环境包括 DealOrNoDeal [[351]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lewis2017dealornodeal)] 和 CaSiNo [[352]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chawla2021casino)]。
 - **辩论（Debate）**：两个 Agent 持相对立场进行辩论；由裁判 Agent（或人类）评判论证质量。用于通过对抗压力引出真实的推理。
-- **协作式任务完成**：具有互补能力（规划者、执行者、评论者）的 Agent 必须协作完成任一单独 Agent 无法解决的任务。相关框架包括 AutoGen [wu2023autogen]、CrewAI [moura2023crewai] 和 MetaGPT [hong2023metagpt]。
+- **协作式任务完成**：具有互补能力（规划者、执行者、评论者）的 Agent 必须协作完成任一单独 Agent 无法解决的任务。相关框架包括 AutoGen [[326]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wu2023autogen)]、CrewAI [[329]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-moura2023crewai)] 和 MetaGPT [[353]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hong2023metagpt)]。
 - **竞争性游戏**：Agent 在零和博弈（国际象棋、围棋、扑克）中对弈，对手本身就是另一个 LLM Agent。在这类环境中的自博弈已经在狭窄领域内产生了超人类的表现。
 
 ## OpenEnv：标准化的 Agent 环境接口
 
-Agent 环境的激增带来了碎片化问题：每个环境都暴露不同的 API、使用不同的观察格式、需要不同的脚手架。**OpenEnv** [huggingface2025openenv] 是 Hugging Face 最近推出的开源框架，直接针对这一问题：它为 Agent 执行环境提供 Gymnasium 风格 [towers2024gymnasium] 的接口（`step()`、`reset()`、`state()`），以基于 Docker 的隔离部署通过 WebSocket 通信。OpenEnv 与更广泛的标准化努力互补，如 AgentGym [xi2024agentgym]（为 LLM Agent 跨多种环境提供统一格式平台）和 BrowserGym [drouin2024browsergym]（标准化 Web Agent 基准的观察和动作空间）。下文的设计原则概括了这些项目共同收敛出的最佳实践。
+Agent 环境的激增带来了碎片化问题：每个环境都暴露不同的 API、使用不同的观察格式、需要不同的脚手架。**OpenEnv** [[354]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-huggingface2025openenv)] 是 Hugging Face 最近推出的开源框架，直接针对这一问题：它为 Agent 执行环境提供 Gymnasium 风格 [[355]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-towers2024gymnasium)] 的接口（`step()`、`reset()`、`state()`），以基于 Docker 的隔离部署通过 WebSocket 通信。OpenEnv 与更广泛的标准化努力互补，如 AgentGym [[356]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-xi2024agentgym)]（为 LLM Agent 跨多种环境提供统一格式平台）和 BrowserGym [[357]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-drouin2024browsergym)]（标准化 Web Agent 基准的观察和动作空间）。下文的设计原则概括了这些项目共同收敛出的最佳实践。
 
 ![OpenEnv 架构与一个 LLM Agent。Agent 通过 harness 循环进行推理，并调用类型化的 EnvClient。客户端通过 WebSocket 与运行在 Docker 容器内的 HTTPEnvServer 通信。RL 训练器（虚线）可选地包裹该循环，以采集 rollout 和奖励信号用于 Policy 优化。]({{ site.baseurl }}/figures/fig_064_openenv-arch.png)
 
@@ -279,7 +279,7 @@ app = create_app(MyEnvironment(), MyAction, MyObservation)
 
 **harness 集成（实验性）。**
 
-RFC 0054 引入了一个面向 harness 的层，RL 训练框架通过 MCP 风格的工具调用与环境交互。`build_harness_rollout_func()` 辅助函数可产生一个 TRL 兼容的 rollout 函数，将 OpenEnv 直接桥接进 TorchForge [meta2025torchforge] 等现有训练流水线。
+RFC 0054 引入了一个面向 harness 的层，RL 训练框架通过 MCP 风格的工具调用与环境交互。`build_harness_rollout_func()` 辅助函数可产生一个 TRL 兼容的 rollout 函数，将 OpenEnv 直接桥接进 TorchForge [[358]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-meta2025torchforge)] 等现有训练流水线。
 
 **治理。**
 
@@ -345,7 +345,7 @@ client.close()
 
 ### 面向 LLM Agent 的 Gymnasium 风格 API
 
-Gymnasium API [towers2024gymnasium]（OpenAI Gym 的继任者）是 RL 环境的事实标准。将其适配到 LLM Agent 需要两处修改：(1) 观察和动作是字符串（或包含字符串的字典）而非数值数组；(2) `step` 方法必须处理异步工具执行。
+Gymnasium API [[355]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-towers2024gymnasium)]（OpenAI Gym 的继任者）是 RL 环境的事实标准。将其适配到 LLM Agent 需要两处修改：(1) 观察和动作是字符串（或包含字符串的字典）而非数值数组；(2) `step` 方法必须处理异步工具执行。
 
 ### 奖励函数工程
 
@@ -661,7 +661,7 @@ Agent 环境是训练和评估 LLM Agent 的基底。本节的关键要点是：
 1. **环境不是可选项。** 安全探索、可复现评估和课程学习都需要结构化环境。若没有环境，Chatbot 评估与 Agent 评估之间的鸿沟无法跨越。
 2. **四个维度都需谨慎设计。** 观察空间、动作空间、奖励信号和 Episode 结构各有可能让整个基准失效的失败模式。
 3. **生态丰富但碎片化。** 代码沙箱、Web 环境、计算机使用类环境、SWE 环境、科研环境、游戏和多 Agent 竞技场各测试不同能力。任何单一环境都不充分。
-4. **标准化很重要。** OpenEnv [huggingface2025openenv] 提供 Gymnasium 风格的 API，配合 Docker 隔离以及把 Hugging Face Spaces 作为注册中心——降低了构建新环境以及在不同环境间比较 Agent 的成本。
+4. **标准化很重要。** OpenEnv [[354]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-huggingface2025openenv)] 提供 Gymnasium 风格的 API，配合 Docker 隔离以及把 Hugging Face Spaces 作为注册中心——降低了构建新环境以及在不同环境间比较 Agent 的成本。
 5. **人类差距真实存在但正在收窄。** 当前 LLM Agent 在大多数基准上达到人类性能的 20--50\%。进展最快的是训练数据充裕的领域（代码），最慢的是需要细粒度感知的领域（GUI 控制）。
 
 > **Agent 环境中的开放研究问题**

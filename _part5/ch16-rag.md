@@ -4,7 +4,7 @@ title: 检索增强生成（RAG）
 permalink: /part5/ch16-rag.html
 ---
 
-检索增强生成（Retrieval-Augmented Generation, RAG）[lewis2020retrieval] 已成为在生产环境中部署大型语言模型时最具实际影响力的技术之一。RAG 不再仅依赖训练时编码进模型权重中的知识，而是为 LLM 配备一个动态、可更新的外部记忆——使其能够在广泛的知识密集型任务中给出准确、有据可查且可验证的响应。
+检索增强生成（Retrieval-Augmented Generation, RAG）[[109]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lewis2020retrieval)] 已成为在生产环境中部署大型语言模型时最具实际影响力的技术之一。RAG 不再仅依赖训练时编码进模型权重中的知识，而是为 LLM 配备一个动态、可更新的外部记忆——使其能够在广泛的知识密集型任务中给出准确、有据可查且可验证的响应。
 
 ## 动机与问题陈述
 
@@ -110,7 +110,7 @@ Answer:"""
 
 ### 稀疏检索：BM25 与 TF-IDF
 
-稀疏检索方法将文档和查询表示为词汇表上的高维稀疏向量。给定查询 $q$（含词项 $t_1, \ldots, t_n$）时，针对文档 $d$ 的经典 BM25 评分函数 [robertson2009probabilistic] 为：
+稀疏检索方法将文档和查询表示为词汇表上的高维稀疏向量。给定查询 $q$（含词项 $t_1, \ldots, t_n$）时，针对文档 $d$ 的经典 BM25 评分函数 [[261]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-robertson2009probabilistic)] 为：
 
 $$
   \text{BM25}(d, q) = \sum_{i=1}^{n} \text{IDF}(t_i) \cdot
@@ -129,7 +129,7 @@ $$
 
 ### 稠密检索：DPR
 
-稠密段落检索（Dense Passage Retrieval, DPR）[karpukhin2020dense] 使用两个独立的、基于 BERT 的编码器——一个*查询编码器* $E_Q$ 和一个*段落编码器* $E_P$——通过对比 Loss 进行训练，使相关的查询—段落对在 Embedding 空间中彼此靠近。
+稠密段落检索（Dense Passage Retrieval, DPR）[[262]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-karpukhin2020dense)] 使用两个独立的、基于 BERT 的编码器——一个*查询编码器* $E_Q$ 和一个*段落编码器* $E_P$——通过对比 Loss 进行训练，使相关的查询—段落对在 Embedding 空间中彼此靠近。
 
 **双编码器（Bi-Encoder）架构。**
 
@@ -151,10 +151,10 @@ $$
 
 **近似最近邻搜索。**
 
-在大规模场景下，对数百万个 Embedding 进行穷举搜索不可行。FAISS [johnson2019billion]（Facebook AI Similarity Search）提供了高效的近似最近邻（Approximate Nearest Neighbor, ANN）搜索，所用方法包括：
+在大规模场景下，对数百万个 Embedding 进行穷举搜索不可行。FAISS [[263]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-johnson2019billion)]（Facebook AI Similarity Search）提供了高效的近似最近邻（Approximate Nearest Neighbor, ANN）搜索，所用方法包括：
 
 - **IVF（倒排文件索引，Inverted File Index）**：将向量聚类到 Voronoi 单元中；只搜索邻近的单元
-- **HNSW（分层可导航小世界，Hierarchical Navigable Small World）** [malkov2018efficient]：基于图的索引，搜索复杂度 $O(\log N)$
+- **HNSW（分层可导航小世界，Hierarchical Navigable Small World）** [[264]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-malkov2018efficient)]：基于图的索引，搜索复杂度 $O(\log N)$
 - **PQ（乘积量化，Product Quantization）**：压缩向量以减少内存占用
 
 ### 基于倒数排名融合的混合检索
@@ -165,7 +165,7 @@ $$
   s_{\text{hybrid}}(d, q) = \alpha \cdot s_{\text{dense}}(d, q) + (1-\alpha) \cdot s_{\text{sparse}}(d, q)
 $$
 
-然而，来自不同系统的分数无法直接比较。**倒数排名融合（Reciprocal Rank Fusion, RRF）** [cormack2009reciprocal] 通过在排名而非分数上操作来规避这个问题：
+然而，来自不同系统的分数无法直接比较。**倒数排名融合（Reciprocal Rank Fusion, RRF）** [[265]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-cormack2009reciprocal)] 通过在排名而非分数上操作来规避这个问题：
 
 $$
   \text{RRF}(d) = \sum_{r \in \mathcal{R}} \frac{1}{k + \text{rank}_r(d)}
@@ -191,7 +191,7 @@ $$
 
 **SPLADE（v1）—— 核心思想。**
 
-SPLADE（Sparse Lexical and Expansion Model）[formal2021splade] 使用预训练的掩码语言模型（如 BERT/DistilBERT），为每个文档或查询生成一个覆盖*整个词汇表*的稀疏向量。关键洞见在于：MLM 头部已经知道文本中每个位置在语义上与哪些词相关——SPLADE 把这种知识重新利用为词项重要性权重。
+SPLADE（Sparse Lexical and Expansion Model）[[266]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-formal2021splade)] 使用预训练的掩码语言模型（如 BERT/DistilBERT），为每个文档或查询生成一个覆盖*整个词汇表*的稀疏向量。关键洞见在于：MLM 头部已经知道文本中每个位置在语义上与哪些词相关——SPLADE 把这种知识重新利用为词项重要性权重。
 
 **架构。**
 
@@ -233,9 +233,9 @@ $$
 
 **SPLADEv2 —— 关键改进。**
 
-SPLADEv2 [formal2021spladev2] 引入了若干改进，显著提升了效率与效果：
+SPLADEv2 [[267]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-formal2021spladev2)] 引入了若干改进，显著提升了效率与效果：
 
-1. **从交叉编码器蒸馏**：SPLADEv2 不只用二元相关性标签训练，而是借助交叉编码器教师（如 MonoT5 [nogueira2020document]）提供软相关性得分，从而获得更丰富的训练信号：
+1. **从交叉编码器蒸馏**：SPLADEv2 不只用二元相关性标签训练，而是借助交叉编码器教师（如 MonoT5 [[268]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-nogueira2020document)]）提供软相关性得分，从而获得更丰富的训练信号：
 
 $$
     \mathcal{L}_{\text{distill}} = \text{KL}\!\left(\sigma(s_{\text{student}}) \,\|\, \sigma(s_{\text{teacher}})\right)
@@ -265,7 +265,7 @@ $$
 > | 稀疏度控制 | $L_1$ 正则化 | 感知 FLOPS 的正则化 |
 > | 查询/文档对称性 | 同一编码器、同一 $\lambda$ | 非对称（查询更稀疏） |
 > | 骨干 | BERT-base（110M） | DistilBERT（66M） |
-> | MRR@10（MS MARCO [bajaj2016msmarco]） | 34.0 | 36.8 |
+> | MRR@10（MS MARCO [[269]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-bajaj2016msmarco)]） | 34.0 | 36.8 |
 > | 平均每文档非零项数 | $\sim$200 | $\sim$120（更稀疏 40%） |
 
 > **何时使用 SPLADE**
@@ -276,7 +276,7 @@ $$
 
 ### ColBERT：晚期交互
 
-ColBERT [khattab2020colbert] 将查询和文档编码为 Token 级 Embedding 的*集合*，并使用 *MaxSim* 算子进行打分：
+ColBERT [[270]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-khattab2020colbert)] 将查询和文档编码为 Token 级 Embedding 的*集合*，并使用 *MaxSim* 算子进行打分：
 
 $$
   s(q, d) = \sum_{i \in \lvert \mathbf{q} \rvert} \max_{j \in \lvert \mathbf{d} \rvert} \mathbf{q}_i^\top \mathbf{d}_j
@@ -307,27 +307,27 @@ $$
 
 - **Batch 内负样本**：同一训练 Batch 中的其他段落（无额外成本、数量充足）
 - **硬负样本**：由 BM25 检索出的、词面相似但语义无关的段落（对质量影响最大）
-- **蒸馏负样本**（ColBERTv2 [santhanam2022colbertv2]）：使用交叉编码器教师挖掘最难的负样本，并将其得分蒸馏到 ColBERT 中
+- **蒸馏负样本**（ColBERTv2 [[271]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-santhanam2022colbertv2)]）：使用交叉编码器教师挖掘最难的负样本，并将其得分蒸馏到 ColBERT 中
 
 **索引与服务。**
 
 在索引阶段，所有文档 Token 的 Embedding 都被预计算并存储（在 ColBERTv2 中可选地使用残差量化压缩）。在查询阶段，只需实时编码查询 Token，并与已存储的文档 Embedding 计算 MaxSim。这种分离带来：
 
 - **离线文档编码**：编码一次，服务于多次查询
-- **PLAID 索引** [santhanam2022colbertv2]：对文档 Embedding 聚类，用聚类中心进行初步候选检索，然后只在候选集上计算精确的 MaxSim——延迟可降低 5--10$\times$
+- **PLAID 索引** [[271]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-santhanam2022colbertv2)]：对文档 Embedding 聚类，用聚类中心进行初步候选检索，然后只在候选集上计算精确的 MaxSim——延迟可降低 5--10$\times$
 - **索引大小**：每文档 $\lvert d \rvert \times 128$ 个浮点数（比单向量方法更大，但通过量化可压缩到约每维度 2 字节）
 
 ### 检索方法对比
 
 | 方法 | 延迟 | 准确率 | 索引大小 | GPU | 最佳适用场景 |
 | --- | --- | --- | --- | --- | --- |
-| TF-IDF [sparckjones1972idf] | 极低 | 低 | 小 | 无需 | 基线、精确匹配 |
-| BM25 [robertson2009probabilistic] | 极低 | 中等 | 小 | 无需 | 关键词搜索、罕见词项 |
-| DPR / 双编码器 [karpukhin2020dense] | 低 | 高 | 大 | 需要 | 语义相似度 |
-| SPLADE [formal2021splade] | 低 | 高 | 中等 | 需要 | 兼顾精度与速度的混合方案 |
-| ColBERT [khattab2020colbert] | 中等 | 极高 | 极大 | 需要 | 高精度检索 |
-| 交叉编码器 [nogueira2019passage] | 高 | 最高 | N/A | 需要 | 对 top-$k$ 重排序 |
-| 混合（RRF） [cormack2009reciprocal] | 低 | 极高 | 大 | 需要 | 生产系统 |
+| TF-IDF [[272]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-sparckjones1972idf)] | 极低 | 低 | 小 | 无需 | 基线、精确匹配 |
+| BM25 [[261]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-robertson2009probabilistic)] | 极低 | 中等 | 小 | 无需 | 关键词搜索、罕见词项 |
+| DPR / 双编码器 [[262]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-karpukhin2020dense)] | 低 | 高 | 大 | 需要 | 语义相似度 |
+| SPLADE [[266]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-formal2021splade)] | 低 | 高 | 中等 | 需要 | 兼顾精度与速度的混合方案 |
+| ColBERT [[270]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-khattab2020colbert)] | 中等 | 极高 | 极大 | 需要 | 高精度检索 |
+| 交叉编码器 [[273]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-nogueira2019passage)] | 高 | 最高 | N/A | 需要 | 对 top-$k$ 重排序 |
+| 混合（RRF） [[265]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-cormack2009reciprocal)] | 低 | 极高 | 大 | 需要 | 生产系统 |
 
 ## 分块策略
 
@@ -421,7 +421,7 @@ retriever.add_documents(documents)
 
 用户的原始查询往往含糊、过短，或与文档语言匹配不佳。查询变换技术在搜索之前改进检索。
 
-**HyDE（假设性文档 Embedding，Hypothetical Document Embeddings）** [gao2022precise]。
+**HyDE（假设性文档 Embedding，Hypothetical Document Embeddings）** [[274]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-gao2022precise)]。
 
 不直接对查询做 Embedding，而是生成一个*假设性回答*并对其做 Embedding：
 
@@ -492,7 +492,7 @@ compressed_docs = compression_retriever.get_relevant_documents(query)
 
 ### Self-RAG
 
-Self-RAG [asai2023selfrag] 训练单个模型完成以下任务：(1) 决定*是否*进行检索，(2) 在带或不带检索的条件下生成，(3) 使用特殊的反思 Token *批评*自己的输出：
+Self-RAG [[275]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-asai2023selfrag)] 训练单个模型完成以下任务：(1) 决定*是否*进行检索，(2) 在带或不带检索的条件下生成，(3) 使用特殊的反思 Token *批评*自己的输出：
 
 - `[Retrieve]`：模型是否应检索更多段落？
 - `[IsRel]`：检索到的段落是否与查询相关？
@@ -503,7 +503,7 @@ Self-RAG [asai2023selfrag] 训练单个模型完成以下任务：(1) 决定*是
 
 ### CRAG：纠正式 RAG
 
-CRAG [yan2024crag] 增加了一个*检索评估器*，对检索到的文档打分并触发纠正动作：
+CRAG [[276]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yan2024crag)] 增加了一个*检索评估器*，对检索到的文档打分并触发纠正动作：
 
 1. 检索 top-$k$ 文档
 2. 对每个文档打分：**正确** / **模糊** / **错误**
@@ -513,7 +513,7 @@ CRAG [yan2024crag] 增加了一个*检索评估器*，对检索到的文档打�
 
 ### 自适应 RAG
 
-自适应 RAG（Adaptive RAG） [jeong2024adaptive] 根据预测出的查询复杂度将其路由到不同的检索策略：
+自适应 RAG（Adaptive RAG） [[277]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jeong2024adaptive)] 根据预测出的查询复杂度将其路由到不同的检索策略：
 
 - **不检索**：模型可凭参数化知识回答的简单事实型查询
 - **单步 RAG**：对中等复杂度的查询采用标准的“先检索后生成”
@@ -523,7 +523,7 @@ CRAG [yan2024crag] 增加了一个*检索评估器*，对检索到的文档打�
 
 ### Graph RAG
 
-Microsoft 的 Graph RAG [edge2024local] 从文档语料库构建*知识图谱*，并使用社区检测生成分层摘要：
+Microsoft 的 Graph RAG [[278]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-edge2024local)] 从文档语料库构建*知识图谱*，并使用社区检测生成分层摘要：
 
 1. **实体抽取**：LLM 从每个块中抽取实体与关系
 2. **图构建**：构建图 $G = (V, E)$，其中节点是实体、边是关系
@@ -537,7 +537,7 @@ Microsoft 的 Graph RAG [edge2024local] 从文档语料库构建*知识图谱*�
 
 ### RAG-Fusion
 
-RAG-Fusion [rackauckas2023ragfusion] 从原始查询生成多条搜索查询，对每条都进行检索，再使用 RRF（上文公式）融合排名列表：
+RAG-Fusion [[279]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-rackauckas2023ragfusion)] 从原始查询生成多条搜索查询，对每条都进行检索，再使用 RRF（上文公式）融合排名列表：
 
 ```python
 def reciprocal_rank_fusion(ranked_lists: list[list[str]], k: int = 60) -> list[str]:
@@ -561,7 +561,7 @@ def rag_fusion(query: str, retriever, llm, n_queries: int = 4) -> str:
 
 ## 高效 RAG 解码：REFRAG
 
-RAG 的一个实际瓶颈是*解码延迟*：拼接到 LLM 上下文中的检索段落往往很长但相关性稀疏，从而拉高首 Token 时延（Time-to-First-Token, TTFT）和 KV-cache 内存。REFRAG [lin2025refrag] 观察到，由于检索到的段落是独立来源的（通过重排序中的多样性或去重），它们的 Attention 模式呈*块对角*——大多数跨段落 Attention 接近于零。这种稀疏性意味着解码阶段对 RAG 上下文的大部分计算其实是不必要的。
+RAG 的一个实际瓶颈是*解码延迟*：拼接到 LLM 上下文中的检索段落往往很长但相关性稀疏，从而拉高首 Token 时延（Time-to-First-Token, TTFT）和 KV-cache 内存。REFRAG [[280]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lin2025refrag)] 观察到，由于检索到的段落是独立来源的（通过重排序中的多样性或去重），它们的 Attention 模式呈*块对角*——大多数跨段落 Attention 接近于零。这种稀疏性意味着解码阶段对 RAG 上下文的大部分计算其实是不必要的。
 
 **压缩—感知—展开（Compress--Sense--Expand）框架。**
 
@@ -789,11 +789,11 @@ executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
 ### Search-R1：RL 训练的智能体 RAG
 
-上述智能体 RAG 方法依赖*Prompt 工程*的编排——Agent 的搜索行为由指令控制，而非通过训练学习。**Search-R1** [jin2025searchr1] 采取了根本不同的方法：通过强化学习训练 LLM，使其*学会在推理过程中何时、检索什么、检索多少次*。
+上述智能体 RAG 方法依赖*Prompt 工程*的编排——Agent 的搜索行为由指令控制，而非通过训练学习。**Search-R1** [[281]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jin2025searchr1)] 采取了根本不同的方法：通过强化学习训练 LLM，使其*学会在推理过程中何时、检索什么、检索多少次*。
 
 **核心思想。**
 
-Search-R1 扩展了 DeepSeek-R1 [deepseek2025r1] 推理框架，将搜索引擎查询视为 RL 训练循环中的**Action**。在思维链（Chain-of-Thought，CoT）生成过程中，模型可以输出特殊 Token `<search>query</search>`，触发对搜索引擎的实时检索。检索结果被注入回推理上下文，模型继续生成。
+Search-R1 扩展了 DeepSeek-R1 [[156]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-deepseek2025r1)] 推理框架，将搜索引擎查询视为 RL 训练循环中的**Action**。在思维链（Chain-of-Thought，CoT）生成过程中，模型可以输出特殊 Token `<search>query</search>`，触发对搜索引擎的实时检索。检索结果被注入回推理上下文，模型继续生成。
 
 **形式化设定。**
 
@@ -836,7 +836,7 @@ Search-R1 使用组相对策略优化（Group Relative Policy Optimization, GRPO
 
 **结果。**
 
-在开放域问答基准（NQ [kwiatkowski2019natural]、TriviaQA [joshi2017triviaqa]、HotpotQA [yang2018hotpotqa]）上，使用 7B 模型的 Search-R1 优于：
+在开放域问答基准（NQ [[282]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kwiatkowski2019natural)]、TriviaQA [[283]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-joshi2017triviaqa)]、HotpotQA [[284]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yang2018hotpotqa)]）上，使用 7B 模型的 Search-R1 优于：
 
 - 标准 RAG（单次检索）准确率高出 15--20%
 - 基于 Prompt 的智能体 RAG（ReAct 风格）准确率高出 8--12%
@@ -928,7 +928,7 @@ $$
 
 ### RAGAs 框架
 
-RAGAs（Retrieval Augmented Generation Assessment） [es2023ragas] 提供了一个使用 LLM 判官的无参考评测框架：
+RAGAs（Retrieval Augmented Generation Assessment） [[285]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-es2023ragas)] 提供了一个使用 LLM 判官的无参考评测框架：
 
 ```python
 from ragas import evaluate
@@ -967,7 +967,7 @@ print(results.to_pandas())
 >
 > 1. **检索遗漏**：相关文档存在于语料库中却未被检索到。原因：分块不佳、Embedding 模型不匹配、查询—文档词汇差距。
 > 2. **上下文污染**：检索到的文档包含误导性或矛盾的信息，导致模型生成错误答案。
-> 3. **中部迷失（Lost-in-the-Middle）**：LLM 对长上下文的开头和结尾关注更强；中间部分的相关信息可能被忽略 [liu2023lost]。
+> 3. **中部迷失（Lost-in-the-Middle）**：LLM 对长上下文的开头和结尾关注更强；中间部分的相关信息可能被忽略 [[286]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2023lost)]。
 > 4. **过度检索**：检索块过多会稀释相关信号，并增加延迟与成本。
 > 5. **即便检索仍幻觉**：模型忽略检索到的上下文，基于参数化记忆生成内容，尤其当上下文与训练数据相冲突时。
 > 6. **引用伪造**：模型将主张归因到并不支持这些主张的文档。
@@ -986,11 +986,11 @@ Embedding 模型是 RAG 系统中影响最大的单一组件选择——它决�
 | Cohere `embed-english-v3.0` | 1024 | 512 | 64.5 | API | 支持 int8/二值 |
 | Google `text-embedding-005` | 768 | 2048 | --- | API | 集成于 Vertex AI |
 | *开放权重（自托管）* |  |  |  |  |  |
-| `nvidia/NV-Embed-v2` [lee2024nvembed] | 4096 | 32K | 72.3 | 免费 | MTEB #1（2024 年 9 月） |
-| `Alibaba-NLP/gte-Qwen2-7B` [li2023gte] | 3584 | 32K | 70.2 | 免费 | Apache-2.0，多语言 |
-| `BAAI/bge-m3` [chen2024bgem3] | 1024 | 8192 | 65.0 | 免费 | 稠密 + 稀疏 + 多向量 |
+| `nvidia/NV-Embed-v2` [[287]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lee2024nvembed)] | 4096 | 32K | 72.3 | 免费 | MTEB #1（2024 年 9 月） |
+| `Alibaba-NLP/gte-Qwen2-7B` [[288]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-li2023gte)] | 3584 | 32K | 70.2 | 免费 | Apache-2.0，多语言 |
+| `BAAI/bge-m3` [[289]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chen2024bgem3)] | 1024 | 8192 | 65.0 | 免费 | 稠密 + 稀疏 + 多向量 |
 | `jinaai/jina-embeddings-v3` | 1024 | 8192 | 66.0 | 免费 | 多语言，LoRA 适配器 |
-| `BAAI/bge-large-en-v1.5` [xiao2023cpack] | 1024 | 512 | 64.2 | 免费 | 成熟，生态完善 |
+| `BAAI/bge-large-en-v1.5` [[290]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-xiao2023cpack)] | 1024 | 512 | 64.2 | 免费 | 成熟，生态完善 |
 
 **选型标准。**
 
@@ -1115,7 +1115,7 @@ class RAGIndexManager:
 
 ### RAFT：检索增强微调（Retrieval-Augmented Fine-Tuning）
 
-RAFT [zhang2024raft] 在混合了相关文档与*干扰*文档的设置下训练模型回答问题，教会模型识别并只使用相关上下文：
+RAFT [[291]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhang2024raft)] 在混合了相关文档与*干扰*文档的设置下训练模型回答问题，教会模型识别并只使用相关上下文：
 
 1. 对每个训练样本 $(q, a, d^*)$，采样 $k-1$ 个干扰文档 $\{d_i^-\}$
 2. 在 `[q, `$d^*$`, `$d_1^-$`, \ldots{}, `$d_{k-1}^-$`]` $\to$ `[chain-of-thought + a]` 上微调
@@ -1129,7 +1129,7 @@ $$
 
 ### 检索器—生成器联合训练
 
-为获得极致性能，可以对检索器与生成器进行联合训练。REALM [guu2020realm] 与 RAG [lewis2020retrieval] 论文提出了端到端训练方法，让 Gradient 流经检索步骤：
+为获得极致性能，可以对检索器与生成器进行联合训练。REALM [[292]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-guu2020realm)] 与 RAG [[109]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lewis2020retrieval)] 论文提出了端到端训练方法，让 Gradient 流经检索步骤：
 
 $$
   \nabla_\theta \mathcal{L} = \nabla_\theta \left[
@@ -1147,17 +1147,17 @@ $$
 
 | 方法 | 准确率 | 延迟 | 复杂度 | 成本 | 最佳适用场景 |
 | --- | --- | --- | --- | --- | --- |
-| 朴素 RAG [lewis2020retrieval] | 中等 | 低 | 低 | 低 | 原型、简单问答 |
-| RAG + 重排序 [nogueira2019passage] | 高 | 中等 | 中等 | 中等 | 生产级问答系统 |
-| HyDE [gao2022precise] | 高 | 中等 | 低 | 中等 | 语义不匹配的领域 |
+| 朴素 RAG [[109]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lewis2020retrieval)] | 中等 | 低 | 低 | 低 | 原型、简单问答 |
+| RAG + 重排序 [[273]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-nogueira2019passage)] | 高 | 中等 | 中等 | 中等 | 生产级问答系统 |
+| HyDE [[274]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-gao2022precise)] | 高 | 中等 | 低 | 中等 | 语义不匹配的领域 |
 | 多查询 RAG | 高 | 中等 | 中等 | 中等 | 歧义查询 |
-| RAG-Fusion [rackauckas2023ragfusion] | 高 | 中等 | 中等 | 中等 | 多样化的查询类型 |
-| Self-RAG [asai2023selfrag] | 高 | 中等 | 高 | 中等 | 选择性检索 |
-| CRAG [yan2024crag] | 高 | 中等 | 高 | 高 | 不可靠的语料库 |
-| 自适应 RAG [jeong2024adaptive] | 高 | 低--高 | 高 | 中等 | 查询复杂度混合 |
-| Graph RAG [edge2024local] | 极高 | 高 | 极高 | 高 | 全局综合查询 |
+| RAG-Fusion [[279]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-rackauckas2023ragfusion)] | 高 | 中等 | 中等 | 中等 | 多样化的查询类型 |
+| Self-RAG [[275]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-asai2023selfrag)] | 高 | 中等 | 高 | 中等 | 选择性检索 |
+| CRAG [[276]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yan2024crag)] | 高 | 中等 | 高 | 高 | 不可靠的语料库 |
+| 自适应 RAG [[277]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jeong2024adaptive)] | 高 | 低--高 | 高 | 中等 | 查询复杂度混合 |
+| Graph RAG [[278]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-edge2024local)] | 极高 | 高 | 极高 | 高 | 全局综合查询 |
 | 智能体 RAG | 极高 | 高 | 极高 | 高 | 多跳推理 |
-| RAFT [zhang2024raft] | 极高 | 低 | 极高 | 极高 | 特定领域部署 |
+| RAFT [[291]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhang2024raft)] | 极高 | 低 | 极高 | 极高 | 特定领域部署 |
 
 > **RAG 系统的关键设计问题**
 >

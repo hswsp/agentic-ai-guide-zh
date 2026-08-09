@@ -44,11 +44,11 @@ permalink: /part5/ch23-a2a.html
 
 ## Google A2A 协议
 
-2025 年 4 月，Google（在 50 余家技术合作伙伴的共同贡献下）发布了 **智能体到智能体（A2A）协议** [google-a2a-2025]，这是一份用于 AI Agent 之间互操作通信的开放规范。该协议随后被捐赠给 **Linux Foundation**，截至 2026 年支持机构已超过 150 家。A2A 围绕一组核心原则进行设计，使其区别于早期的临时方案。
+2025 年 4 月，Google（在 50 余家技术合作伙伴的共同贡献下）发布了 **智能体到智能体（A2A）协议** [[360]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-google-a2a-2025)]，这是一份用于 AI Agent 之间互操作通信的开放规范。该协议随后被捐赠给 **Linux Foundation**，截至 2026 年支持机构已超过 150 家。A2A 围绕一组核心原则进行设计，使其区别于早期的临时方案。
 
 ### 设计理念
 
-A2A 规范明确提出了五条指导原则（根据官方规范 [google-a2a-2025] §1.2 改编）：
+A2A 规范明确提出了五条指导原则（根据官方规范 [[360]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-google-a2a-2025)] §1.2 改编）：
 
 > **A2A 设计原则**
 >
@@ -399,7 +399,7 @@ class AgentRouter:
 
 ### 版本管理与兼容性
 
-Agent Card 包含 `version` 字段。编排器应指定最低版本要求，并在只有旧版本可用时进行优雅降级。推荐使用语义化版本（Semantic Versioning）[preston2024semver]（`MAJOR.MINOR.PATCH`）：破坏性接口变更递增 `MAJOR`，新增能力递增 `MINOR`。
+Agent Card 包含 `version` 字段。编排器应指定最低版本要求，并在只有旧版本可用时进行优雅降级。推荐使用语义化版本（Semantic Versioning）[[361]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-preston2024semver)]（`MAJOR.MINOR.PATCH`）：破坏性接口变更递增 `MAJOR`，新增能力递增 `MINOR`。
 
 > **长生命周期系统中的版本偏斜**
 >
@@ -550,7 +550,7 @@ sub_ctx = ctx.child_context()
 
 ### 合同网协议（Contract Net Protocol）
 
-**合同网协议（Contract Net Protocol, CNP）** [smith1980contract] 是一种经典的多 Agent 协调机制，可被改造用于基于 LLM 的系统：
+**合同网协议（Contract Net Protocol, CNP）** [[362]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-smith1980contract)] 是一种经典的多 Agent 协调机制，可被改造用于基于 LLM 的系统：
 
 1. **宣告（Announcement）**：管理者 Agent 向所有潜在承包者 Agent 广播任务公告，其中包含任务需求和评估标准。
 2. **竞标（Bidding）**：承包者 Agent 根据自身能力评估任务，并提交包含预计完成时间、置信度和资源需求的竞标。
@@ -619,7 +619,7 @@ sub_ctx = ctx.child_context()
 
 ### 黑板系统（Blackboard Systems）
 
-**黑板系统** [hayes1985blackboard]提供一个共享工作区（即"黑板"），Agent 在上面发布部分解、观察和假设。其他 Agent 监视黑板，在能够提供价值时进行贡献——这是一种*机会主义*的问题求解方式。
+**黑板系统** [[309]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hayes1985blackboard)]提供一个共享工作区（即"黑板"），Agent 在上面发布部分解、观察和假设。其他 Agent 监视黑板，在能够提供价值时进行贡献——这是一种*机会主义*的问题求解方式。
 
 黑板系统非常适合那些求解路径事先未知、不同 Agent 在不同阶段做出贡献的问题——例如科学假设生成、复杂调试或多源情报分析。
 
@@ -670,7 +670,7 @@ async def quorum_vote(agents: list[AgentCard], question: str,
 
 ## A2A 与 MCP：互补的协议
 
-A2A 与 **模型上下文协议（Model Context Protocol, MCP）** [anthropic-mcp-2024] 之间的关系常被误解。这两种协议是*互补*的，并非竞争关系：
+A2A 与 **模型上下文协议（Model Context Protocol, MCP）** [[323]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-anthropic-mcp-2024)] 之间的关系常被误解。这两种协议是*互补*的，并非竞争关系：
 
 > **核心区别**
 >
@@ -713,19 +713,19 @@ A2A 与 **模型上下文协议（Model Context Protocol, MCP）** [anthropic-mc
 
 每个 Agent 都必须具有可验证的身份。可选方案包括：
 
-- 由可信身份提供方签发的 **JWT 令牌** [rfc7519]，携带 Agent ID、颁发者和过期时间。接收方 Agent 使用提供方的公钥进行验证。
-- 由内部 CA 颁发的 **mTLS 证书** [rfc8705]，同时提供认证与传输加密。
-- 适用于不存在单一可信权威的跨组织场景的 **去中心化标识符（Decentralized Identifiers, DIDs）** [w3c-did-2022]。
+- 由可信身份提供方签发的 **JWT 令牌** [[363]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-rfc7519)]，携带 Agent ID、颁发者和过期时间。接收方 Agent 使用提供方的公钥进行验证。
+- 由内部 CA 颁发的 **mTLS 证书** [[364]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-rfc8705)]，同时提供认证与传输加密。
+- 适用于不存在单一可信权威的跨组织场景的 **去中心化标识符（Decentralized Identifiers, DIDs）** [[365]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-w3c-did-2022)]。
 
 ### 消息完整性与加密
 
-- 所有 A2A 通信都应通过 **TLS 1.3** [rfc8446] 进行，以防止窃听和中间人攻击。
+- 所有 A2A 通信都应通过 **TLS 1.3** [[366]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-rfc8446)] 进行，以防止窃听和中间人攻击。
 - 对于敏感负载，**端到端加密**（例如 JWE）可以确保中间基础设施（负载均衡器、代理）无法读取消息内容。
 - **消息签名**（JWS）提供不可否认性：接收方 Agent 可以证明某条特定消息确实来自某位特定发送者。
 
 ### 授权 scope
 
-并非每个 Agent 都应该能够要求其他任何 Agent 做任何事。OAuth 2.0 授权 scope [rfc6749] 定义了边界：
+并非每个 Agent 都应该能够要求其他任何 Agent 做任何事。OAuth 2.0 授权 scope [[367]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-rfc6749)] 定义了边界：
 
 ```python
 # DataAgent 的 OAuth 2.0 scope 示例

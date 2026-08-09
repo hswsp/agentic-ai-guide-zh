@@ -96,7 +96,7 @@ Agent 框架生态快速增长，每个框架都体现了不同的设计哲学�
 
 ### LangGraph
 
-LangGraph [langchain2024langgraph] 由 LangChain Inc. 开发，将 Agent 执行建模为一个*有向图*：节点表示计算步骤，边表示步骤之间的迁移。这种基于图的抽象提供了对 Agent 流程的显式控制，使复杂多步骤行为更易于推理、测试与调试。
+LangGraph [[325]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-langchain2024langgraph)] 由 LangChain Inc. 开发，将 Agent 执行建模为一个*有向图*：节点表示计算步骤，边表示步骤之间的迁移。这种基于图的抽象提供了对 Agent 流程的显式控制，使复杂多步骤行为更易于推理、测试与调试。
 
 **核心概念。**
 
@@ -260,7 +260,7 @@ result = graph.invoke(
 
 ### AutoGen（Microsoft）
 
-AutoGen [wu2023autogen] 由 Microsoft Research 开发，采用了截然不同的思路：它将 Agent 建模为通过结构化消息传递进行通信的*可对话实体（conversable entity）*。AutoGen 不局限于单个 Agent 循环，而是支持多个 Agent 在共享会话中协作以求解复杂任务。
+AutoGen [[326]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wu2023autogen)] 由 Microsoft Research 开发，采用了截然不同的思路：它将 Agent 建模为通过结构化消息传递进行通信的*可对话实体（conversable entity）*。AutoGen 不局限于单个 Agent 循环，而是支持多个 Agent 在共享会话中协作以求解复杂任务。
 
 **Conversable Agents。**
 
@@ -339,7 +339,7 @@ user_proxy.initiate_chat(
 
 ### CrewAI
 
-CrewAI [moura2023crewai] 为多 Agent 系统引入了一种*基于角色（role-based）*的范式，灵感来自组织管理学。Agent 通过其职业角色、目标和背景故事来定义——这一设计借力 LLM 对人类组织结构的理解。
+CrewAI [[329]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-moura2023crewai)] 为多 Agent 系统引入了一种*基于角色（role-based）*的范式，灵感来自组织管理学。Agent 通过其职业角色、目标和背景故事来定义——这一设计借力 LLM 对人类组织结构的理解。
 
 **核心抽象。**
 
@@ -424,7 +424,7 @@ result = crew.kickoff(inputs={"topic": "Reinforcement Learning for LLMs"})
 
 ### OpenAI Assistants API 与 Agents SDK
 
-OpenAI 为 Agent 开发提供了两套互补产品：**Assistants API**，面向有状态 Agent 的托管基础设施；以及 **Agents SDK** [openai2024agentssdk]（前身为 Swarm），一个面向多 Agent 编排的轻量 Python 库。
+OpenAI 为 Agent 开发提供了两套互补产品：**Assistants API**，面向有状态 Agent 的托管基础设施；以及 **Agents SDK** [[386]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-openai2024agentssdk)]（前身为 Swarm），一个面向多 Agent 编排的轻量 Python 库。
 
 **Assistants API 架构。**
 
@@ -559,7 +559,7 @@ result = await Runner.run(
 
 ### DSPy
 
-DSPy [khattab2023dspy]（Declarative Self-improving Python，声明式自改进 Python）采用了截然不同的 Agent 开发思路：与其手工调 Prompt，DSPy 通过自动化优化*编译*高层程序规约（program specification）为优化后的 Prompt。
+DSPy [[112]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-khattab2023dspy)]（Declarative Self-improving Python，声明式自改进 Python）采用了截然不同的 Agent 开发思路：与其手工调 Prompt，DSPy 通过自动化优化*编译*高层程序规约（program specification）为优化后的 Prompt。
 
 **核心理念。**
 
@@ -647,7 +647,7 @@ compiled_agent.save("optimized_rag_agent.json")
 
 ### Semantic Kernel（Microsoft）
 
-Semantic Kernel [microsoft2023semantickernel]（SK）是 Microsoft 面向企业的 Agent 框架，专为与已有软件系统及组织级 Workflow 集成而设计。它提供一种*插件架构（plugin architecture）*，让开发者能把已有业务逻辑暴露为 AI 可调用的函数。
+Semantic Kernel [[387]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-microsoft2023semantickernel)]（SK）是 Microsoft 面向企业的 Agent 框架，专为与已有软件系统及组织级 Workflow 集成而设计。它提供一种*插件架构（plugin architecture）*，让开发者能把已有业务逻辑暴露为 AI 可调用的函数。
 
 **插件架构。**
 
@@ -733,8 +733,8 @@ SK 特别适合企业部署，原因包括：
 
 - **Promptflow**（Microsoft）：可视化的 Prompt 工程与评测
 - **Guidance**（Microsoft）：代码与 Prompt 交织的约束生成
-- **LMQL** [beurerkellner2023lmql]：类 SQL 的 LLM Prompt 查询语言，支持约束
-- **Outlines** [willard2023outlines]：基于正则与 JSON schema 约束的结构化生成
+- **LMQL** [[388]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-beurerkellner2023lmql)]：类 SQL 的 LLM Prompt 查询语言，支持约束
+- **Outlines** [[95]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-willard2023outlines)]：基于正则与 JSON schema 约束的结构化生成
 
 **Tool 注册表。**
 
@@ -746,7 +746,7 @@ SK 特别适合企业部署，原因包括：
 
 - **Mem0**：带自动摘要的自适应记忆层
 - **Zep**：带时间感知（temporal awareness）的长期记忆
-- **Letta** [packer2023memgpt]（原名 MemGPT）：具备自管理记忆层级的 Agent
+- **Letta** [[304]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-packer2023memgpt)]（原名 MemGPT）：具备自管理记忆层级的 Agent
 
 **评测框架。**
 
@@ -763,8 +763,8 @@ SK 特别适合企业部署，原因包括：
 
 Agent 生态正在向若干互操作标准收敛：
 
-- **模型上下文协议（Model Context Protocol, MCP）** [anthropic-mcp-2024]：Anthropic 提出的 Tool 与资源暴露开放标准，使任何 MCP 兼容 Tool 都能与任何 MCP 兼容 Agent 协作（详见第 "模型上下文协议" 章）
-- **智能体到智能体协议（Agent-to-Agent, A2A）** [google-a2a-2025]：Google 提出的 Agent 间通信与任务委派开放标准（详见第 "智能体到智能体通信" 章）
+- **模型上下文协议（Model Context Protocol, MCP）** [[323]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-anthropic-mcp-2024)]：Anthropic 提出的 Tool 与资源暴露开放标准，使任何 MCP 兼容 Tool 都能与任何 MCP 兼容 Agent 协作（详见第 "模型上下文协议" 章）
+- **智能体到智能体协议（Agent-to-Agent, A2A）** [[360]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-google-a2a-2025)]：Google 提出的 Agent 间通信与任务委派开放标准（详见第 "智能体到智能体通信" 章）
 - **Tool 的 OpenAPI 化**：用 OpenAPI 规范定义 Tool 接口，实现 Tool 的自动发现与集成（见下文）
 
 **OpenAPI 作为 Tool 接口层。**

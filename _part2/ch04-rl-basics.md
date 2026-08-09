@@ -3,19 +3,19 @@ layout: home
 title: 大语言模型的强化学习基础
 ---
 
-监督微调（Supervised Fine-Tuning, SFT）教模型模仿示例，但模仿存在天花板：模型永远无法超越其训练数据的质量。强化学习突破了这一壁垒。通过生成新文本、接收 reward 反馈，并朝着获得更高 reward 的行为更新，经过 RL 训练的模型能够*发现*任何人类示范者都未曾写出的策略——产出更有帮助、更准确、且更契合人类偏好的输出 [ouyang2022training]。
+监督微调（Supervised Fine-Tuning, SFT）教模型模仿示例，但模仿存在天花板：模型永远无法超越其训练数据的质量。强化学习突破了这一壁垒。通过生成新文本、接收 reward 反馈，并朝着获得更高 reward 的行为更新，经过 RL 训练的模型能够*发现*任何人类示范者都未曾写出的策略——产出更有帮助、更准确、且更契合人类偏好的输出 [[99]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-ouyang2022training)]。
 
-这是每一款前沿模型背后的机制：GPT-4 [openai2023gpt4]、Claude、Llama-3 [grattafiori2024llama3] 和 DeepSeek-R1 [deepseek2025r1] 都在 SFT 之后施加 RL，作为把一个能力强但缺乏导向的模型转化为对齐助手的关键一步。
+这是每一款前沿模型背后的机制：GPT-4 [[2]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-openai2023gpt4)]、Claude、Llama-3 [[3]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-grattafiori2024llama3)] 和 DeepSeek-R1 [[156]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-deepseek2025r1)] 都在 SFT 之后施加 RL，作为把一个能力强但缺乏导向的模型转化为对齐助手的关键一步。
 
 ## 大语言模型 RL 的两大范式
 
 面向语言模型的 RL 方法可大致划分为两类范式，分别适用于不同的目标：
 
 **范式一：通过人类偏好实现对齐（RLHF/DPO）。**
-将 RL 应用于大语言模型最初的动机是**对齐**——让模型变得有帮助、无害且诚实。**基于人类反馈的强化学习（Reinforcement Learning from Human Feedback, RLHF）** [ouyang2022training, ziegler2019fine, christiano2017deep] 利用人类两两比较的判断（“哪个回答更好？”）来训练 reward 模型，然后优化 policy 以最大化这一学到的 reward。**DPO** [rafailov2023direct] 通过彻底取消 reward 模型来简化这一过程，将偏好直接转化为有监督 loss。两种方法都能产出能够遵循指令且尊重安全约束的对齐助手。
+将 RL 应用于大语言模型最初的动机是**对齐**——让模型变得有帮助、无害且诚实。**基于人类反馈的强化学习（Reinforcement Learning from Human Feedback, RLHF）** [[99]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-ouyang2022training), [157]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-ziegler2019fine), [158]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-christiano2017deep)] 利用人类两两比较的判断（“哪个回答更好？”）来训练 reward 模型，然后优化 policy 以最大化这一学到的 reward。**DPO** [[159]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-rafailov2023direct)] 通过彻底取消 reward 模型来简化这一过程，将偏好直接转化为有监督 loss。两种方法都能产出能够遵循指令且尊重安全约束的对齐助手。
 
 **范式二：通过可验证奖励增强能力（RLVR）。**
-近期，RL 不仅被用于对齐，也被用于**教授新能力**——尤其是推理、数学和代码生成。此处的 reward 不再来自人类偏好，而来自**可验证的结果**：模型是否给出了正确答案？代码是否通过了所有测试？DeepSeek-R1 [deepseek2025r1] 证明，配合基于规则的 reward（格式正确性 + 答案准确性）的 GRPO 能够在*完全不使用人类偏好数据*的情况下，训练模型发展出复杂的思维链（Chain-of-Thought，CoT）推理。这一范式——可验证奖励的强化学习（Reinforcement Learning from Verifiable Rewards, RLVR）——如今已成为构建推理模型和 agentic 系统的主流路线。
+近期，RL 不仅被用于对齐，也被用于**教授新能力**——尤其是推理、数学和代码生成。此处的 reward 不再来自人类偏好，而来自**可验证的结果**：模型是否给出了正确答案？代码是否通过了所有测试？DeepSeek-R1 [[156]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-deepseek2025r1)] 证明，配合基于规则的 reward（格式正确性 + 答案准确性）的 GRPO 能够在*完全不使用人类偏好数据*的情况下，训练模型发展出复杂的思维链（Chain-of-Thought，CoT）推理。这一范式——可验证奖励的强化学习（Reinforcement Learning from Verifiable Rewards, RLVR）——如今已成为构建推理模型和 agentic 系统的主流路线。
 
 > **共同的底层基础**
 >
@@ -47,7 +47,7 @@ title: 大语言模型的强化学习基础
 
 ## RLHF 流水线
 
-经典的 RLHF 流水线 [ouyang2022training] 包含四个阶段：
+经典的 RLHF 流水线 [[99]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-ouyang2022training)] 包含四个阶段：
 
 1. **监督微调（SFT）**：在高质量示例上训练 base 模型，得到一个能够遵循指令的 policy $\pi_{\text{SFT}}$。
 2. **Reward 模型训练**：收集人类偏好比较（对同一 prompt 满足 $y_w \succ y_l$），并使用 Bradley-Terry 模型（Bradley-Terry Model）目标训练 reward 模型 $R_\phi(x, y)$。

@@ -35,7 +35,7 @@ permalink: /part2/ch11-large-scale-system-architecture.html
 
 ### 数据并行（Data Parallelism, DP）与分布式数据并行（Distributed Data Parallelism, DDP）
 
-数据并行是最简单、也最常见的分布式训练形式 [li2020pytorch]。每块 GPU 持有模型的*完整副本*，处理不同的 mini-batch，并同步梯度。
+数据并行是最简单、也最常见的分布式训练形式 [[193]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-li2020pytorch)]。每块 GPU 持有模型的*完整副本*，处理不同的 mini-batch，并同步梯度。
 
 **原始 DP（PyTorch `DataParallel`）。**
 
@@ -43,7 +43,7 @@ permalink: /part2/ch11-large-scale-system-architecture.html
 
 **分布式数据并行（DDP，`DistributedDataParallel`）。**
 
-多进程方案：每块 GPU 各自运行一个进程。在反向计算继续进行的同时，通过 ring-AllReduce [sergeev2018horovod] 在后台同步梯度。
+多进程方案：每块 GPU 各自运行一个进程。在反向计算继续进行的同时，通过 ring-AllReduce [[194]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-sergeev2018horovod)] 在后台同步梯度。
 
 
 ![DDP：每块 GPU 持有完整的模型副本并处理不同的 batch。梯度通过 ring AllReduce 取平均，与反向计算重叠。]({{ site.baseurl }}/figures/fig_033_ddp.png)
@@ -79,7 +79,7 @@ model = DDP(model, device_ids=[local_rank],
 
 ### 张量并行（Tensor Parallelism, TP）
 
-张量并行（Megatron-LM 风格 [shoeybi2019megatron]）把*单个权重矩阵*切到多块 GPU 上。每块 GPU 计算部分结果，再通过 AllReduce 合并。
+张量并行（Megatron-LM 风格 [[195]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shoeybi2019megatron)]）把*单个权重矩阵*切到多块 GPU 上。每块 GPU 计算部分结果，再通过 AllReduce 合并。
 
 **列并行（Column-Parallel）线性层。**
 
@@ -125,7 +125,7 @@ $$
 
 ### 序列并行（Sequence Parallelism, SP）
 
-序列并行（Sequence Parallelism, SP） [korthikanti2023reducing] 解决的是张量并行单独无法消除的一个显存瓶颈：LayerNorm 和 Dropout 层中的**激活值显存**。
+序列并行（Sequence Parallelism, SP） [[196]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-korthikanti2023reducing)] 解决的是张量并行单独无法消除的一个显存瓶颈：LayerNorm 和 Dropout 层中的**激活值显存**。
 
 **问题。**
 
@@ -178,14 +178,14 @@ $$
 **流水线调度策略**
 | **调度** | **气泡** | **显存** | **特性** |
 | --- | --- | --- | --- |
-| GPipe | $\frac{P-1}{M+P-1}$ | $M \times$ 激活值 | 简单；先全部前向再全部反向 [huang2019gpipe] |
-| 1F1B | $\frac{P-1}{M+P-1}$ | $P \times$ 激活值 | 交错；稳态显存有界 [narayanan2019pipedream] |
-| Interleaved 1F1B | $\frac{P-1}{M \cdot V + P - 1}$ | $P \times$ 激活值 | 虚拟 stage（$V$）；进一步减小气泡 [narayanan2021efficient] |
-| Zero-Bubble（ZB-H1） | $\approx 0$ | $P \times$ 激活值 | 把反向拆成 B 和 W 两个阶段 [qi2023zerobubble] |
+| GPipe | $\frac{P-1}{M+P-1}$ | $M \times$ 激活值 | 简单；先全部前向再全部反向 [[197]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-huang2019gpipe)] |
+| 1F1B | $\frac{P-1}{M+P-1}$ | $P \times$ 激活值 | 交错；稳态显存有界 [[198]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-narayanan2019pipedream)] |
+| Interleaved 1F1B | $\frac{P-1}{M \cdot V + P - 1}$ | $P \times$ 激活值 | 虚拟 stage（$V$）；进一步减小气泡 [[199]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-narayanan2021efficient)] |
+| Zero-Bubble（ZB-H1） | $\approx 0$ | $P \times$ 激活值 | 把反向拆成 B 和 W 两个阶段 [[200]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-qi2023zerobubble)] |
 
 > **1F1B：生产标准**
 >
-> **1F1B**（one-forward-one-backward）调度 [narayanan2019pipedream] 被大多数生产系统采用（Megatron-LM [narayanan2021efficient]、DeepSpeed [rajbhandari2020zero]）：
+> **1F1B**（one-forward-one-backward）调度 [[198]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-narayanan2019pipedream)] 被大多数生产系统采用（Megatron-LM [[199]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-narayanan2021efficient)]、DeepSpeed [[201]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-rajbhandari2020zero)]）：
 >
 > **预热**：前向先填满流水线（P-1 个 micro-batch）。
 >
@@ -215,7 +215,7 @@ $$
 
 ### 完全分片数据并行（Fully Sharded Data Parallelism, FSDP / ZeRO-3）
 
-FSDP [zhao2023pytorch]（PyTorch）和 ZeRO-3 [rajbhandari2020zero]（DeepSpeed）解决了 DDP 固有的显存重复问题：不再让每块 GPU 都保存完整的参数、梯度和优化器状态，而是每块 GPU 只拥有 $1/N$ 的切片，需要时即时重建完整张量。
+FSDP [[202]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhao2023pytorch)]（PyTorch）和 ZeRO-3 [[201]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-rajbhandari2020zero)]（DeepSpeed）解决了 DDP 固有的显存重复问题：不再让每块 GPU 都保存完整的参数、梯度和优化器状态，而是每块 GPU 只拥有 $1/N$ 的切片，需要时即时重建完整张量。
 
 
 ![FSDP 把所有模型状态切片到多块 GPU 上。每块 GPU 拥有 $1/N$ 的参数、优化器状态和梯度。在每层计算前，通过 AllGather 按需重建完整参数。]({{ site.baseurl }}/figures/fig_038_fsdp.png)
@@ -338,9 +338,9 @@ model = FSDP(
 
 **优化栈**（累乘加速比）：
 
-1. **vLLM + PagedAttention** [kwon2023efficient]（2--4$\times$）：消除 KV cache 碎片，使更大 batch 成为可能
-2. **连续 batching（continuous batching）** [yu2022orca]（1.5--2$\times$）：不必等最长序列结束；一旦有序列结束就插入新的
-3. **推测解码（Speculative decoding）** [leviathan2023fast]（2--3$\times$）：小 draft 模型一次猜 5 个 token，大模型一次前向就能验证。平均接受 3--4 个。
+1. **vLLM + PagedAttention** [[138]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kwon2023efficient)]（2--4$\times$）：消除 KV cache 碎片，使更大 batch 成为可能
+2. **连续 batching（continuous batching）** [[203]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yu2022orca)]（1.5--2$\times$）：不必等最长序列结束；一旦有序列结束就插入新的
+3. **推测解码（Speculative decoding）** [[124]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-leviathan2023fast)]（2--3$\times$）：小 draft 模型一次猜 5 个 token，大模型一次前向就能验证。平均接受 3--4 个。
 4. **生成用 INT8/FP8 权重**（2$\times$）：带宽需求减半。因为我们在做采样（不是为训练算精确 logits），质量损失极小。
 5. **CUDA graphs**（1.1--1.3$\times$）：消除固定形状操作的 kernel 启动开销
 6. **Prefix caching**（共享前缀 prompt 下 1.5$\times$）：不重新计算 system prompt 的 KV cache
@@ -374,7 +374,7 @@ outputs = engine.generate(prompts, sampling_params)
 
 ## 解耦式架构：生产级设计
 
-诸如 DeepSpeed-Chat [yao2023deepspeedchat] 与 OpenRLHF [hu2024openrlhf] 这样的生产级 RLHF 系统采用**解耦式架构**，将生成、打分、训练拆成三个可独立扩展的集群。
+诸如 DeepSpeed-Chat [[204]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yao2023deepspeedchat)] 与 OpenRLHF [[205]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hu2024openrlhf)] 这样的生产级 RLHF 系统采用**解耦式架构**，将生成、打分、训练拆成三个可独立扩展的集群。
 
 
 ![解耦式 RLHF 架构。每个集群针对自己的负载做优化。打分后的 rollout 先在经验缓冲（experience buffer）中累积，再被训练消费。]({{ site.baseurl }}/figures/fig_040_fig40.png)
@@ -425,11 +425,11 @@ outputs = engine.generate(prompts, sampling_params)
 
 **其他技术**：
 
-- **梯度检查点（Gradient checkpointing）** [chen2016training]：不存全部激活，反向时重算。节省约 60% 激活显存，代价是约 33% 的额外计算。可选择性：只对 attention 层（显存重）做 checkpoint，保留 FFN 激活（重算成本高）。
-- **混合精度（Mixed precision）** [micikevicius2018mixed]：前向用 BF16（2 字节/参数），优化器状态用 FP32（m、v 各 4 字节）。master 权重用 FP32 累积。
-- **CPU offloading**（ZeRO-Infinity [rajbhandari2021zeroinfinity]）：把优化器状态放到 CPU RAM。显存省一半，但慢 2--3$\times$（PCIe 64GB/s 瓶颈）。
+- **梯度检查点（Gradient checkpointing）** [[206]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chen2016training)]：不存全部激活，反向时重算。节省约 60% 激活显存，代价是约 33% 的额外计算。可选择性：只对 attention 层（显存重）做 checkpoint，保留 FFN 激活（重算成本高）。
+- **混合精度（Mixed precision）** [[207]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-micikevicius2018mixed)]：前向用 BF16（2 字节/参数），优化器状态用 FP32（m、v 各 4 字节）。master 权重用 FP32 累积。
+- **CPU offloading**（ZeRO-Infinity [[208]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-rajbhandari2021zeroinfinity)]）：把优化器状态放到 CPU RAM。显存省一半，但慢 2--3$\times$（PCIe 64GB/s 瓶颈）。
 - **激活 offloading**：前向时把激活搬到 CPU，反向时再搬回来。仅在显存确实紧张时使用。
-- **FlashAttention** [dao2022flashattention, dao2023flashattention2]：attention 显存从 O($n^2$) 降到 O($n$)。快 2--4$\times$，长序列时显存节省巨大。
+- **FlashAttention** [[17]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-dao2022flashattention), [61]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-dao2023flashattention2)]：attention 显存从 O($n^2$) 降到 O($n$)。快 2--4$\times$，长序列时显存节省巨大。
 
 ### FlashAttention 对 RLHF 的影响
 
@@ -602,7 +602,7 @@ ds_config = {
 
 ### 衡量训练效率：MFU
 
-**模型 FLOPs 利用率（Model FLOPs Utilization, MFU）** [chowdhery2022palm] 是衡量训练效率的标准指标：
+**模型 FLOPs 利用率（Model FLOPs Utilization, MFU）** [[209]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chowdhery2022palm)] 是衡量训练效率的标准指标：
 
 $$
 \text{MFU} = \frac{\text{实际吞吐（tokens/秒）} \times \text{每 token 的 FLOPs}}{\text{硬件峰值 FLOPS}}
@@ -646,7 +646,7 @@ $$
 
 - **过小**：GPU 利用率低（算术强度低），通信占主导。
 - **过大**：每 token 的学习收益递减（超过 critical batch size），算力被浪费。
-- **最佳点**：*临界 batch size*（critical batch size）$B_\text{crit}$，即梯度噪声等于梯度信号之处。对 LLM，$B_\text{crit} \sim 1$--$4$M token [mccandlish2018empirical]。
+- **最佳点**：*临界 batch size*（critical batch size）$B_\text{crit}$，即梯度噪声等于梯度信号之处。对 LLM，$B_\text{crit} \sim 1$--$4$M token [[210]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-mccandlish2018empirical)]。
 
 对 RLHF 而言，batch 包含的是*rollout*（不仅仅是 token）：
 $$
@@ -805,7 +805,7 @@ future = dcp.async_save(
 
 ## RL 训练的优化器配置
 
-RL 训练（PPO、GRPO、DPO）相比预训练或 SFT 对优化器有独特要求。Loss 地形非平稳（policy 变化会改变生成的数据）、梯度更嘈杂（reward 信号方差大）、且更容易出现灾难性遗忘（Catastrophic Forgetting）或 reward hacking。本节以 AdamW [loshchilov2019adamw] 作为默认优化器，整理 RL 特有的优化器实践指南。
+RL 训练（PPO、GRPO、DPO）相比预训练或 SFT 对优化器有独特要求。Loss 地形非平稳（policy 变化会改变生成的数据）、梯度更嘈杂（reward 信号方差大）、且更容易出现灾难性遗忘（Catastrophic Forgetting）或 reward hacking。本节以 AdamW [[59]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-loshchilov2019adamw)] 作为默认优化器，整理 RL 特有的优化器实践指南。
 
 ### 为什么 RL 需要不同的优化器设置
 
@@ -872,7 +872,7 @@ RL 训练对数值精度尤其敏感：
 
 ### HuggingFace TRL 的 RL 配置
 
-TRL 库 [vonwerra2022trl] 为 LLM 的 PPO、DPO 等 RL 方法提供了生产级实现。
+TRL 库 [[160]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-vonwerra2022trl)] 为 LLM 的 PPO、DPO 等 RL 方法提供了生产级实现。
 
 ```python
 from trl import PPOConfig, PPOTrainer, DPOConfig, DPOTrainer
@@ -952,7 +952,7 @@ dpo_trainer.train()
 
 > **MoE 用于 RLHF**
 >
-> 混合专家（Mixture-of-Experts, MoE）模型 [fedus2022switch] 在 RLHF 中越来越常见：
+> 混合专家（Mixture-of-Experts, MoE）模型 [[89]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-fedus2022switch)] 在 RLHF 中越来越常见：
 >
 > - **优势**：相同算力下容量提升 3--4$\times$。对 reward 模型尤其有利（更多容量去打分）。
 > - **挑战**：专家并行需要 all-to-all 通信（token 跨 GPU 路由），与流水线并行存在冲突。

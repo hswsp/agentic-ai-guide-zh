@@ -4,7 +4,7 @@ title: 模型上下文协议（Model Context Protocol, MCP）
 permalink: /part5/ch21-mcp.html
 ---
 
-工具增强型语言模型的兴起带来了一个碎片化问题：每一个 Agent 框架、每一个 LLM 提供商、每一次企业部署都在发明自己的一套机制来把模型与外部工具和数据源连接起来。**模型上下文协议（Model Context Protocol, MCP）** [anthropic-mcp-2024] 由 Anthropic 于 2024 年末提出，是一个旨在彻底解决这一问题的开放标准——为 AI 应用与它们所需工具之间提供一个通用的、与厂商无关的接口。
+工具增强型语言模型的兴起带来了一个碎片化问题：每一个 Agent 框架、每一个 LLM 提供商、每一次企业部署都在发明自己的一套机制来把模型与外部工具和数据源连接起来。**模型上下文协议（Model Context Protocol, MCP）** [[323]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-anthropic-mcp-2024)] 由 Anthropic 于 2024 年末提出，是一个旨在彻底解决这一问题的开放标准——为 AI 应用与它们所需工具之间提供一个通用的、与厂商无关的接口。
 
 ## 动机：工具集成问题
 
@@ -142,7 +142,7 @@ Resources 支持**订阅**：client 可以订阅某个 resource URI，并在底�
 
 ## 协议规范
 
-MCP 构建在 **JSON-RPC 2.0** [jsonrpc2010spec] 之上，这是一种以 JSON 作为消息编码的轻量级远程过程调用协议。该选择提供了一个被广泛理解、与编程语言无关、且有广泛库支持的基础。
+MCP 构建在 **JSON-RPC 2.0** [[359]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jsonrpc2010spec)] 之上，这是一种以 JSON 作为消息编码的轻量级远程过程调用协议。该选择提供了一个被广泛理解、与编程语言无关、且有广泛库支持的基础。
 
 ### JSON-RPC 2.0 消息格式
 

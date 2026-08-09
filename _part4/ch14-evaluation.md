@@ -75,7 +75,7 @@ permalink: /part4/ch14-evaluation.html
 
 ### 标注者间一致性
 
-原始一致率（所有标注者达成一致的样本比例）是一个不充分的度量，因为它没有考虑偶然一致。两个标准的偶然性修正度量是 Cohen's $\kappa$[cohen1960coefficient]（两位标注者）和 Fleiss' $\kappa$[fleiss1971measuring]（多位标注者）。
+原始一致率（所有标注者达成一致的样本比例）是一个不充分的度量，因为它没有考虑偶然一致。两个标准的偶然性修正度量是 Cohen's $\kappa$[[240]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-cohen1960coefficient)]（两位标注者）和 Fleiss' $\kappa$[[241]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-fleiss1971measuring)]（多位标注者）。
 
 **Cohen's Kappa。**
 
@@ -148,7 +148,7 @@ $$
 
 ### 用于校准的 LLM-as-Judge
 
-当用 LLM 生成评估标签时，校准至关重要：评判者的分数必须与人类判断对齐。令 $h_i \in [0,1]$ 为样本 $i$ 的人类偏好分数，$\hat{h}_i$ 为评判者预测分数。校准误差由期望校准误差（Expected Calibration Error, ECE）[guo2017calibration] 度量：
+当用 LLM 生成评估标签时，校准至关重要：评判者的分数必须与人类判断对齐。令 $h_i \in [0,1]$ 为样本 $i$ 的人类偏好分数，$\hat{h}_i$ 为评判者预测分数。校准误差由期望校准误差（Expected Calibration Error, ECE）[[242]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-guo2017calibration)] 度量：
 
 $$
 \text{ECE} = \sum_{b=1}^{B} \frac{\lvert B_b \rvert}{n} \left\lvert \text{acc}(B_b) - \text{conf}(B_b) \right\rvert
@@ -160,7 +160,7 @@ $$
 
 ### Self-Instruct
 
-Self-Instruct[wang2022selfinstruct] 从一个由人工撰写的种子任务集合自举出指令跟随数据。算法如下：
+Self-Instruct[[243]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2022selfinstruct)] 从一个由人工撰写的种子任务集合自举出指令跟随数据。算法如下：
 
 1. 维护一个任务池，初始化为 $175$ 个种子任务。
 2. 从任务池中采样 $8$ 个任务，将其作为少样本示例，提示 LLM 生成新任务。
@@ -184,7 +184,7 @@ Self-Instruct[wang2022selfinstruct] 从一个由人工撰写的种子任务集�
 
 ### Evol-Instruct
 
-Evol-Instruct[xu2023wizardlm] 通过迭代地将指令改写得更复杂或更多样，来演化一个种子指令集。应用两类演化算子：
+Evol-Instruct[[244]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-xu2023wizardlm)] 通过迭代地将指令改写得更复杂或更多样，来演化一个种子指令集。应用两类演化算子：
 
 - **深度演化（In-depth evolution）：**增加约束、提升推理步骤数、将抽象具体化、加深对领域知识的要求。
 - **广度演化（In-breadth evolution）：**在相关但不同的主题上生成新指令，提升主题多样性。
@@ -193,7 +193,7 @@ Evol-Instruct[xu2023wizardlm] 通过迭代地将指令改写得更复杂或更�
 
 ### Constitutional AI 数据生成
 
-Constitutional AI（CAI）[bai2022constitutional] 通过让模型依据一组原则（即「宪法」）对自身输出进行批评与修订，从而生成偏好数据。流水线如下：
+Constitutional AI（CAI）[[110]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-bai2022constitutional)] 通过让模型依据一组原则（即「宪法」）对自身输出进行批评与修订，从而生成偏好数据。流水线如下：
 
 1. **监督学习阶段：**采样一个有害 Prompt，生成初始回答，然后提示模型依据某条宪法原则对回答进行批评并修订。将修订后的回答作为监督微调（SFT）的目标。
 2. **RL 阶段：**生成回答对（原始 vs. 修订），用模型标注哪一个更符合宪法，并在这些标签上训练偏好模型。将偏好模型作为 RLHF 的 Reward 信号。
@@ -215,7 +215,7 @@ Constitutional AI（CAI）[bai2022constitutional] 通过让模型依据一组原
 
 ### Arena 风格的成对生成
 
-Chatbot Arena[zheng2023judging] 通过一个众包对战平台来生成评估数据：用户提交 Prompt 并在两个匿名化的模型回答之间投票选择偏好。这能产生一个大规模、自然多样的成对偏好数据集。关键设计选择包括：
+Chatbot Arena[[245]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zheng2023judging)] 通过一个众包对战平台来生成评估数据：用户提交 Prompt 并在两个匿名化的模型回答之间投票选择偏好。这能产生一个大规模、自然多样的成对偏好数据集。关键设计选择包括：
 
 - **匿名化：**隐藏模型身份，防止品牌偏置。
 - **用户提交的 Prompt：**保证 Prompt 的多样性以及与真实世界的相关性。
@@ -228,7 +228,7 @@ Chatbot Arena[zheng2023judging] 通过一个众包对战平台来生成评估数
 
 ### ELO 评分系统
 
-ELO 系统[elo1978rating] 最初为国际象棋而设计，它为每位选手（模型）赋予一个标量评分 $R$，使得选手 $A$ 对阵选手 $B$ 的期望得分为：
+ELO 系统[[246]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-elo1978rating)] 最初为国际象棋而设计，它为每位选手（模型）赋予一个标量评分 $R$，使得选手 $A$ 对阵选手 $B$ 的期望得分为：
 
 $$
 E_A = \frac{1}{1 + 10^{(R_B - R_A)/400}}
@@ -260,7 +260,7 @@ $$
 
 ### Bradley--Terry 模型
 
-Bradley--Terry（BT）模型[bradley1952rank] 是 ELO 的一种最大似然替代方案。给定 $n$ 个模型，其实力参数为 $\beta_1, \ldots, \beta_n > 0$，模型 $i$ 击败模型 $j$ 的概率为：
+Bradley--Terry（BT）模型[[186]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-bradley1952rank)] 是 ELO 的一种最大似然替代方案。给定 $n$ 个模型，其实力参数为 $\beta_1, \ldots, \beta_n > 0$，模型 $i$ 击败模型 $j$ 的概率为：
 
 $$
 P(i \succ j) = \frac{\beta_i}{\beta_i + \beta_j}
@@ -282,7 +282,7 @@ $$
 
 ### TrueSkill
 
-TrueSkill[herbrich2006trueskill] 是一种贝叶斯式的实力评分系统，将每位选手的实力建模为高斯随机变量 $s_i \sim \mathcal{N}(\mu_i, \sigma_i^2)$。选手 $i$ 在某一局中的表现为 $p_i = s_i + \epsilon_i$，其中 $\epsilon_i \sim \mathcal{N}(0, \beta^2)$ 为比赛特定的噪声。当 $p_i > p_j$ 时，选手 $i$ 击败选手 $j$。
+TrueSkill[[247]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-herbrich2006trueskill)] 是一种贝叶斯式的实力评分系统，将每位选手的实力建模为高斯随机变量 $s_i \sim \mathcal{N}(\mu_i, \sigma_i^2)$。选手 $i$ 在某一局中的表现为 $p_i = s_i + \epsilon_i$，其中 $\epsilon_i \sim \mathcal{N}(0, \beta^2)$ 为比赛特定的噪声。当 $p_i > p_j$ 时，选手 $i$ 击败选手 $j$。
 
 观察到 $i \succ j$ 后的后验更新通过期望传播（Expectation Propagation, EP）计算。胜方的关键更新方程为：
 
@@ -298,7 +298,7 @@ $$
 
 ### 带置信区间的胜率
 
-最简单的排序指标是胜率：模型 $A$ 在成对比较中胜出的比例。给定 $n$ 次比较，其中 $w$ 次胜出，胜率为 $\hat{p} = w/n$。在 $p = 0$ 与 $p = 1$ 附近，Wilson 分数置信区间[wilson1927probable] 的覆盖性能优于朴素的 Wald 区间，因此更被推荐：
+最简单的排序指标是胜率：模型 $A$ 在成对比较中胜出的比例。给定 $n$ 次比较，其中 $w$ 次胜出，胜率为 $\hat{p} = w/n$。在 $p = 0$ 与 $p = 1$ 附近，Wilson 分数置信区间[[248]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wilson1927probable)] 的覆盖性能优于朴素的 Wald 区间，因此更被推荐：
 
 $$
 \text{CI} = \frac{\hat{p} + \frac{z^2}{2n} \pm z\sqrt{\frac{\hat{p}(1-\hat{p})}{n} + \frac{z^2}{4n^2}}}{1 + \frac{z^2}{n}}
@@ -308,7 +308,7 @@ $$
 
 ### Chatbot Arena 方法论
 
-Chatbot Arena[zheng2023judging] 将上述要素组合为一个生产规模的评估系统：
+Chatbot Arena[[245]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zheng2023judging)] 将上述要素组合为一个生产规模的评估系统：
 
 1. 用户提交 Prompt，并获得两个匿名化模型的回答。
 2. 用户对偏好的回答进行投票（或声明平局）。
@@ -324,7 +324,7 @@ Chatbot Arena[zheng2023judging] 将上述要素组合为一个生产规模的评
 
 ### BLEU
 
-BLEU（Bilingual Evaluation Understudy）[papineni2002bleu] 度量假设译文 $h$ 与一个或多个参考 $\mathcal{R}$ 之间的 $n$-gram 精度：
+BLEU（Bilingual Evaluation Understudy）[[249]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-papineni2002bleu)] 度量假设译文 $h$ 与一个或多个参考 $\mathcal{R}$ 之间的 $n$-gram 精度：
 
 $$
 \text{BLEU} = \text{BP} \cdot \exp\!\left(\sum_{n=1}^{N} w_n \log p_n\right)
@@ -348,7 +348,7 @@ $$
 
 ### ROUGE
 
-ROUGE（Recall-Oriented Understudy for Gisting Evaluation）[lin2004rouge] 是一类面向召回的指标，专为摘要任务设计：
+ROUGE（Recall-Oriented Understudy for Gisting Evaluation）[[250]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lin2004rouge)] 是一类面向召回的指标，专为摘要任务设计：
 
 $$
 \text{ROUGE-N} = \frac{\sum_{r \in \mathcal{R}} \sum_{\text{ngram} \in r} \min(\text{count}(\text{ngram}, h), \text{count}(\text{ngram}, r))}{\sum_{r \in \mathcal{R}} \sum_{\text{ngram} \in r} \text{count}(\text{ngram}, r)}
@@ -368,7 +368,7 @@ $$
 
 ### BERTScore
 
-BERTScore[zhang2020bertscore] 使用预训练 BERT 模型的上下文 Embedding 来计算 Token 级相似度。给定假设 Token $\hat{\mathbf{x}} = \langle \hat{x}_1, \ldots, \hat{x}_m \rangle$ 与参考 Token $\mathbf{x} = \langle x_1, \ldots, x_n \rangle$，及其 Embedding $\hat{\mathbf{e}}_i$ 与 $\mathbf{e}_j$：
+BERTScore[[251]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhang2020bertscore)] 使用预训练 BERT 模型的上下文 Embedding 来计算 Token 级相似度。给定假设 Token $\hat{\mathbf{x}} = \langle \hat{x}_1, \ldots, \hat{x}_m \rangle$ 与参考 Token $\mathbf{x} = \langle x_1, \ldots, x_n \rangle$，及其 Embedding $\hat{\mathbf{e}}_i$ 与 $\mathbf{e}_j$：
 
 $$
 R_{\text{BERT}} = \frac{1}{\lvert x \rvert} \sum_{x_j \in \mathbf{x}} \max_{\hat{x}_i \in \hat{\mathbf{x}}} \frac{\hat{\mathbf{e}}_i^\top \mathbf{e}_j}{\|\hat{\mathbf{e}}_i\| \|\mathbf{e}_j\|}
@@ -390,7 +390,7 @@ $$
 
 ### METEOR
 
-METEOR[banerjee2005meteor] 通过在 unigram 匹配上计算 F-score，并配合词干化与同义词匹配模块，解决了 BLEU 对召回的盲视：
+METEOR[[252]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-banerjee2005meteor)] 通过在 unigram 匹配上计算 F-score，并配合词干化与同义词匹配模块，解决了 BLEU 对召回的盲视：
 
 $$
 \text{METEOR} = F_{\text{mean}} \cdot (1 - \text{Pen})
@@ -410,7 +410,7 @@ $$
 
 ### 代码任务的 Pass@k
 
-对于代码生成，功能正确性通过在测试用例上执行生成的代码来衡量。pass@$k$ 指标[chen2021evaluating] 估计在 $k$ 个生成样本中至少有一个通过全部测试的概率：
+对于代码生成，功能正确性通过在测试用例上执行生成的代码来衡量。pass@$k$ 指标[[253]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chen2021evaluating)] 估计在 $k$ 个生成样本中至少有一个通过全部测试的概率：
 
 $$
 \text{pass@}k = \mathbb{E}_{\text{problems}}\!\left[1 - \frac{\binom{n-c}{k}}{\binom{n}{k}}\right]
@@ -521,7 +521,7 @@ $$
 
 ### SWE-bench 方法论
 
-SWE-bench[jimenez2024swebench] 在真实软件工程任务上评估 LLM：给定一个 GitHub issue 描述与仓库代码库，模型必须生成解决该 issue 的 patch。评估流程如下：
+SWE-bench[[254]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jimenez2024swebench)] 在真实软件工程任务上评估 LLM：给定一个 GitHub issue 描述与仓库代码库，模型必须生成解决该 issue 的 patch。评估流程如下：
 
 1. 将 issue 描述与相关代码上下文提供给模型。
 2. 模型生成一个 patch（统一 diff 格式）。
@@ -539,7 +539,7 @@ SWE-bench[jimenez2024swebench] 在真实软件工程任务上评估 LLM：给定
 
 ### WebArena 方法论
 
-WebArena[zhou2024webarena] 在沙箱浏览器环境中以贴近真实的网页导航任务评估 Agent。该基准包含跨五个 Web 应用（电商、社交论坛、协作开发、内容管理与地图）的 812 个任务。评估方式如下：
+WebArena[[255]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhou2024webarena)] 在沙箱浏览器环境中以贴近真实的网页导航任务评估 Agent。该基准包含跨五个 Web 应用（电商、社交论坛、协作开发、内容管理与地图）的 812 个任务。评估方式如下：
 
 - **功能性评估：**通过检查应用状态来验证任务结果（例如「商品是否已加入购物车？」「帖子是否已创建？」）。
 - **基于 URL 的评估：**对于导航任务，将最终 URL 与期望 URL 进行比较。
@@ -552,12 +552,12 @@ WebArena[zhou2024webarena] 在沙箱浏览器环境中以贴近真实的网页�
 | SWE-bench | 软件工程 | 2,294 | 测试执行 | $\sim$43 |
 | SWE-bench Lite | 软件工程 | 300 | 测试执行 | $\sim$50 |
 | WebArena | 网页导航 | 812 | 状态/URL/程序 | $\sim$40 |
-| ALFWorld[shridhar2021alfworld] | 家居任务 | 3,553 | 仿真器状态 | $\sim$90 |
-| AgentBench[liu2023agentbench] | 多领域 | 1,091 | 任务特定 | $\sim$45 |
+| ALFWorld[[256]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shridhar2021alfworld)] | 家居任务 | 3,553 | 仿真器状态 | $\sim$90 |
+| AgentBench[[257]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2023agentbench)] | 多领域 | 1,091 | 任务特定 | $\sim$45 |
 
 ## LLM-as-Judge
 
-LLM-as-Judge[zheng2023judging] 使用一个能力强的 LLM 来评估其他（或同一个）LLM 的输出。该方法无需人工标注就能扩展到大规模评估集合，并能为其判断提供详尽的理由。
+LLM-as-Judge[[245]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zheng2023judging)] 使用一个能力强的 LLM 来评估其他（或同一个）LLM 的输出。该方法无需人工标注就能扩展到大规模评估集合，并能为其判断提供详尽的理由。
 
 ### 设置与 Prompt 模板
 
@@ -653,7 +653,7 @@ $$
 
 ### G-Eval 框架
 
-G-Eval[liu2023geval] 是一个面向 LLM 评估的结构化框架，使用思维链（Chain-of-Thought，CoT）提示与 Token 概率加权来产出更可靠的分数。框架如下：
+G-Eval[[258]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2023geval)] 是一个面向 LLM 评估的结构化框架，使用思维链（Chain-of-Thought，CoT）提示与 Token 概率加权来产出更可靠的分数。框架如下：
 
 1. **生成评估步骤：**提示 LLM 为评估任务生成详尽的评分细则（例如"列出你评估一篇摘要连贯性时所采取的步骤"）。
 2. **以概率加权方式打分：**对每个分值 $s \in \{1, 2, 3, 4, 5\}$，从评判模型获取对数概率 $\log P_\theta(s \mid \text{prompt, steps, response})$。最终分数为以概率加权的平均：
@@ -697,11 +697,11 @@ G-Eval 与人类判断的相关性高于直接提示，尤其在连贯性与一�
 
 > **基准的生命周期**
 >
-> 基准的效用会随着研究社区对其的优化而随时间退化。MMLU[hendrycks2021measuring] 曾是对世界知识的挑战性测试，如今模型在其上已接近人类水平，但这些模型在新的知识任务上仍会失败。新基准应被视为临时的信号源，而非永久的金标准。
+> 基准的效用会随着研究社区对其的优化而随时间退化。MMLU[[259]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hendrycks2021measuring)] 曾是对世界知识的挑战性测试，如今模型在其上已接近人类水平，但这些模型在新的知识任务上仍会失败。新基准应被视为临时的信号源，而非永久的金标准。
 
 ### 评估中的 Goodhart 定律
 
-Goodhart 定律指出：*"当一个度量成为目标时，它就不再是好的度量。"*[goodhart1984problems] 在 LLM 评估中，这有多种体现：
+Goodhart 定律指出：*"当一个度量成为目标时，它就不再是好的度量。"*[[260]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-goodhart1984problems)] 在 LLM 评估中，这有多种体现：
 
 - **Reward 欺骗（Reward hacking）：**用基于人类反馈的强化学习（Reinforcement Learning from Human Feedback, RLHF）训练的模型可能学会利用 Reward 模型，而非真正提升质量。模型可能学会输出冗长、听起来自信但实际上事实错误的回答，这类回答在 Reward 模型上得分却很高。
 - **指标博弈：**为最大化 BLEU 或 ROUGE 而微调的模型，可能产出在这些指标上得分良好但对人类用处不大的输出。

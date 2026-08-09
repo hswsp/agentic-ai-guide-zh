@@ -20,7 +20,7 @@ permalink: /part5/ch17-memory-systems.html
 
 > **记忆作为认知架构**
 >
-> 认知科学在生物智能体中区分出多种记忆系统 [tulving1985memory, squire1992declarative]：*工作记忆*（对信息的主动操控）、*情景记忆*（自传式事件）、*语义记忆*（世界知识）以及*程序记忆*（技能与习惯）。有效的智能体 AI 系统从类似的划分中获益——并非因为我们要模拟神经科学，而是因为这些类别真实地反映了截然不同的*访问模式*、*更新频率*和*检索机制*。
+> 认知科学在生物智能体中区分出多种记忆系统 [[293]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-tulving1985memory), [294]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-squire1992declarative)]：*工作记忆*（对信息的主动操控）、*情景记忆*（自传式事件）、*语义记忆*（世界知识）以及*程序记忆*（技能与习惯）。有效的智能体 AI 系统从类似的划分中获益——并非因为我们要模拟神经科学，而是因为这些类别真实地反映了截然不同的*访问模式*、*更新频率*和*检索机制*。
 
 形式化地，我们把 Agent 建模为一个元组 $\mathcal{A} = (\pi_\theta, \mathcal{M}, \mathcal{R}, \mathcal{W})$，其中 $\pi_\theta$ 是 Policy（LLM），$\mathcal{M}$ 是记忆存储，$\mathcal{R}: \mathcal{Q} \times \mathcal{M} \to \mathcal{D}$ 是把查询映射到检索结果的检索函数，$\mathcal{W}: \mathcal{M} \times \mathcal{E} \to \mathcal{M}$ 是用新经验 $\mathcal{E}$ 更新记忆的写入函数。在每一步 $t$，Agent 观察到 $o_t$，检索相关上下文 $c_t = \mathcal{R}(o_t, \mathcal{M})$，并采取行动：
 
@@ -38,7 +38,7 @@ $$
 
 工作记忆是 Agent 的*活动工作空间*：当前正在被操控的信息。在 LLM Agent 中它对应于：
 
-- **草稿板（Scratchpads）。** 在产出最终答案之前写入专用缓冲区的中间推理步骤（例如思维链 Chain-of-Thought [wei2022chain]、scratchpad [nye2021show]）。
+- **草稿板（Scratchpads）。** 在产出最终答案之前写入专用缓冲区的中间推理步骤（例如思维链 Chain-of-Thought [[103]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wei2022chain)]、scratchpad [[295]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-nye2021show)]）。
 - **思维链缓冲区。** 在答案 Token $a$ 之前生成的推理 Token 序列 $z_1, z_2, \ldots, z_k$，建模为 $p(a \mid x) = \sum_z p(a \mid x, z)\,p(z \mid x)$。
 - **对话上下文。** 保留在上下文窗口中的近期轮次历史 $[(u_1, a_1), \ldots, (u_t, a_t)]$。
 
@@ -86,7 +86,7 @@ $$
 
 ### 基于 RAG 的记忆
 
-检索增强生成（Retrieval-Augmented Generation, RAG） [lewis2020retrieval] 是 LLM Agent 外部记忆的主流范式。记忆存储 $\mathcal{M}$ 是文档集合 $\{d_i\}_{i=1}^N$；检索把查询 $q$ 映射到一个有序子集。
+检索增强生成（Retrieval-Augmented Generation, RAG） [[109]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lewis2020retrieval)] 是 LLM Agent 外部记忆的主流范式。记忆存储 $\mathcal{M}$ 是文档集合 $\{d_i\}_{i=1}^N$；检索把查询 $q$ 映射到一个有序子集。
 
 **Embedding 存储与向量数据库。**
 
@@ -96,11 +96,11 @@ $$
 \text{Retrieve}(q, \mathcal{M}, k) = \underset{S \subseteq [N],\, \lvert S \rvert=k}{\arg\max} \sum_{i \in S} \text{sim}(\mathbf{q}, \mathbf{v}_i),
 $$
 
-其中 $\text{sim}(\cdot,\cdot)$ 通常为余弦相似度。近似最近邻（Approximate Nearest-Neighbor, ANN）索引（FAISS [johnson2019billion]、HNSW [malkov2018efficient]、ScaNN [guo2020scann]）使得 $N \sim 10^7$ 量级下仍然可行。
+其中 $\text{sim}(\cdot,\cdot)$ 通常为余弦相似度。近似最近邻（Approximate Nearest-Neighbor, ANN）索引（FAISS [[263]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-johnson2019billion)]、HNSW [[264]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-malkov2018efficient)]、ScaNN [[296]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-guo2020scann)]）使得 $N \sim 10^7$ 量级下仍然可行。
 
 **检索策略。**
 
-- **稠密检索（Dense retrieval）。** 查询和文档都由神经编码器编码（例如 DPR [karpukhin2020dense]、`text-embedding-3-large`）。能捕捉语义相似度，但需要 GPU 推理。
+- **稠密检索（Dense retrieval）。** 查询和文档都由神经编码器编码（例如 DPR [[262]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-karpukhin2020dense)]、`text-embedding-3-large`）。能捕捉语义相似度，但需要 GPU 推理。
 - **稀疏检索（Sparse retrieval）。** 基于 Token 重叠的 BM25 或 TF-IDF。快速、可解释、在精确关键词匹配上表现强劲。
 - **混合检索（Hybrid retrieval）。** 通过倒数排名融合（Reciprocal Rank Fusion, RRF）合并稠密与稀疏分数：
 
@@ -108,7 +108,7 @@ $$
 \text{RRF}(d, k) = \sum_{r \in \text{rankers}} \frac{1}{k + \text{rank}_r(d)},
 $$
 
-其中 $k=60$ 是平滑常数。混合检索一致地优于单独使用任一种 [chen2022hybrid]。
+其中 $k=60$ 是平滑常数。混合检索一致地优于单独使用任一种 [[297]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chen2022hybrid)]。
 
 **重排序（Re-ranking）。**
 
@@ -134,7 +134,7 @@ $$
 
 **分层压缩（Hierarchical Compression）。**
 
-将记忆组织为层级 $L_0 \supset L_1 \supset \cdots \supset L_K$，其中 $L_0$ 是原文，每个 $L_{i+1}$ 都是 $L_i$ 的摘要。检索首先访问 $L_K$（压缩程度最高、最快），按需逐层深入。这呼应了 Forte [forte2022building] 的*渐进式摘要*技术。
+将记忆组织为层级 $L_0 \supset L_1 \supset \cdots \supset L_K$，其中 $L_0$ 是原文，每个 $L_{i+1}$ 都是 $L_i$ 的摘要。检索首先访问 $L_K$（压缩程度最高、最快），按需逐层深入。这呼应了 Forte [[298]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-forte2022building)] 的*渐进式摘要*技术。
 
 **何时摘要、何时原样存储。**
 
@@ -146,7 +146,7 @@ $$
 
 **知识图谱。**
 
-知识图谱 $\mathcal{G} = (\mathcal{V}, \mathcal{E}, \mathcal{R})$ 把事实存储为三元组 $(h, r, t)$，其中 $h, t \in \mathcal{V}$ 是实体，$r \in \mathcal{R}$ 是关系。Agent 可通过 SPARQL [harris2013sparql]、Cypher [francis2018cypher] 或自然语言到图的翻译进行查询。
+知识图谱 $\mathcal{G} = (\mathcal{V}, \mathcal{E}, \mathcal{R})$ 把事实存储为三元组 $(h, r, t)$，其中 $h, t \in \mathcal{V}$ 是实体，$r \in \mathcal{R}$ 是关系。Agent 可通过 SPARQL [[299]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-harris2013sparql)]、Cypher [[300]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-francis2018cypher)] 或自然语言到图的翻译进行查询。
 
 **实体-关系抽取。**
 
@@ -154,7 +154,7 @@ $$
 
 **GraphRAG。**
 
-GraphRAG [edge2024local] 在 RAG 之上叠加图遍历：给定一个查询，先检索种子实体，然后通过 $k$ 跳邻域遍历来挖掘 Embedding 相似度未直接匹配到的相关事实。这对多跳推理尤其强大：
+GraphRAG [[278]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-edge2024local)] 在 RAG 之上叠加图遍历：给定一个查询，先检索种子实体，然后通过 $k$ 跳邻域遍历来挖掘 Embedding 相似度未直接匹配到的相关事实。这对多跳推理尤其强大：
 
 $$
 \text{GraphRetrieve}(q, \mathcal{G}, k) = \bigcup_{v \in \text{seeds}(q)} \mathcal{N}_k(v, \mathcal{G}),
@@ -164,11 +164,11 @@ $$
 
 **时序知识图谱。**
 
-事实具有有效期：$(h, r, t, [t_\text{start}, t_\text{end}])$。时序知识图谱 [lacroix2020tensor] 支持类似 “2023 年 OpenAI 的 CEO 是谁？” 的查询，而不会把过去与现在的状态混淆在一起。
+事实具有有效期：$(h, r, t, [t_\text{start}, t_\text{end}])$。时序知识图谱 [[301]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lacroix2020tensor)] 支持类似 “2023 年 OpenAI 的 CEO 是谁？” 的查询，而不会把过去与现在的状态混淆在一起。
 
 ### 键值记忆网络（Key-Value Memory Networks）
 
-可微分记忆网络 [weston2014memory, sukhbaatar2015end] 把记忆表示为一组键值对 $\{(\mathbf{k}_i, \mathbf{v}_i)\}_{i=1}^M$，并通过基于软 Attention 的检索访问：
+可微分记忆网络 [[302]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-weston2014memory), [303]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-sukhbaatar2015end)] 把记忆表示为一组键值对 $\{(\mathbf{k}_i, \mathbf{v}_i)\}_{i=1}^M$，并通过基于软 Attention 的检索访问：
 
 $$
 \alpha_i = \text{softmax}\!\left(\frac{\mathbf{q}^\top \mathbf{k}_i}{\sqrt{D}}\right), \qquad
@@ -179,7 +179,7 @@ $$
 
 ### MemGPT 与虚拟上下文管理
 
-MemGPT [packer2023memgpt] 引入了类似操作系统虚拟内存的*虚拟上下文*抽象。记忆被组织为多层：
+MemGPT [[304]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-packer2023memgpt)] 引入了类似操作系统虚拟内存的*虚拟上下文*抽象。记忆被组织为多层：
 
 **页入/页出策略（Page-In / Page-Out）。**
 
@@ -226,11 +226,11 @@ $$
 | 格式 | 优点 | 缺点 |
 | --- | --- | --- |
 | **原子事实**（“用户偏好 Python。”） | 检索精确；可组合；去重与冲突检测容易 | 失去上下文；存在抽取错误；对细微信息脆弱 |
-| **结构化笔记**（A-MEM [xu2025amem]） | 元数据丰富（标签、链接）；支持图遍历；在精确性与上下文之间取得平衡 | 写入成本更高；需要预先设计 schema |
-| **摘要式 Episode**（MemGPT [packer2023memgpt]） | 保留叙事连贯性；紧凑；适合多轮（Multi-Turn）推理 | 摘要有损；难以局部更新 |
+| **结构化笔记**（A-MEM [[305]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-xu2025amem)]） | 元数据丰富（标签、链接）；支持图遍历；在精确性与上下文之间取得平衡 | 写入成本更高；需要预先设计 schema |
+| **摘要式 Episode**（MemGPT [[304]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-packer2023memgpt)]） | 保留叙事连贯性；紧凑；适合多轮（Multi-Turn）推理 | 摘要有损；难以局部更新 |
 | **原始对话记录** | 无损；无抽取错误；支持精确引用 | 存储量大；检索嘈杂；扫描代价高 |
 
-实际生产系统往往会组合多种粒度 [chhikara2025mem0]：抽取原子事实以支持精确召回，维护摘要式 Episode 以保留叙事性上下文，并把原始对话记录存入冷存储以满足可审计性需求。Generative Agents 架构 [park2023generative] 将观察存储为原子的“记忆对象”，附带自然语言描述、重要性分数与时间戳——同时支持精确检索与时序推理。
+实际生产系统往往会组合多种粒度 [[306]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chhikara2025mem0)]：抽取原子事实以支持精确召回，维护摘要式 Episode 以保留叙事性上下文，并把原始对话记录存入冷存储以满足可审计性需求。Generative Agents 架构 [[307]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-park2023generative)] 将观察存储为原子的“记忆对象”，附带自然语言描述、重要性分数与时间戳——同时支持精确检索与时序推理。
 
 **设计准则。**
 
@@ -244,7 +244,7 @@ $$
 
 检索查询 $q$ 未必要直接使用原始观察。更好的策略包括：
 
-- **HyDE（假设性文档 Embedding，Hypothetical Document Embeddings）** [gao2022precise]： 先生成一个假设性的答案，对其做 Embedding，然后以该 Embedding 作为查询。
+- **HyDE（假设性文档 Embedding，Hypothetical Document Embeddings）** [[274]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-gao2022precise)]： 先生成一个假设性的答案，对其做 Embedding，然后以该 Embedding 作为查询。
 - **查询扩展（Query expansion）：** 生成查询的多个改写，并取检索结果的并集。
 - **回退式 Prompt（Step-back prompting）：** 在检索之前先把具体查询抽象为一个更一般的问题。
 
@@ -256,7 +256,7 @@ $$
 \text{score}(d, q, t) = \lambda \cdot \text{sim}(\mathbf{q}, \mathbf{v}_d) + (1-\lambda) \cdot \exp\!\left(-\frac{t - t_d}{\tau_\text{decay}}\right),
 $$
 
-其中 $t_d$ 是记忆的创建时间，$\tau_\text{decay}$ 控制衰减速率。Generative Agents 论文 [park2023generative] 采用了类似的近期性加权检索。
+其中 $t_d$ 是记忆的创建时间，$\tau_\text{decay}$ 控制衰减速率。Generative Agents 论文 [[307]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-park2023generative)] 采用了类似的近期性加权检索。
 
 ### 更新：冲突解决与巩固
 
@@ -272,11 +272,11 @@ $$
 
 - **LRU 驱逐：** 容量超限时移除最近最少使用的条目。
 - **重要性加权的遗忘：** $p(\text{forget}\,\mid\,d) \propto \exp(-\text{importance}(d))$。
-- **间隔重复（Spaced repetition）：** 反复被访问的记忆保留得更久，遵循指数遗忘曲线 [ebbinghaus1885memory]。
+- **间隔重复（Spaced repetition）：** 反复被访问的记忆保留得更久，遵循指数遗忘曲线 [[308]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-ebbinghaus1885memory)]。
 
 ### 反思：元认知操作
 
-反思（reflection） [park2023generative, shinn2023reflexion] 是一种高阶记忆操作：Agent 读取自己的记忆并生成*洞见*：
+反思（reflection） [[307]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-park2023generative), [212]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shinn2023reflexion)] 是一种高阶记忆操作：Agent 读取自己的记忆并生成*洞见*：
 
 $$
 \text{Reflect}(\mathcal{M}) \to \{i_1, i_2, \ldots\} \subset \mathcal{M}_\text{semantic},
@@ -293,7 +293,7 @@ $$
 > 3. 把这条洞见存入语义记忆。
 > 4. 在下一次尝试中检索这条洞见，并显式地检查空输入。
 >
-> 这就是 Reflexion [shinn2023reflexion] 的核心机制：通过自我反思的“言语化强化学习”。
+> 这就是 Reflexion [[212]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shinn2023reflexion)] 的核心机制：通过自我反思的“言语化强化学习”。
 
 **反思结果存放在哪里？**
 
@@ -358,7 +358,7 @@ $$
 
 ### Blackboard 架构
 
-*blackboard*（黑板）模式 [hayes1985blackboard] 是一种经典的多智能体协调机制：
+*blackboard*（黑板）模式 [[309]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hayes1985blackboard)] 是一种经典的多智能体协调机制：
 
 每个 Agent 都从 blackboard 读取并向其写入。一个*控制器*监控 blackboard，并在某个 Agent 的前置条件满足时将其激活。这把 Agent 彼此解耦：它们通过共享状态而非直接消息进行通信。
 
@@ -403,13 +403,13 @@ $$
 
 常见的方法有：
 
-- **事后重标记（Hindsight relabeling）** [andrychowicz2017hindsight]。一个 Episode 成功后，回溯性地把被检索到的记忆标记为“重要”，并训练写入 Policy 去存储类似条目。
-- **元强化学习（Meta-RL）** [duan2016rl2]。在一组任务分布上训练写入 Policy；Policy 学到存储能在任务间泛化的信息。
-- **好奇心驱动的存储（Curiosity-driven storage）** [pathak2017curiosity]。存储令人意外（预测误差高）的观察，因为它们更可能蕴含信息。
+- **事后重标记（Hindsight relabeling）** [[310]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-andrychowicz2017hindsight)]。一个 Episode 成功后，回溯性地把被检索到的记忆标记为“重要”，并训练写入 Policy 去存储类似条目。
+- **元强化学习（Meta-RL）** [[311]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-duan2016rl2)]。在一组任务分布上训练写入 Policy；Policy 学到存储能在任务间泛化的信息。
+- **好奇心驱动的存储（Curiosity-driven storage）** [[312]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-pathak2017curiosity)]。存储令人意外（预测误差高）的观察，因为它们更可能蕴含信息。
 
 ### 记忆增强的 Policy 优化
 
-联合优化 Policy 与其记忆系统的思想可追溯到可微分记忆网络 [graves2016hybrid]，并由 REALM [guu2020realm] 推广到检索增强的 LLM。一个记忆增强 Agent 的完整 Policy Gradient 目标为：
+联合优化 Policy 与其记忆系统的思想可追溯到可微分记忆网络 [[313]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-graves2016hybrid)]，并由 REALM [[292]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-guu2020realm)] 推广到检索增强的 LLM。一个记忆增强 Agent 的完整 Policy Gradient 目标为：
 
 $$
 \mathcal{L}(\theta, \phi) = \mathbb{E}_{\tau \sim \pi_\theta}\!\left[\sum_{t=0}^T \gamma^t r_t\right] - \lambda \cdot \mathcal{L}_\text{mem}(\phi),
@@ -426,14 +426,14 @@ $$
 | 架构 | 容量 | 检索 | 更新成本 | 可训练 | 最适合 |
 | --- | --- | --- | --- | --- | --- |
 | 上下文内（工作记忆） | $O(L)$ Token | 0 ms | 免费 | 通过微调 | 短任务、主动推理 |
-| 稠密 RAG [lewis2020retrieval] | $O(10^7)$ 文档 | 10--50 ms | $O(1)$ Embedding | 仅编码器 | 语义检索、问答 |
-| 稀疏（BM25） [robertson2009probabilistic] | $O(10^8)$ 文档 | 1--5 ms | $O(\lvert d \rvert)$ 索引 | 否 | 关键词检索、法律/医疗 |
-| 混合 RAG [chen2022hybrid] | $O(10^7)$ 文档 | 15--60 ms | $O(1)$ Embedding | 仅编码器 | 通用检索 |
+| 稠密 RAG [[109]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lewis2020retrieval)] | $O(10^7)$ 文档 | 10--50 ms | $O(1)$ Embedding | 仅编码器 | 语义检索、问答 |
+| 稀疏（BM25） [[261]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-robertson2009probabilistic)] | $O(10^8)$ 文档 | 1--5 ms | $O(\lvert d \rvert)$ 索引 | 否 | 关键词检索、法律/医疗 |
+| 混合 RAG [[297]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chen2022hybrid)] | $O(10^7)$ 文档 | 15--60 ms | $O(1)$ Embedding | 仅编码器 | 通用检索 |
 | 摘要 | 无上限 | 0 ms（在上下文内） | $O(\lvert e \rvert)$ 次 LLM 调用 | 通过微调 | 长对话、叙事 |
-| 知识图谱 [lacroix2020tensor] | $O(10^9)$ 三元组 | 5--100 ms | $O(1)$ 插入 | Embedding 层 | 结构化事实、多跳 |
-| 键值记忆网络 [sukhbaatar2015end] | $O(M)$ 槽位 | $O(M)$ Attention | 一次 Gradient 更新 | 完全可训 | 端到端可微任务 |
-| MemGPT 分层 [packer2023memgpt] | 无上限 | 0--100 ms | 混合 | 通过 RL | 长周期 Agent、助手 |
-| Graph RAG [edge2024local] | $O(10^7)$ 节点 | 20--200 ms | $O(1)$ 插入 | 仅编码器 | 复杂推理、社区结构 |
+| 知识图谱 [[301]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lacroix2020tensor)] | $O(10^9)$ 三元组 | 5--100 ms | $O(1)$ 插入 | Embedding 层 | 结构化事实、多跳 |
+| 键值记忆网络 [[303]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-sukhbaatar2015end)] | $O(M)$ 槽位 | $O(M)$ Attention | 一次 Gradient 更新 | 完全可训 | 端到端可微任务 |
+| MemGPT 分层 [[304]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-packer2023memgpt)] | 无上限 | 0--100 ms | 混合 | 通过 RL | 长周期 Agent、助手 |
+| Graph RAG [[278]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-edge2024local)] | $O(10^7)$ 节点 | 20--200 ms | $O(1)$ 插入 | 仅编码器 | 复杂推理、社区结构 |
 
 ## 评估记忆系统
 
@@ -441,7 +441,7 @@ $$
 
 ### 评估维度
 
-LongMemEval [wu2024longmemeval] 提出长期记忆系统必须展现的五项核心能力：
+LongMemEval [[314]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wu2024longmemeval)] 提出长期记忆系统必须展现的五项核心能力：
 
 1. **信息抽取。** 系统能否从对话轮次中识别并存储显著事实？通过事实召回率衡量：有多少真值事实可从记忆中恢复？
 2. **跨会话推理。** 系统能否综合分散在多次过往会话中的信息？例如：“根据我们上周和昨天的对话，项目范围发生了哪些变化？”
@@ -453,9 +453,9 @@ LongMemEval [wu2024longmemeval] 提出长期记忆系统必须展现的五项核
 
 | 基准 | 发表会议/期刊 | 规模 | 关注点 |
 | --- | --- | --- | --- |
-| LongMemEval [wu2024longmemeval] | ICLR 2025 | 500 个问题，可扩展的历史 | 五项记忆能力；多会话对话 |
-| LOCOMO [maharana2024locomo] | EMNLP 2024 | 多会话对话 | 对话之上的单跳、时序、多跳与开放域问答 |
-| InfiniteBench [zhang2024infinitebench] | ACL 2024 | 100K+ Token 上下文 | 长上下文召回，并非专门为记忆设计，但能测试上限 |
+| LongMemEval [[314]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wu2024longmemeval)] | ICLR 2025 | 500 个问题，可扩展的历史 | 五项记忆能力；多会话对话 |
+| LOCOMO [[315]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-maharana2024locomo)] | EMNLP 2024 | 多会话对话 | 对话之上的单跳、时序、多跳与开放域问答 |
+| InfiniteBench [[316]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhang2024infinitebench)] | ACL 2024 | 100K+ Token 上下文 | 长上下文召回，并非专门为记忆设计，但能测试上限 |
 
 ### 度量指标
 
@@ -675,7 +675,7 @@ class VectorMemoryStore:
 
 ### 分层记忆管理器
 
-受 MemGPT [packer2023memgpt] 启发，这一模式把记忆组织为三层：*热（hot）*（在上下文内，立即可访问）、*温（warm）*（向量存储，可快速检索）和*冷（cold）*（归档，容量无上限）。条目根据访问频率与重要性自动升级或降级——类似 CPU 的缓存层级。
+受 MemGPT [[304]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-packer2023memgpt)] 启发，这一模式把记忆组织为三层：*热（hot）*（在上下文内，立即可访问）、*温（warm）*（向量存储，可快速检索）和*冷（cold）*（归档，容量无上限）。条目根据访问频率与重要性自动升级或降级——类似 CPU 的缓存层级。
 
 ```python
 from enum import Enum
@@ -838,7 +838,7 @@ class HierarchicalMemoryManager:
 
 ### 记忆增强的 Agent 循环
 
-这一模式由 MemGPT [packer2023memgpt] 提出，并在 CoALA 框架 [sumers2023coala] 中得到形式化。它通过一个*读—行动—反思—写入*的循环把记忆系统接入 Agent 的推理流程：响应之前，Agent 检索相关记忆；响应之后，Agent 决定要存什么。LLM 输出中的特殊 Token 会触发记忆操作，从而把对自身持久化的控制权交给模型本身。
+这一模式由 MemGPT [[304]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-packer2023memgpt)] 提出，并在 CoALA 框架 [[317]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-sumers2023coala)] 中得到形式化。它通过一个*读—行动—反思—写入*的循环把记忆系统接入 Agent 的推理流程：响应之前，Agent 检索相关记忆；响应之后，Agent 决定要存什么。LLM 输出中的特殊 Token 会触发记忆操作，从而把对自身持久化的控制权交给模型本身。
 
 ```python
 import re
@@ -1054,7 +1054,7 @@ and to personalize your responses."""
 
 ### CoALA：面向语言 Agent 的认知架构
 
-Sumers 等人 [sumers2023coala] 提出了 *面向语言 Agent 的认知架构*（Cognitive Architectures for Language Agents, CoALA），这是一个借用认知科学与符号 AI 原则、用于组织日益庞杂的 LLM Agent 生态的统一框架。CoALA 将一个语言 Agent 拆解为：
+Sumers 等人 [[317]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-sumers2023coala)] 提出了 *面向语言 Agent 的认知架构*（Cognitive Architectures for Language Agents, CoALA），这是一个借用认知科学与符号 AI 原则、用于组织日益庞杂的 LLM Agent 生态的统一框架。CoALA 将一个语言 Agent 拆解为：
 
 - **模块化记忆**：工作记忆（上下文窗口）、情景记忆（过往经验）、语义记忆（世界知识）以及程序记忆（动作 schema）——与「记忆类型分类」一节的分类体系相对应。
 - **结构化的动作空间**：内部动作（推理、检索、记忆写入）与外部动作（工具调用 Tool Calling、与环境交互）。
@@ -1064,7 +1064,7 @@ CoALA 的贡献与其说是一个新系统，不如说是一种*设计语言*：
 
 ### Mem0：生产级记忆层
 
-Mem0 [chhikara2025mem0] 致力于弥合研究型记忆系统与生产部署之间的鸿沟。核心思路：
+Mem0 [[306]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chhikara2025mem0)] 致力于弥合研究型记忆系统与生产部署之间的鸿沟。核心思路：
 
 - **自动抽取**：Mem0 并不依赖 LLM 显式发出记忆写入命令，而是自动从对话轮次中抽取显著事实，并将其巩固到持久化存储中。
 - **基于图的记忆**：除了扁平的向量存储之外，Mem0 还在抽取出的实体与事实之上维护一张*关系图*，以支持多跳记忆查询（“用户在项目 Y 的语境下，对话题 X 说过什么？”）。
@@ -1074,7 +1074,7 @@ Mem0 [chhikara2025mem0] 致力于弥合研究型记忆系统与生产部署之�
 
 ### 睡眠时计算（Sleep-Time Compute）：离线记忆处理
 
-Lin 等人 [lin2025sleeptime] 提出了 *sleep-time compute*（睡眠时计算）范式，让 Agent 在用户交互的*间隔之间*处理并巩固记忆，而不是只在查询时才计算。其类比是生物的睡眠——大脑在睡眠中巩固记忆并预先建立有用的联想。
+Lin 等人 [[318]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lin2025sleeptime)] 提出了 *sleep-time compute*（睡眠时计算）范式，让 Agent 在用户交互的*间隔之间*处理并巩固记忆，而不是只在查询时才计算。其类比是生物的睡眠——大脑在睡眠中巩固记忆并预先建立有用的联想。
 
 **工作机制。**
 
@@ -1094,7 +1094,7 @@ Lin 等人 [lin2025sleeptime] 提出了 *sleep-time compute*（睡眠时计算�
 
 ### A-MEM：受 Zettelkasten 启发的智能体记忆
 
-A-MEM [xu2025amem] 引入了一种借鉴 *Zettelkasten* 方法的记忆系统——该方法是一种基于密集互联原子笔记的笔记系统——为 LLM Agent 实现动态、自组织的记忆。
+A-MEM [[305]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-xu2025amem)] 引入了一种借鉴 *Zettelkasten* 方法的记忆系统——该方法是一种基于密集互联原子笔记的笔记系统——为 LLM Agent 实现动态、自组织的记忆。
 
 **关键设计原则。**
 

@@ -4,7 +4,7 @@ title: GRPO —— 组相对策略优化
 permalink: /part2/ch07-grpo.html
 ---
 
-组相对策略优化（Group Relative Policy Optimization, GRPO） [shao2024deepseekmath] 是一种专为语言模型设计的强化学习算法，它消除了对独立 value network（critic）的需求。GRPO 由 DeepSeek 在 DeepSeekMath 工作中提出，随后在 DeepSeek-R1 [deepseek2025r1] 中被扩展到更大规模，已经迅速成为 LLM 训练中的主流 RL 方法——被大多数开源对齐框架（TRL、OpenRLHF、veRL）作为默认算法采用。
+组相对策略优化（Group Relative Policy Optimization, GRPO） [[168]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shao2024deepseekmath)] 是一种专为语言模型设计的强化学习算法，它消除了对独立 value network（critic）的需求。GRPO 由 DeepSeek 在 DeepSeekMath 工作中提出，随后在 DeepSeek-R1 [[156]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-deepseek2025r1)] 中被扩展到更大规模，已经迅速成为 LLM 训练中的主流 RL 方法——被大多数开源对齐框架（TRL、OpenRLHF、veRL）作为默认算法采用。
 
 其核心思想看似简单却出人意料地有效：与其训练一个神经网络去预测期望 reward（即 PPO 中的 critic），GRPO 通过对同一 prompt 生成多条响应、利用该组的 reward 统计量作为 baseline，从经验上 *估计* 这一基线。这从显存中去掉了一整个模型，将工程复杂度减半，而且——令人意外的是——往往优于 PPO，因为经验基线比训练不充分的 value function 更准确。
 
@@ -24,7 +24,7 @@ PPO 的 value model（critic）在语言任务上存在三大问题：
 2. **精度**：对部分序列预测期望 reward 极其困难。value function 经常出错 $\rightarrow$ advantage 出错 $\rightarrow$ gradient 方向出错。
 3. **训练**：value head 需要大量样本才能收敛。RL 早期它给出嘈杂的预测，破坏 policy 学习的稳定性。
 
-**GRPO 的关键洞见** [shao2024deepseekmath]：与其学习 $V(s)$，不如从一组样本中经验地 *估计* 它。对同一 prompt 生成 $G$ 条响应，计算它们的 reward，并用组统计量作为 baseline。
+**GRPO 的关键洞见** [[168]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shao2024deepseekmath)]：与其学习 $V(s)$，不如从一组样本中经验地 *估计* 它。对同一 prompt 生成 $G$ 条响应，计算它们的 reward，并用组统计量作为 baseline。
 
 ## 算法
 
@@ -47,7 +47,7 @@ $$
 >
 > **归一化**：除以 $\sigma_G$ 确保 advantage 在不同 reward 量级的 prompt 之间具有尺度不变性。
 >
-> **DeepSeek-R1 突破** [deepseek2025r1]：纯 GRPO 配合二值正确性 reward（答对 $r=1$，答错 $r=0$）在数学/代码上训练时，模型自发涌现出思维链（Chain-of-Thought，CoT）推理、自我验证和错误纠正——完全没有被显式指示这么做。
+> **DeepSeek-R1 突破** [[156]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-deepseek2025r1)]：纯 GRPO 配合二值正确性 reward（答对 $r=1$，答错 $r=0$）在数学/代码上训练时，模型自发涌现出思维链（Chain-of-Thought，CoT）推理、自我验证和错误纠正——完全没有被显式指示这么做。
 
 
 ![GRPO 实战：对一个数学 prompt 采样 $G{=}5$ 条响应。三条正确（$r{=}1$），两条错误（$r{=}0$）。组均值 $\mu_G{=}0.6$ 充当 baseline；正确响应获得正 advantage（强化），错误响应获得负 advantage（抑制）。]({{ site.baseurl }}/figures/fig_029_fig29.png)
@@ -176,7 +176,7 @@ trainer.train()
 
 后训练对齐（基于人类反馈的强化学习（Reinforcement Learning from Human Feedback, RLHF）、直接偏好优化（Direct Preference Optimization, DPO））经常因为 *典型性偏差*（typicality bias）而降低输出多样性：人类标注者系统性地偏好熟悉的、“典型的”文本而非新颖的替代方案。这种模式坍塌是数据层面的现象，并非纯算法问题。
 
-Verbalized Sampling（VS） [zhang2025verbalized] 是一种无需训练的 prompt 策略，通过要求模型在单次生成中 **显式言语化多条响应上的概率分布** 来规避这种坍塌。
+Verbalized Sampling（VS） [[91]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhang2025verbalized)] 是一种无需训练的 prompt 策略，通过要求模型在单次生成中 **显式言语化多条响应上的概率分布** 来规避这种坍塌。
 
 > **Verbalized Sampling —— 核心思想**
 >
@@ -252,7 +252,7 @@ def verbalized_sample(model, tokenizer, task, n=5):
 
 > **为什么需要 DAPO？**
 >
-> 基础 GRPO 使用 *对称* clipping：无论 policy 想增加还是减小某 token 的概率，约束都是相同的。但探索与利用具有不同的风险特征。增大一个好 token 的概率通常是安全的；而抑制一个恰好出现在坏 completion 中的 token，若该 token 本身是中性的，则可能是灾难性的错误。DAPO [yu2025dapo] 引入五项针对性修复，共同显著改进训练稳定性与最终性能。
+> 基础 GRPO 使用 *对称* clipping：无论 policy 想增加还是减小某 token 的概率，约束都是相同的。但探索与利用具有不同的风险特征。增大一个好 token 的概率通常是安全的；而抑制一个恰好出现在坏 completion 中的 token，若该 token 本身是中性的，则可能是灾难性的错误。DAPO [[169]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yu2025dapo)] 引入五项针对性修复，共同显著改进训练稳定性与最终性能。
 
 #### 组件 1 —— 非对称 Clipping（Clip-Higher）
 
@@ -348,7 +348,7 @@ DAPO 会重新采样那些整组 completion 获得相同 reward（全对或全�
 >
 > GRPO *逐 token* 地 clip importance ratio。但一条 500 token 的序列，即使每个单独的 ratio 都在 $[1-\epsilon, 1+\epsilon]$ 内，逐 token ratio 的乘积可能大或小到天文数字。当在同一 batch 上进行多次 gradient 步（off-policy）时，这种不匹配迅速放大，clipping 界限在序列级别上变得毫无意义。
 
-GSPO [chen2025gspo] 将 *序列级* importance weight 定义为逐 token ratio 的几何平均，等价于完整序列概率比的 $\lvert o_i \rvert$ 次方根：
+GSPO [[170]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chen2025gspo)] 将 *序列级* importance weight 定义为逐 token ratio 的几何平均，等价于完整序列概率比的 $\lvert o_i \rvert$ 次方根：
 
 $$
 \boxed{
@@ -400,7 +400,7 @@ $$
 
 > **预训练偏差问题**
 >
-> 标准 GRPO 在组内归一化 advantage，但 *预训练分布* 会引入系统性偏差：在预训练数据中常见的 token 即便不携带任务相关信息也会获得较大 gradient。Dr. GRPO [liu2024drgrpo] 识别并纠正这种偏差，将 gradient 信号聚焦于 *有信息量的* token。
+> 标准 GRPO 在组内归一化 advantage，但 *预训练分布* 会引入系统性偏差：在预训练数据中常见的 token 即便不携带任务相关信息也会获得较大 gradient。Dr. GRPO [[171]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2024drgrpo)] 识别并纠正这种偏差，将 gradient 信号聚焦于 *有信息量的* token。
 
 Dr. GRPO 修改逐 token gradient 权重，以考虑该 token 对 reward 信号的边际贡献。模型本就赋予高概率的 token（无论 reward 如何）会被降权：
 
@@ -440,7 +440,7 @@ $$
 
 > **"It Takes Two" 洞见**
 >
-> "It Takes Two" 论文 [xu2025twograpo] 从经验和理论上证明：$G=2$ 的 GRPO（每个 prompt 仅两条 completion）在大多数推理基准上能匹配甚至超过 $G=16$ 的 GRPO。这令人意外——为什么更少样本反而足够？
+> "It Takes Two" 论文 [[172]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-xu2025twograpo)] 从经验和理论上证明：$G=2$ 的 GRPO（每个 prompt 仅两条 completion）在大多数推理基准上能匹配甚至超过 $G=16$ 的 GRPO。这令人意外——为什么更少样本反而足够？
 
 关键洞见是：GRPO 的有效性并 *不* 主要来自准确的 advantage 估计（那需要较大的 $G$），而是来自一个结构上类似 DPO 的隐式 *对比目标*：
 
@@ -492,7 +492,7 @@ $$
 
 > **硬 Clipping 的脆弱性**
 >
-> PPO 风格的 clipping 产生不连续 gradient：clip 带外 gradient 为零，带内非零。这种“悬崖效应”会在边界附近造成不稳定，并使信赖域对 $\epsilon$ 的选择敏感。SAPO [han2025sapo] 用一个平滑、温度可控的 gate 函数替换硬 clip。
+> PPO 风格的 clipping 产生不连续 gradient：clip 带外 gradient 为零，带内非零。这种“悬崖效应”会在边界附近造成不稳定，并使信赖域对 $\epsilon$ 的选择敏感。SAPO [[173]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-han2025sapo)] 用一个平滑、温度可控的 gate 函数替换硬 clip。
 
 SAPO 用一个平滑替代品替换 $\min(\rho A, \mathrm{clip}(\rho,\cdot)\,A)$ 目标：
 
@@ -540,7 +540,7 @@ $$
 
 > **隐蔽的 vLLM 概率不匹配**
 >
-> 当使用 vLLM 进行快速生成时，vLLM 返回的 log-probability 与训练前向传播中计算的不同 [zhong2025tismis]。这 *不是* bug —— 它源于不同的 CUDA 内核、不同的浮点精度以及不同的 Attention 实现（如 FlashAttention vs PagedAttention）。这种不匹配悄悄破坏了 on-policy 假设：用于计算 importance ratio 的“旧 policy”概率是错的，导致 gradient 估计出现偏差。
+> 当使用 vLLM 进行快速生成时，vLLM 返回的 log-probability 与训练前向传播中计算的不同 [[174]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhong2025tismis)]。这 *不是* bug —— 它源于不同的 CUDA 内核、不同的浮点精度以及不同的 Attention 实现（如 FlashAttention vs PagedAttention）。这种不匹配悄悄破坏了 on-policy 假设：用于计算 importance ratio 的“旧 policy”概率是错的，导致 gradient 估计出现偏差。
 
 #### Truncated Importance Sampling（TIS）
 
@@ -603,7 +603,7 @@ TIS 和 MIS 都既可在 token 级、也可在序列级应用：
 
 > **原理性的 Reward 重塑**
 >
-> 大多数 GRPO 变体只是启发式地修改 clipping 机制。VESPO 从变分推断框架推导出一个原理性的 reward 重塑核，将 policy optimization 视为近似后验推断。VESPO [luo2025vespo] 推导出的核是平滑、非对称的，并天然地处理异步或 off-policy 训练中的陈旧性问题。
+> 大多数 GRPO 变体只是启发式地修改 clipping 机制。VESPO 从变分推断框架推导出一个原理性的 reward 重塑核，将 policy optimization 视为近似后验推断。VESPO [[175]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-luo2025vespo)] 推导出的核是平滑、非对称的，并天然地处理异步或 off-policy 训练中的陈旧性问题。
 
 VESPO 从变分目标推导出每条 trajectory $\tau$ 的加权函数 $W(\tau)$。最终的 gradient 权重形式为：
 
@@ -643,7 +643,7 @@ $$
 
 > **Ratio Clipping 的问题**
 >
-> PPO 的 ratio clipping 是约束新旧 policy 间 KL 散度的代理。但这个代理并不完美：clipping 对低概率 token 过度惩罚（这里概率的小绝对变化对应较大的 ratio 变化），而对高概率 token 惩罚不足（这里大的绝对变化对应较小的 ratio 变化）。DPPO [an2025dppo] 用 *直接散度估计* 替换 ratio clipping。
+> PPO 的 ratio clipping 是约束新旧 policy 间 KL 散度的代理。但这个代理并不完美：clipping 对低概率 token 过度惩罚（这里概率的小绝对变化对应较大的 ratio 变化），而对高概率 token 惩罚不足（这里大的绝对变化对应较小的 ratio 变化）。DPPO [[176]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-an2025dppo)] 用 *直接散度估计* 替换 ratio clipping。
 
 DPPO 直接使用新旧 policy 分布间的 Total Variation（TV）或 KL 散度来计算信赖域约束：
 
@@ -685,7 +685,7 @@ $$
 
 > **RL 的扩展律**
 >
-> ScaleRL 论文 [luo2025scalerl] 系统研究了什么因素能让 LLM 的 RL 训练有效扩展。关键发现是：两项修改——batch 级 reward 缩放与 DAPO 风格的 token 级 loss——共同解锁了规模化下的强性能，单独任一项都不够。CISPO（Clipped IS Policy Optimization）就是由此得到的算法。
+> ScaleRL 论文 [[177]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-luo2025scalerl)] 系统研究了什么因素能让 LLM 的 RL 训练有效扩展。关键发现是：两项修改——batch 级 reward 缩放与 DAPO 风格的 token 级 loss——共同解锁了规模化下的强性能，单独任一项都不够。CISPO（Clipped IS Policy Optimization）就是由此得到的算法。
 
 #### Batch 级 Reward 缩放
 
@@ -745,7 +745,7 @@ $$
 
 > **多 Reward 坍塌问题**
 >
-> 在多目标 RL 中（例如同时优化正确性与格式），标准 GRPO 归一化 *组合后* 的 reward。若某一项 reward 方差远高于另一项，它会主导归一化 advantage，相当于忽略其他 reward。这就是 *advantage 坍塌*：低方差 reward 贡献近乎为零的 gradient。GDPO [zhong2025gdpo] 在聚合前 *独立* 归一化每项 reward。
+> 在多目标 RL 中（例如同时优化正确性与格式），标准 GRPO 归一化 *组合后* 的 reward。若某一项 reward 方差远高于另一项，它会主导归一化 advantage，相当于忽略其他 reward。这就是 *advantage 坍塌*：低方差 reward 贡献近乎为零的 gradient。GDPO [[178]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhong2025gdpo)] 在聚合前 *独立* 归一化每项 reward。
 
 其核心机制在聚合前 *独立* 归一化每项 reward：
 
@@ -790,7 +790,7 @@ $$
 
 ### GOPO —— Group Ordinal Policy Optimization
 
-GOPO [choi2025gopo] 始于一个简单观察：reward model 是用成对比较（“A 是否优于 B？”）训练的，因此只有其输出的 **排序** 是可信的——原始数值分数本身没有内在意义。然而 GRPO 直接把这些原始幅度喂入 advantage 计算。对于不可验证 reward 的任务——摘要、开放式聊天、指令跟随——这种不匹配引入了噪声，因为 0.6 reward 分的差距可能在输出空间某个区域反映真实质量，而在另一个区域毫无意义。
+GOPO [[179]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-choi2025gopo)] 始于一个简单观察：reward model 是用成对比较（“A 是否优于 B？”）训练的，因此只有其输出的 **排序** 是可信的——原始数值分数本身没有内在意义。然而 GRPO 直接把这些原始幅度喂入 advantage 计算。对于不可验证 reward 的任务——摘要、开放式聊天、指令跟随——这种不匹配引入了噪声，因为 0.6 reward 分的差距可能在输出空间某个区域反映真实质量，而在另一个区域毫无意义。
 
 **关键洞见**：完全丢弃 reward 幅度。仅使用组内 reward 的 **序数排名**。
 

@@ -4,7 +4,7 @@ title: 强化学习导论
 permalink: /part1/ch03-rl-intro.html
 ---
 
-强化学习（Reinforcement Learning，RL）是一种范式，其中**智能体（agent）**通过与**环境（environment）**交互、接收**奖励（rewards）**作为反馈，并优化其**策略（policy）**以最大化长期累积奖励来学习做出序贯决策[sutton2018reinforcement]。与监督学习（需要带标签的输入-输出对）不同，RL 通过*试错（trial and error）*来发现最优行为。
+强化学习（Reinforcement Learning，RL）是一种范式，其中**智能体（agent）**通过与**环境（environment）**交互、接收**奖励（rewards）**作为反馈，并优化其**策略（policy）**以最大化长期累积奖励来学习做出序贯决策[[139]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-sutton2018reinforcement)]。与监督学习（需要带标签的输入-输出对）不同，RL 通过*试错（trial and error）*来发现最优行为。
 
 ![强化学习概览：智能体与环境交互，接收奖励作为反馈，并通过试错更新其策略。与从带标签数据对学习的监督学习不同，RL 通过经验最大化奖励来学习应当做什么。]({{ site.baseurl }}/figures/fig_020_fig20.png)
 
@@ -114,7 +114,7 @@ $$
 
 ## 时序差分（Temporal Difference，TD）学习
 
-TD 学习[sutton1988learning]采用自举（bootstrap）思想——它使用其他价值估计来更新价值估计，无需等待完整 episode 结束。
+TD 学习[[140]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-sutton1988learning)]采用自举（bootstrap）思想——它使用其他价值估计来更新价值估计，无需等待完整 episode 结束。
 
 ### 理解 TD 误差：以「惊讶」作为学习信号
 
@@ -178,7 +178,7 @@ $$
 
 ## Q-Learning
 
-Q-Learning[watkins1989learning]是基础性的**异策略、基于价值**的算法。它直接学习最优 $Q^*$，与所遵循的策略无关。
+Q-Learning[[141]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-watkins1989learning)]是基础性的**异策略、基于价值**的算法。它直接学习最优 $Q^*$，与所遵循的策略无关。
 
 **更新规则**：
 
@@ -192,13 +192,13 @@ $$
 >
 > 这就是 Q-Learning 可以从重放缓冲区（Replay Buffer）、演示数据或任何经验来源中学习的原因。数据无需来自当前策略。
 
-**SARSA**[rummery1994online]（同策略替代方案）：使用*实际采取的*动作而非最大值：
+**SARSA**[[142]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-rummery1994online)]（同策略替代方案）：使用*实际采取的*动作而非最大值：
 
 $$
 Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha\left[r_t + \gamma Q(s_{t+1}, a_{t+1}) - Q(s_t, a_t)\right]
 $$
 
-**深度 Q 网络（Deep Q-Networks，DQN）**[mnih2015human]：用神经网络 $Q_\theta(s,a)$ 取代表格化的 $Q(s,a)$。关键创新包括：经验重放缓冲区（异策略数据复用）、目标网络（稳定性）、$\epsilon$-贪心探索。
+**深度 Q 网络（Deep Q-Networks，DQN）**[[143]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-mnih2015human)]：用神经网络 $Q_\theta(s,a)$ 取代表格化的 $Q(s,a)$。关键创新包括：经验重放缓冲区（异策略数据复用）、目标网络（稳定性）、$\epsilon$-贪心探索。
 
 **DQN 损失函数**：网络通过最小化从重放缓冲区采样的 mini-batch 上的均方 TD 误差来训练：
 
@@ -229,7 +229,7 @@ $$
 
 ### 理解重放缓冲区
 
-**重放缓冲区（Replay Buffer）**[lin1992self]（经验回放）是一种数据存储机制，保存过往经验以便智能体后续再学习。智能体不会在执行动作后立刻丢弃数据，而是将转移存入记忆库，并随机采样 mini-batch 用于训练。
+**重放缓冲区（Replay Buffer）**[[144]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lin1992self)]（经验回放）是一种数据存储机制，保存过往经验以便智能体后续再学习。智能体不会在执行动作后立刻丢弃数据，而是将转移存入记忆库，并随机采样 mini-batch 用于训练。
 
 **存储内容**：每条转移是一个元组：
 
@@ -266,7 +266,7 @@ class ReplayBuffer:
 
 > **直觉：优先级经验回放（Prioritized Experience Replay，PER）**
 >
-> 在标准缓冲区中，所有经验的采样概率相等。但有些经验信息量大得多。**PER**[schaul2016prioritized]按 **TD 误差幅度**对采样概率进行加权——如果某条转移引发了巨大「惊讶」（$\lvert \delta_t \rvert$ 高），智能体就更频繁地采样它，从而更快修正模型。在 Atari 基准上可将学习速度加快 2--3 倍。
+> 在标准缓冲区中，所有经验的采样概率相等。但有些经验信息量大得多。**PER**[[145]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-schaul2016prioritized)]按 **TD 误差幅度**对采样概率进行加权——如果某条转移引发了巨大「惊讶」（$\lvert \delta_t \rvert$ 高），智能体就更频繁地采样它，从而更快修正模型。在 Atari 基准上可将学习速度加快 2--3 倍。
 
 > **警告：为什么 Q-Learning 对 LLM 不适用**
 >
@@ -274,7 +274,7 @@ class ReplayBuffer:
 
 ## 策略梯度方法——REINFORCE
 
-与其学习价值函数再推导策略，不如直接优化策略参数 $\theta$ 以最大化期望回报[williams1992simple]。
+与其学习价值函数再推导策略，不如直接优化策略参数 $\theta$ 以最大化期望回报[[146]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-williams1992simple)]。
 
 **目标**：$J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}[R(\tau)] = \mathbb{E}_{\pi_\theta}\left[\sum_{t=0}^T r_t\right]$
 
@@ -322,7 +322,7 @@ $$
 >
 > 该梯度**不需要对环境的状态转移** $p(s'\mid s,a)$ **求导**。对数求导技巧将其转化为一个期望，只需*运行策略并观察奖励*就能估计。把 $G_t$ 替换为优势 $\hat{A}_t = G_t - V(s_t)$ 可以在不引入偏差的前提下降低方差（因为对任何仅依赖状态的基线 $b(s)$，都有 $\mathbb{E}[\nabla\log\pi \cdot b(s)] = 0$）。
 
-**REINFORCE 算法（REINFORCE）**[williams1992simple]（Williams, 1992）：
+**REINFORCE 算法（REINFORCE）**[[146]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-williams1992simple)]（Williams, 1992）：
 
 1. 在 $\pi_\theta$ 下采样完整轨迹 $\tau = (s_0, a_0, r_0, s_1, a_1, r_1, \ldots)$
 2. 为每个时间步计算回报 $G_t = \sum_{k=0}^{T-t} \gamma^k r_{t+k}$
@@ -377,10 +377,10 @@ $$
 
 > **关键：面向 LLM 的 PPO 演进路径**
 >
-> 1. **REINFORCE**[williams1992simple]：高方差、无自举 $\rightarrow$ 对 LLM 不可行
-> 2. **A2C/A3C**[mnih2016asynchronous]（Advantage Actor-Critic）：使用基于 TD 的优势，方差更低，但步长无界。
-> 3. **TRPO**[schulman2015trust]：约束策略更新前后的 KL 散度。稳定但代价高（二阶方法）。
-> 4. **PPO**[schulman2017proximal]：通过裁剪策略比率，仅用一阶优化就达到与 TRPO 类似的稳定性。是 LLM RL 训练的标准方法。
+> 1. **REINFORCE**[[146]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-williams1992simple)]：高方差、无自举 $\rightarrow$ 对 LLM 不可行
+> 2. **A2C/A3C**[[147]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-mnih2016asynchronous)]（Advantage Actor-Critic）：使用基于 TD 的优势，方差更低，但步长无界。
+> 3. **TRPO**[[148]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-schulman2015trust)]：约束策略更新前后的 KL 散度。稳定但代价高（二阶方法）。
+> 4. **PPO**[[149]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-schulman2017proximal)]：通过裁剪策略比率，仅用一阶优化就达到与 TRPO 类似的稳定性。是 LLM RL 训练的标准方法。
 > 5. **GRPO**：完全去掉 critic，使用组内统计量作为基线。更简单，对可验证奖励有效。
 
 ## 广义优势估计（Generalized Advantage Estimation，GAE）
@@ -390,7 +390,7 @@ $$
 - **1 步 TD 优势**（$r_t + \gamma V(s_{t+1}) - V(s_t)$）：方差低（仅含一步随机性），但**有偏**——若价值函数 $V$ 不准确，优势估计就会系统性偏离。
 - **Monte Carlo 优势**（$G_t - V(s_t)$）：无偏（使用实际回报），但**方差高**——许多随机奖励之和在不同 episode 间波动剧烈。
 
-GAE[schulman2016high]（Schulman 等，2016）通过单一参数 $\lambda \in [0, 1]$ 在两种极端之间提供**平滑插值**。它对所有 $n$ 的 $n$ 步优势估计进行指数加权平均，给出一种在偏差与方差之间权衡的原则化方式。
+GAE[[150]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-schulman2016high)]（Schulman 等，2016）通过单一参数 $\lambda \in [0, 1]$ 在两种极端之间提供**平滑插值**。它对所有 $n$ 的 $n$ 步优势估计进行指数加权平均，给出一种在偏差与方差之间权衡的原则化方式。
 
 **核心思想**：在每个时间步计算 1 步 TD 误差 $\delta_t$，然后用指数衰减权重 $(\gamma\lambda)^l$ 进行混合——近期 TD 误差权重完整，远期的被降权：
 
@@ -492,7 +492,7 @@ $$
 | **样本效率** | 低（必须经历所有情况） | 高（可在想象中规划） |
 | **准确性** | 无模型偏差 | 模型误差会累积 |
 | **何时使用** | 复杂/未知的转移 | 简单转移，追求效率 |
-| **示例** | PPO、DQN、SAC[haarnoja2018soft] | MuZero[schrittwieser2020mastering]、Dreamer[hafner2020dream]、AlphaGo[silver2016mastering] |
+| **示例** | PPO、DQN、SAC[[151]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-haarnoja2018soft)] | MuZero[[152]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-schrittwieser2020mastering)]、Dreamer[[153]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hafner2020dream)]、AlphaGo[[154]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-silver2016mastering)] |
 
 > **直觉：为什么 LLM RL 是无模型的**
 >
@@ -502,7 +502,7 @@ $$
 
 ## 奖励塑形（Reward Shaping）
 
-**奖励塑形（Reward Shaping）**[ng1999policy]是一种由开发者修改或补充环境原始奖励函数的技术。其主要目的是将**稀疏奖励**场景（智能体仅在任务最终完成时才获得反馈）转换为带有中间反馈信号的**稠密奖励**场景，以加速收敛。
+**奖励塑形（Reward Shaping）**[[155]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-ng1999policy)]是一种由开发者修改或补充环境原始奖励函数的技术。其主要目的是将**稀疏奖励**场景（智能体仅在任务最终完成时才获得反馈）转换为带有中间反馈信号的**稠密奖励**场景，以加速收敛。
 
 ### 数学框架
 

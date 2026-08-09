@@ -6,7 +6,7 @@ permalink: /part5/ch24-multi-agent-systems.html
 
 ## 动机：为什么需要多个 Agent？
 
-人工智能的历史在很多方面就是一部规模演进史。早期 AI 系统是单体式的：单一程序、单一知识库、单一推理引擎。随着问题日益复杂，研究者发现，没有任何单一 Agent——无论能力多强——能够高效地处理一个丰富、开放式任务的方方面面。这一洞见在分布式 AI 与多智能体系统（Multi-Agent System, MAS）研究中早有定论 [weiss1999multiagent, wooldridge2009introduction]，而在大语言模型时代又被赋予了新的紧迫性。
+人工智能的历史在很多方面就是一部规模演进史。早期 AI 系统是单体式的：单一程序、单一知识库、单一推理引擎。随着问题日益复杂，研究者发现，没有任何单一 Agent——无论能力多强——能够高效地处理一个丰富、开放式任务的方方面面。这一洞见在分布式 AI 与多智能体系统（Multi-Agent System, MAS）研究中早有定论 [[368]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-weiss1999multiagent), [369]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wooldridge2009introduction)]，而在大语言模型时代又被赋予了新的紧迫性。
 
 > **核心直觉**
 >
@@ -32,7 +32,7 @@ permalink: /part5/ch24-multi-agent-systems.html
 
 > **历史脉络**
 >
-> 多智能体系统研究可以追溯到 1980 年代，其奠基性工作包括分布式问题求解 [durfee1989distributed]、合同网协议（Contract Net Protocol） [smith1980contract] 以及 FIPA Agent 通信标准 [fipa2002acl]。向基于 LLM 的 Agent 转变让这些经典思想在新的载体上重获新生：以前是手工编码、做符号推理的 Agent，现在则是其"认知"从学习到的神经表示中涌现出来的 Agent。核心的架构模式——层级、市场、黑板、消息传递——依然惊人地相关。
+> 多智能体系统研究可以追溯到 1980 年代，其奠基性工作包括分布式问题求解 [[370]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-durfee1989distributed)]、合同网协议（Contract Net Protocol） [[362]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-smith1980contract)] 以及 FIPA Agent 通信标准 [[371]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-fipa2002acl)]。向基于 LLM 的 Agent 转变让这些经典思想在新的载体上重获新生：以前是手工编码、做符号推理的 Agent，现在则是其"认知"从学习到的神经表示中涌现出来的 Agent。核心的架构模式——层级、市场、黑板、消息传递——依然惊人地相关。
 
 从单体 Agent 到 Agent 社会的转变映射了复杂系统中一个更广泛的模式：随着问题空间的增长，分布式、模块化架构始终优于集中式、单体式架构。问题不再是*是否*使用多个 Agent，而是*如何*组织它们。
 
@@ -145,7 +145,7 @@ Manager 的职责包括：
 
 受生物系统（蚁群、鸟群）启发的蜂群架构，由许多遵循简单局部规则的**松耦合 Agent**组成，能在没有任何中央协调者或全局状态的情况下产生复杂的全局行为。
 
-OpenAI 的 **Swarm** 框架 [openai2024swarm]（现已被 OpenAI Agents SDK 取代，但其概念原语依然有影响力）通过两个原语将其落地：
+OpenAI 的 **Swarm** 框架 [[324]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-openai2024swarm)]（现已被 OpenAI Agents SDK 取代，但其概念原语依然有影响力）通过两个原语将其落地：
 
 - **Routines（例程）**：Agent 为完成子任务所遵循的指令序列
 - **Handoffs（移交）**：一个 Agent 将控制权（以及相关上下文）转交给另一个 Agent
@@ -211,7 +211,7 @@ Agent 如何协调——如何共享信息、分工以及解决冲突——与�
 
 ### 共享状态（全局黑板）
 
-**黑板架构（blackboard architecture）** [hayes1985blackboard] 提供一个所有 Agent 都可以读写的共享数据结构。在 LLM 系统中，它通常实现为一个共享字典、数据库或结构化文档。
+**黑板架构（blackboard architecture）** [[309]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hayes1985blackboard)] 提供一个所有 Agent 都可以读写的共享数据结构。在 LLM 系统中，它通常实现为一个共享字典、数据库或结构化文档。
 
 ```python
 import threading
@@ -350,7 +350,7 @@ $$\hat{p} = \frac{\sum_{i=1}^{n} w_i \cdot p_i}{\sum_{i=1}^{n} w_i}$$
 
 ### 基于市场的协调
 
-市场机制通过**拍卖与竞标**分配任务和资源。合同网协议（Contract Net Protocol） [smith1980contract] 是最古老的多 Agent 协调机制之一，本质上是一种任务拍卖：
+市场机制通过**拍卖与竞标**分配任务和资源。合同网协议（Contract Net Protocol） [[362]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-smith1980contract)] 是最古老的多 Agent 协调机制之一，本质上是一种任务拍卖：
 
 1. *Manager* 广播一条带有需求的任务公告
 2. *Contractor*（承包者）Agent 提交竞标（能力声明 + 成本估算）
@@ -361,7 +361,7 @@ $$\hat{p} = \frac{\sum_{i=1}^{n} w_i \cdot p_i}{\sum_{i=1}^{n} w_i}$$
 
 ### Stigmergy：通过环境进行的间接通信
 
-**Stigmergy（共识主动性）** [grasse1959reconstruction] 用一种更简单的机制取代显式的 Agent 间消息传递：每个 Agent 在工作时以副作用方式修改共享环境，其他 Agent 对这些修改而非直接信号做出反应。经典例证是觅食的蚂蚁在返程路径上沉积信息素；后续蚂蚁强化成功路径，无需任何蚂蚁"开口"说话。
+**Stigmergy（共识主动性）** [[372]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-grasse1959reconstruction)] 用一种更简单的机制取代显式的 Agent 间消息传递：每个 Agent 在工作时以副作用方式修改共享环境，其他 Agent 对这些修改而非直接信号做出反应。经典例证是觅食的蚂蚁在返程路径上沉积信息素；后续蚂蚁强化成功路径，无需任何蚂蚁"开口"说话。
 
 在 LLM 多智能体系统中，Stigmergy 表现为：
 
@@ -421,7 +421,7 @@ class AgentMessage(BaseModel):
 
 ### Performative 类型（受 FIPA-ACL 启发）
 
-借鉴 FIPA Agent 通信语言 [fipa2002acl]，并针对 LLM Agent 进行现代化改造：
+借鉴 FIPA Agent 通信语言 [[371]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-fipa2002acl)]，并针对 LLM Agent 进行现代化改造：
 
 | Performative | 语义 | 示例用途 |
 | --- | --- | --- |
@@ -491,7 +491,7 @@ LLM 多智能体系统中常见的角色：
 - 一位着眼长远的*远见者*
 - 一位反向论辩的*唱反调者（devil's advocate）*
 
-这种思维多样性受"六顶思考帽"（Six Thinking Hats） [debono1985six] 等技巧启发，能减少群体思维，产出更稳健的集体推理。
+这种思维多样性受"六顶思考帽"（Six Thinking Hats） [[373]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-debono1985six)] 等技巧启发，能减少群体思维，产出更稳健的集体推理。
 
 > **角色冲突的化解**
 >
@@ -503,7 +503,7 @@ LLM 多智能体系统中常见的角色：
 
 ### 辩论模式（Debate Pattern）
 
-多个 Agent 为不同立场辩论；一个裁判 Agent 评估论点并做出决定。已有研究表明辩论能提升事实准确性并减少幻觉 [du2023improving]。
+多个 Agent 为不同立场辩论；一个裁判 Agent 评估论点并做出决定。已有研究表明辩论能提升事实准确性并减少幻觉 [[374]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-du2023improving)]。
 
 ```python
 async def debate_round(question: str, agents: list, judge: Agent,
@@ -597,7 +597,7 @@ $$o^* = \arg\max_{o \in \{o_1,\ldots,o_N\}} \text{score}(o, \text{task})$$
 
 ### 数学形式化
 
-多智能体系统可形式化为一个**马尔可夫博弈（Markov Game）**，也称随机博弈（stochastic game） [shapley1953stochastic]：
+多智能体系统可形式化为一个**马尔可夫博弈（Markov Game）**，也称随机博弈（stochastic game） [[375]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shapley1953stochastic)]：
 
 $$\mathcal{G} = \langle \mathcal{N}, \mathcal{S}, \{\mathcal{A}^i\}_{i \in \mathcal{N}}, \mathcal{T}, \{R^i\}_{i \in \mathcal{N}}, \gamma \rangle$$
 
@@ -619,7 +619,7 @@ $$\nabla_{\theta^i} J^i \approx \mathbb{E}\left[\nabla_{\theta^i} \log \pi^i(a^i
 
 ### 集中训练、去中心化执行（CTDE）
 
-集中训练、去中心化执行（Centralized Training, Decentralized Execution, CTDE） [lowe2017multi, rashid2018qmix] 是合作型多 Agent RL 的主流范式。训练阶段，集中式 critic 可访问全局状态 $s$ 与所有 Agent 的动作 $\mathbf{a} = (a^1, \ldots, a^n)$。执行阶段，每个 Agent 仅基于其局部观测 $o^i$ 行动。
+集中训练、去中心化执行（Centralized Training, Decentralized Execution, CTDE） [[376]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lowe2017multi), [377]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-rashid2018qmix)] 是合作型多 Agent RL 的主流范式。训练阶段，集中式 critic 可访问全局状态 $s$ 与所有 Agent 的动作 $\mathbf{a} = (a^1, \ldots, a^n)$。执行阶段，每个 Agent 仅基于其局部观测 $o^i$ 行动。
 
 Agent $i$ 的集中式 critic：
 
@@ -637,7 +637,7 @@ CTDE 在训练时解决了非平稳性问题（集中式 critic 看到完整的�
 
 ### 通信学习（Communication Learning）
 
-与使用固定通信协议不同，Agent 可以**学习要通信什么**。在可微通信框架 [sukhbaatar2016learning, das2019tarmac] 中，Agent 产生连续的通信向量 $m^i_t$ 并传递给其他 Agent：
+与使用固定通信协议不同，Agent 可以**学习要通信什么**。在可微通信框架 [[378]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-sukhbaatar2016learning), [379]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-das2019tarmac)] 中，Agent 产生连续的通信向量 $m^i_t$ 并传递给其他 Agent：
 
 $$a^i_t, m^i_t = \pi^i_{\theta^i}(o^i_t, \{m^j_{t-1}\}_{j \neq i})$$
 
@@ -645,11 +645,11 @@ $$a^i_t, m^i_t = \pi^i_{\theta^i}(o^i_t, \{m^j_{t-1}\}_{j \neq i})$$
 
 ### 涌现通信（Emergent Communication）
 
-当 Agent 仅依靠 Reward 信号（没有预定义语言）从零训练时，它们可以发展出**涌现通信协议** [lazaridou2020emergent]：编码任务相关信息的共享符号系统。虽然在科学上令人着迷，但 LLM 系统中的涌现通信通常并不可取——我们希望 Agent 使用人类可理解的语言进行通信。
+当 Agent 仅依靠 Reward 信号（没有预定义语言）从零训练时，它们可以发展出**涌现通信协议** [[380]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lazaridou2020emergent)]：编码任务相关信息的共享符号系统。虽然在科学上令人着迷，但 LLM 系统中的涌现通信通常并不可取——我们希望 Agent 使用人类可理解的语言进行通信。
 
 ### 自我对弈（Self-Play）
 
-在竞争或混合动机场景下，**自我对弈（self-play）** [silver2017mastering] 通过让 Agent 与自身的副本对抗来训练。这会自动产生课程式学习：随着 Agent 的提升，其对手（自身的早期版本）变得越来越难以击败。
+在竞争或混合动机场景下，**自我对弈（self-play）** [[381]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-silver2017mastering)] 通过让 Agent 与自身的副本对抗来训练。这会自动产生课程式学习：随着 Agent 的提升，其对手（自身的早期版本）变得越来越难以击败。
 
 对于 LLM Agent，自我对弈被用于：
 
@@ -659,7 +659,7 @@ $$a^i_t, m^i_t = \pi^i_{\theta^i}(o^i_t, \{m^j_{t-1}\}_{j \neq i})$$
 
 ### 基于种群的训练（Population-Based Training）
 
-**基于种群的训练（Population-Based Training, PBT）** [jaderberg2019human] 维护一个具有不同 Policy、超参数和专长的多样化 Agent 种群。Agent 会被定期评估；表现不佳的 Agent 会被表现优秀 Agent 的变异副本所替换。
+**基于种群的训练（Population-Based Training, PBT）** [[382]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jaderberg2019human)] 维护一个具有不同 Policy、超参数和专长的多样化 Agent 种群。Agent 会被定期评估；表现不佳的 Agent 会被表现优秀 Agent 的变异副本所替换。
 
 对于多 Agent LLM 系统，PBT 实现了：
 
@@ -687,9 +687,9 @@ $$\max_{\pi^1,\ldots,\pi^n} \sum_{i=1}^{n} J^i(\pi^1, \ldots, \pi^n)$$
 >
 > 对于有兴趣了解多智能体系统博弈论基础的读者：
 >
-> - **Shoham & Leyton-Brown** [shoham2008multiagent] —— 全面的教科书，涵盖 Agent 系统的 Nash 均衡、机制设计与社会选择理论。
-> - **Zhang et al.** [zhang2021multiagent] —— 综述了在合作、竞争与混合场景下具有收敛保证的多 Agent RL 算法。
-> - **Nisan et al.** [nisan2007algorithmic] —— 算法博弈论的权威参考，涵盖拍卖、均衡计算与无政府代价（price of anarchy）。
+> - **Shoham & Leyton-Brown** [[383]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shoham2008multiagent)] —— 全面的教科书，涵盖 Agent 系统的 Nash 均衡、机制设计与社会选择理论。
+> - **Zhang et al.** [[384]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhang2021multiagent)] —— 综述了在合作、竞争与混合场景下具有收敛保证的多 Agent RL 算法。
+> - **Nisan et al.** [[385]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-nisan2007algorithmic)] —— 算法博弈论的权威参考，涵盖拍卖、均衡计算与无政府代价（price of anarchy）。
 
 ## 挑战与解决方案
 

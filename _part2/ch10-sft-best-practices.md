@@ -290,7 +290,7 @@ $$
 **针对灾难性遗忘**:
 
 1. **数据回放(Data replay)**:将 5--10% 的预训练数据混入 SFT 数据集。确保 Gradient 更新不会完全忽视预训练分布。
-2. **弹性权重整合(Elastic Weight Consolidation, EWC)** [kirkpatrick2017overcoming]:添加正则项 $\Omega(\theta) = \frac{\lambda}{2}\sum_i F_i(\theta_i - \theta_i^*)^2$,惩罚对原任务而言 Fisher 信息高的参数的变化。
+2. **弹性权重整合(Elastic Weight Consolidation, EWC)** [[192]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kirkpatrick2017overcoming)]:添加正则项 $\Omega(\theta) = \frac{\lambda}{2}\sum_i F_i(\theta_i - \theta_i^*)^2$,惩罚对原任务而言 Fisher 信息高的参数的变化。
 3. **LoRA / 参数高效微调**:只训练低秩 adapter(参数量 $<1\%$),基础权重完全冻结。这避免了预训练知识的*永久性摧毁* —— 你随时可以移除 adapter 来恢复原模型。然而,**当 adapter 处于激活状态时**,组合系统 $(W_0 + BA)$ 仍可能表现出遗忘:adapter 可能将模型的有效行为推离旧技能。LoRA 保护的是 checkpoint,而非激活时的推理行为。
 4. **保守的学习率**:使用 $1$--$5 \times 10^{-6}$ 配合较少的 Epoch(1--3)。更大的学习率会加速遗忘。
 5. **渐进式训练**:逐步混合分布,随时间增加 SFT 数据比例,而非突然切换。
@@ -298,7 +298,7 @@ $$
 **针对对齐税**:
 
 1. **仔细调节 $\beta$**:更低的 $\beta$ 给予模型更多自由(减少税负),但可能牺牲安全性。多数场景下最优 $\beta \in [0.05, 0.3]$。
-2. **高质量、多样化的 SFT 数据**:对齐税的一部分来自 SFT 收窄了输出分布;更广、更多样化的 SFT 数据可减少这部分。RL 阶段通过 KL 正则化 [ouyang2022training]进一步施加约束。
+2. **高质量、多样化的 SFT 数据**:对齐税的一部分来自 SFT 收窄了输出分布;更广、更多样化的 SFT 数据可减少这部分。RL 阶段通过 KL 正则化 [[99]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-ouyang2022training)]进一步施加约束。
 3. **条件对齐(Conditional alignment)**:训练模型仅在安全标志激活时才对齐。推理时为基准测试关闭约束(仅供研究使用的技术)。
 4. **Constitutional AI / RLAIF**:利用模型自生成反馈创建更细致的偏好数据,在提升对齐的同时保留能力。
 5. **有针对性的 RL 预算**:不要过度训练 RL。监控能力基准,当税负超出可接受阈值(通常是 2--5% MMLU 回退)时停止。

@@ -325,7 +325,7 @@ NVLink 是同一节点内 GPU 之间的点对点互联。每条链路都是双�
 
 ## vLLM——分页注意力与高吞吐推理
 
-vLLM[kwon2023efficient] 引入了分页注意力（PagedAttention），它借鉴操作系统用于管理 RAM 的分页抽象，并将其应用于 GPU 的键值缓存（KV Cache）。在 LLM 推理过程中，*KV cache*——存储了所有先前 token 的 key 和 value 张量——是最大的内存消耗者。高效管理 KV cache 是高吞吐推理的核心挑战。
+vLLM[[138]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kwon2023efficient)] 引入了分页注意力（PagedAttention），它借鉴操作系统用于管理 RAM 的分页抽象，并将其应用于 GPU 的键值缓存（KV Cache）。在 LLM 推理过程中，*KV cache*——存储了所有先前 token 的 key 和 value 张量——是最大的内存消耗者。高效管理 KV cache 是高吞吐推理的核心挑战。
 
 ### KV cache 碎片化问题
 
@@ -552,7 +552,7 @@ response = client.completions.create(
 vLLM 将掩码计算委托给后端引擎：
 
 - **XGrammar**（自 v0.7 起为默认）：基于下推自动机的引擎，支持 JSON schema、正则和任意 EBNF 语法。得益于高效的 C++ 核心，对复杂 schema 而言最快。
-- **Outlines**[willard2023outlines]：基于 FSM；支持 JSON 和正则。在 XGrammar 不可用时作为回退方案。
+- **Outlines**[[95]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-willard2023outlines)]：基于 FSM；支持 JSON 和正则。在 XGrammar 不可用时作为回退方案。
 
 掩码在模型前向传播产生 logits *之后*、采样*之前*施加——实际中每步只增加不到 1 ms，因为 FSM/PDA 状态转移和预先计算的索引查找均为 $O(1)$。
 

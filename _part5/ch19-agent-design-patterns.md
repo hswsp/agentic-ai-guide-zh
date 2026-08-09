@@ -17,7 +17,7 @@ permalink: /part5/ch19-agent-design-patterns.html
 
 ## 工作流模式
 
-以下模式改编自 Anthropic 对 Agent 构建模块的分类 [anthropic2024buildingagents]，在*预定义*的控制流中使用 LLM。由系统（而非模型）决定执行顺序。
+以下模式改编自 Anthropic 对 Agent 构建模块的分类 [[330]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-anthropic2024buildingagents)]，在*预定义*的控制流中使用 LLM。由系统（而非模型）决定执行顺序。
 
 ### Prompt 链（Prompt Chaining）
 
@@ -42,7 +42,7 @@ permalink: /part5/ch19-agent-design-patterns.html
 多个 LLM 调用并发运行，由一个程序层合并它们的输出。可分为两个子模式：
 
 - **分段（Sectioning，fan-out）**：将输入划分为互不相交的块并独立处理——例如对一个代码库同时运行安全、性能和风格检查。
-- **投票（Voting，冗余）**：用不同随机种子或温度对同一 Prompt 发起 $N$ 次调用，然后通过多数投票 [wang2022selfconsistency]、奖励模型打分或 LLM-as-judge 选出最佳结果。
+- **投票（Voting，冗余）**：用不同随机种子或温度对同一 Prompt 发起 $N$ 次调用，然后通过多数投票 [[331]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2022selfconsistency)]、奖励模型打分或 LLM-as-judge 选出最佳结果。
 
 > **并行化示例：代码评审**
 >
@@ -61,7 +61,7 @@ permalink: /part5/ch19-agent-design-patterns.html
 
 ### Evaluator-Optimizer
 
-一个双模型反馈循环 [madaan2023selfrefine]：生成器产出候选输出，由独立的评估器依据显式标准对其打分。若得分低于阈值，则将评估器的评论追加到生成器的上下文中，循环往复，直到达到质量标准或耗尽重试预算。
+一个双模型反馈循环 [[228]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-madaan2023selfrefine)]：生成器产出候选输出，由独立的评估器依据显式标准对其打分。若得分低于阈值，则将评估器的评论追加到生成器的上下文中，循环往复，直到达到质量标准或耗尽重试预算。
 
 ![Evaluator-optimizer：无需训练的迭代式精化。]({{ site.baseurl }}/figures/fig_063_fig63.png)
 
@@ -73,7 +73,7 @@ permalink: /part5/ch19-agent-design-patterns.html
 
 ### ReAct（Reason + Act）
 
-最基础的 Agent 模式 [yao2023react]。LLM 在思考（内部推理）、行动（工具调用）和观察（处理结果）之间循环交替，直到产出最终答案。
+最基础的 Agent 模式 [[108]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yao2023react)]。LLM 在思考（内部推理）、行动（工具调用）和观察（处理结果）之间循环交替，直到产出最终答案。
 
 > **ReAct 实现要点**
 >
@@ -84,7 +84,7 @@ permalink: /part5/ch19-agent-design-patterns.html
 
 ### 规划型 Agent（Planning Agents）
 
-Agent 在执行前生成显式计划，并可在执行过程中修订计划 [wang2023planandsolve]。
+Agent 在执行前生成显式计划，并可在执行过程中修订计划 [[107]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2023planandsolve)]。
 
 | 策略 | 再规划时机 | 特征 |
 | --- | --- | --- |
@@ -132,11 +132,11 @@ Agent 暂停以评估自身轨迹并纠正方向：
 
 > **Reflexion：从失败中学习**
 >
-> **Reflexion** 模式 [shinn2023reflexion] 维护一个持久化的“反思记忆”。每次失败后，Agent 写下一段自然语言反思（“我失败是因为没有检查边界情况”）。在下一次尝试中，这些反思被纳入 Prompt——从而实现跨 Episode 的学习而无需更新权重。
+> **Reflexion** 模式 [[212]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shinn2023reflexion)] 维护一个持久化的“反思记忆”。每次失败后，Agent 写下一段自然语言反思（“我失败是因为没有检查边界情况”）。在下一次尝试中，这些反思被纳入 Prompt——从而实现跨 Episode 的学习而无需更新权重。
 
 ### 工具调用模式（Tool-Use Patterns）
 
-Agent 调用工具的方式显著影响其可靠性、延迟和成本。已涌现出五种经典模式 [schick2023toolformer]：
+Agent 调用工具的方式显著影响其可靠性、延迟和成本。已涌现出五种经典模式 [[320]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-schick2023toolformer)]：
 
 | 模式 | 描述 | 示例 |
 | --- | --- | --- |
@@ -160,7 +160,7 @@ Agent 调用工具的方式显著影响其可靠性、延迟和成本。已涌�
 
 **嵌套（Agent-as-Tool）。**
 
-一次工具调用会唤起一个完全独立的 Agent——拥有自己的 Prompt、工具和上下文。父 Agent 将子 Agent 视为黑盒函数。这实现了专业化：研究 Agent 将代码执行委派给编码 Agent，后者能访问沙箱和测试运行器。Swarm 模式 [openai2024swarm] 通过专业化 Agent 之间的交接（handoff）泛化了这一思路。
+一次工具调用会唤起一个完全独立的 Agent——拥有自己的 Prompt、工具和上下文。父 Agent 将子 Agent 视为黑盒函数。这实现了专业化：研究 Agent 将代码执行委派给编码 Agent，后者能访问沙箱和测试运行器。Swarm 模式 [[324]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-openai2024swarm)] 通过专业化 Agent 之间的交接（handoff）泛化了这一思路。
 
 **回退（优雅降级）。**
 
@@ -168,7 +168,7 @@ harness 按优先级顺序尝试工具：若首选工具失败（超时、限流
 
 ## 设计原则
 
-以下原则提炼自 Anthropic 的《构建有效 Agent》指南 [anthropic2024buildingagents]，适用于所有模式：
+以下原则提炼自 Anthropic 的《构建有效 Agent》指南 [[330]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-anthropic2024buildingagents)]，适用于所有模式：
 
 1. **保持简单。** 使用能跑通的最简架构。仅在确有必要时增加复杂度。一个能解决问题的 Prompt 链，永远胜过一个“也许能解决”的多 Agent 系统。
 2. **透明优于聪明。** 每一步都应可检查。避免隐藏状态或隐式推理。当 Agent 失败时，你需要理解*原因*——不透明的架构使调试无从下手。

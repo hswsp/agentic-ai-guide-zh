@@ -8,7 +8,7 @@ permalink: /part2/ch09-reward-model-training.html
 
 ## Bradley-Terry 模型 —— 完整推导
 
-Bradley-Terry 模型 [bradley1952rank] 是成对偏好学习(pairwise preference learning)的标准概率框架。给定对 prompt $q$ 的两个回答 $y_1$ 和 $y_2$,该模型假设:
+Bradley-Terry 模型 [[186]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-bradley1952rank)] 是成对偏好学习(pairwise preference learning)的标准概率框架。给定对 prompt $q$ 的两个回答 $y_1$ 和 $y_2$,该模型假设:
 
 $$
 P(y_1 \succ y_2 \mid q) = \sigma(r(y_1, q) - r(y_2, q))
@@ -155,7 +155,7 @@ $$
 > - 代码生成中的中间编译检查
 > - 多部分答案的部分匹配分数
 >
-> 这是基于势函数的 Reward 塑形(Potential-Based Reward Shaping, PBRS) [ng1999policy] 在 LLM 场景下的直接应用 —— “塑形 Reward 保留最优 Policy”这一理论保证使得 PRM 成为在推理任务中获取稠密 Reward 的有原则方法。
+> 这是基于势函数的 Reward 塑形(Potential-Based Reward Shaping, PBRS) [[155]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-ng1999policy)] 在 LLM 场景下的直接应用 —— “塑形 Reward 保留最优 Policy”这一理论保证使得 PRM 成为在推理任务中获取稠密 Reward 的有原则方法。
 
 #### 自动 PRM 标注
 
@@ -167,7 +167,7 @@ $$
 
 ## RLVR 中基于规则的 Reward
 
-可验证奖励的强化学习(Reinforcement Learning from Verifiable Rewards, RLVR)使用确定性、基于规则的 Reward 函数,而非习得的奖励模型。这能显著减少奖励黑客行为(尽管模型仍可能利用格式技巧、边界情况或测试记忆来作弊),DeepSeek-R1 [deepseek2025r1] 即采用此方法。
+可验证奖励的强化学习(Reinforcement Learning from Verifiable Rewards, RLVR)使用确定性、基于规则的 Reward 函数,而非习得的奖励模型。这能显著减少奖励黑客行为(尽管模型仍可能利用格式技巧、边界情况或测试记忆来作弊),DeepSeek-R1 [[156]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-deepseek2025r1)] 即采用此方法。
 
 > **TRL 中基于规则的 Reward 函数**
 >
@@ -281,7 +281,7 @@ $$
 
 #### Plackett-Luce 模型
 
-Plackett-Luce(PL)模型 [plackett1975analysis] 是将 Bradley-Terry 推广至完整排序的标准扩展。给定 $K$ 个回答 $y_1, \ldots, y_K$ 及其排序 $\pi$(其中 $\pi(1)$ 为最佳):
+Plackett-Luce(PL)模型 [[187]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-plackett1975analysis)] 是将 Bradley-Terry 推广至完整排序的标准扩展。给定 $K$ 个回答 $y_1, \ldots, y_K$ 及其排序 $\pi$(其中 $\pi(1)$ 为最佳):
 
 > **Plackett-Luce 似然**
 >
@@ -303,14 +303,14 @@ Plackett-Luce(PL)模型 [plackett1975analysis] 是将 Bradley-Terry 推广至完
 
 > **列表式 Loss 函数**
 >
-> - **ListMLE** [xia2008listwise]:直接最大化真实排序的 PL 似然。简洁有效。
-> - **ListNet** [cao2007listnet]:最小化模型的 top-1 概率分布与真实分布之间的 KL 散度:
+> - **ListMLE** [[188]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-xia2008listwise)]:直接最大化真实排序的 PL 似然。简洁有效。
+> - **ListNet** [[189]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-cao2007listnet)]:最小化模型的 top-1 概率分布与真实分布之间的 KL 散度:
 > $$
 > \mathcal{L}_{ListNet} = -\sum_{i=1}^{K} P_{true}(y_i  is best) \cdot \log P_{model}(y_i  is best)
 > $$
 > 其中 $P_{\text{model}}(y_i \text{ is best}) = \frac{e^{r_\phi(y_i)}}{\sum_j e^{r_\phi(y_j)}}$。
-> - **LambdaRank** [burges2006lambdarank]:用排序指标(例如 NDCG)的变化对成对 Gradient 加权。当排名靠前的质量更重要时尤为有用。
-> - **RankNet** [burges2005ranknet]:对所有成对组合求和的成对交叉熵 —— 等价于在从排序中抽取的所有 $\binom{K}{2}$ 个对上应用 BT。
+> - **LambdaRank** [[190]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-burges2006lambdarank)]:用排序指标(例如 NDCG)的变化对成对 Gradient 加权。当排名靠前的质量更重要时尤为有用。
+> - **RankNet** [[191]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-burges2005ranknet)]:对所有成对组合求和的成对交叉熵 —— 等价于在从排序中抽取的所有 $\binom{K}{2}$ 个对上应用 BT。
 
 #### GRPO 与拒绝采样中的 listwise Reward
 

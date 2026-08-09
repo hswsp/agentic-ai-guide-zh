@@ -12,7 +12,7 @@ permalink: /part2/ch08-preference-optimization-variants.html
 
 标准 DPO 的主要局限：偏好数据由一个 *不同的* 模型生成（通常是较旧的 checkpoint，甚至是不同的模型族）。随着训练推进，policy 生成的文本与训练 pair 已完全不同 $\rightarrow$ loss 在一个无关分布上进行优化。
 
-**Online DPO 方案** [guo2024direct]：每一步都从 *当前* policy 生成新鲜的偏好 pair，用 reward model 判定，然后应用 DPO loss。
+**Online DPO 方案** [[180]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-guo2024direct)]：每一步都从 *当前* policy 生成新鲜的偏好 pair，用 reward model 判定，然后应用 DPO loss。
 
 ### 算法
 
@@ -82,7 +82,7 @@ trainer.train()
 
 DPO 需要 *成对* 偏好：对同一 prompt，你既需要好的也需要坏的响应。实际上大多数反馈是 *未配对* 的：用户对单个响应给出点赞/点踩，没有匹配的 pair。
 
-**KTO 的洞见** [ethayarajh2024kto]：使用前景理论（来自行为经济学）。人类对损失的感受比对收益更强烈。“点踩”应当产生比“点赞”更强的 gradient。
+**KTO 的洞见** [[181]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-ethayarajh2024kto)]：使用前景理论（来自行为经济学）。人类对损失的感受比对收益更强烈。“点踩”应当产生比“点赞”更强的 gradient。
 
 ### Loss 函数
 
@@ -162,7 +162,7 @@ trainer.train()
 
 DPO 有一个退化解：通过让 chosen 与 rejected 之间的 margin *无限大* 来达到零 loss。实际上这意味着 DPO 会过拟合——把 chosen 概率推到 1、rejected 概率推到 0，记住训练数据。
 
-**IPO 的修复** [azar2024general]：与其使用会饱和的 log-sigmoid，不如使用一个针对 *特定* margin 的平方 loss。loss 在有限差距处最小，而非无穷远。
+**IPO 的修复** [[182]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-azar2024general)]：与其使用会饱和的 log-sigmoid，不如使用一个针对 *特定* margin 的平方 loss。loss 在有限差距处最小，而非无穷远。
 
 ### Loss 函数
 
@@ -216,7 +216,7 @@ trainer.train()
 
 ### 动机
 
-迄今所有方法都需要参考模型——要么是独立副本（显存翻倍），要么通过 LoRA 隐式存在。ORPO [hong2024orpo] 通过将监督微调（Supervised Fine-Tuning, SFT）与偏好对齐合并到单一 loss 中，彻底消除了参考模型。
+迄今所有方法都需要参考模型——要么是独立副本（显存翻倍），要么通过 LoRA 隐式存在。ORPO [[183]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hong2024orpo)] 通过将监督微调（Supervised Fine-Tuning, SFT）与偏好对齐合并到单一 loss 中，彻底消除了参考模型。
 
 **关键洞见**：用生成 chosen 与生成 rejected 的 *odds ratio*（几率比）作为偏好信号。SFT 部分自然防止坍塌（无需 KL 正则）。
 
@@ -279,13 +279,13 @@ trainer.train()
 
 > **另见：SimPO**
 >
-> **SimPO** [meng2024simpo] 是另一种无参考的偏好方法，使用长度归一化的 log-probability 作为隐式 reward，彻底消除参考模型。它在 Section 「DPO 扩展与变体」 与其他 DPO 扩展一同介绍，因为它们都共享无参考的理念。
+> **SimPO** [[167]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-meng2024simpo)] 是另一种无参考的偏好方法，使用长度归一化的 log-probability 作为隐式 reward，彻底消除参考模型。它在 Section 「DPO 扩展与变体」 与其他 DPO 扩展一同介绍，因为它们都共享无参考的理念。
 
 ## Best-of-N 采样（拒绝采样）
 
 ### 动机
 
-有时候最简单的方法获胜。Best-of-N 采样（Rejection Sampling） [nakano2021webgpt] 在 RL 阶段 *完全不需要训练*——只需生成多个候选并挑选最佳。
+有时候最简单的方法获胜。Best-of-N 采样（Rejection Sampling） [[184]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-nakano2021webgpt)] 在 RL 阶段 *完全不需要训练*——只需生成多个候选并挑选最佳。
 
 ### 算法
 
@@ -310,7 +310,7 @@ $$
 >
 > 许多生产模型就是这样训练的：比 PPO 简单、几乎同样有效、完全稳定。
 >
-> **理论联系** [gao2023scaling]：Best-of-N 实现了隐式的 KL 约束 policy：$\pi_\text{BoN}(y\mid x) \propto \pi_\theta(y\mid x)^{1-1/N} \cdot r(x,y)^{1/N}$。
+> **理论联系** [[185]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-gao2023scaling)]：Best-of-N 实现了隐式的 KL 约束 policy：$\pi_\text{BoN}(y\mid x) \propto \pi_\theta(y\mid x)^{1-1/N} \cdot r(x,y)^{1/N}$。
 
 ### TRL 实现
 

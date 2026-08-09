@@ -24,7 +24,7 @@ harness 强制实施清晰的 **关注点分离**（separation of concerns）：
 
 > **为何要分离关注点？**
 >
-> 语言模型本质上是一个函数 $f_\theta : \text{tokens} \to \text{tokens}$。它没有持久状态、无法调用 API，也没有时间感知。harness 就是为模型提供“身体”的“操作系统”——持久记忆、执行器（工具）以及调度器（编排器） [packer2023memgpt]。正如操作系统将硬件从应用程序中抽象出来，harness 将基础设施从模型中抽象出来。
+> 语言模型本质上是一个函数 $f_\theta : \text{tokens} \to \text{tokens}$。它没有持久状态、无法调用 API，也没有时间感知。harness 就是为模型提供“身体”的“操作系统”——持久记忆、执行器（工具）以及调度器（编排器） [[304]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-packer2023memgpt)]。正如操作系统将硬件从应用程序中抽象出来，harness 将基础设施从模型中抽象出来。
 
 ## Context Window 管理
 
@@ -78,7 +78,7 @@ $$
 
 **对旧轮次进行摘要。**
 
-用 LLM 生成的摘要替换最旧的 $k$ 轮 [packer2023memgpt]：
+用 LLM 生成的摘要替换最旧的 $k$ 轮 [[304]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-packer2023memgpt)]：
 
 $$
 H' = \text{Summarize}(H_{1:k}) \;\|\; H_{k+1:n}
@@ -116,7 +116,7 @@ $$
 
 ### 递归 Context 分解
 
-上述策略——摘要、选择性保留、滑动窗口——都接受一个基本约束：*所有内容都必须装入单个 context window*。一种更激进的方法完全摒弃这一约束：让模型**递归调用自身**（或子模型）处理 Context 的分区，并跨调用聚合结果 [zhang2025rlm]。
+上述策略——摘要、选择性保留、滑动窗口——都接受一个基本约束：*所有内容都必须装入单个 context window*。一种更激进的方法完全摒弃这一约束：让模型**递归调用自身**（或子模型）处理 Context 的分区，并跨调用聚合结果 [[319]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhang2025rlm)]。
 
 > **递归语言模型（Recursive Language Model, RLM）**
 >
@@ -130,7 +130,7 @@ $$
 
 **为什么递归有效。**
 
-Context rot（上下文腐烂）——即模型准确率随 Context 长度增长而经验性地下降的现象——意味着即便拥有大 context window（128k+）的模型在长输入上的表现也会更差。通过让每次单独调用保持简短和聚焦，递归分解完全规避了这种退化。Zhang 等 [zhang2025rlm] 证明，递归的 GPT-5-mini 在困难的长 Context 基准上*超越*了非递归的 GPT-5，同时每次查询成本更低。
+Context rot（上下文腐烂）——即模型准确率随 Context 长度增长而经验性地下降的现象——意味着即便拥有大 context window（128k+）的模型在长输入上的表现也会更差。通过让每次单独调用保持简短和聚焦，递归分解完全规避了这种退化。Zhang 等 [[319]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhang2025rlm)] 证明，递归的 GPT-5-mini 在困难的长 Context 基准上*超越*了非递归的 GPT-5，同时每次查询成本更低。
 
 **实现模式。**
 
@@ -234,7 +234,7 @@ $$
 
 ### Few-Shot 管理
 
-Few-shot 示例提升可靠性但消耗 Token。harness 应该 [liu2022makes]：
+Few-shot 示例提升可靠性但消耗 Token。harness 应该 [[101]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2022makes)]：
 
 - **选择相关示例**，使用与当前查询的 Embedding 相似度。
 - **轮换示例**，避免对固定示例集的过拟合。
@@ -288,7 +288,7 @@ Prompt 中工具描述的其他最佳实践：
 
 ## 工具集成与执行
 
-工具使用是现代 LLM Agent 的标志性能力 [schick2023toolformer]。harness 负责管理工具定义、选择、执行与输出处理。
+工具使用是现代 LLM Agent 的标志性能力 [[320]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-schick2023toolformer)]。harness 负责管理工具定义、选择、执行与输出处理。
 
 ### 工具定义 Schema
 
@@ -371,8 +371,8 @@ MCP（见「模型上下文协议（MCP）」一节）提供了一种标准化�
 
 当 Agent 可以访问成百上千的工具时，将所有定义都纳入 Prompt 是不可行的（Token 成本）且适得其反（选择混乱）。有两种关键方法应对这一问题：
 
-- **检索增强的工具选择：** 在每一轮中，仅基于用户查询与工具描述之间的 Embedding 相似度检索 top-$k$ 最相关的工具。这与面向文档的检索增强生成（Retrieval-Augmented Generation, RAG）类似——只有与 Context 相关的工具被注入 Prompt。**Gorilla** [patil2023gorilla] 证明，将检索与检索感知训练（retriever-aware training, RAT）结合，可以让 LLM 在数千个相互重叠的 API 中准确选择，并在测试时适应版本变更。
-- **微调工具选择：** **ToolLLM** [qin2024toolllm] 在一个大规模工具使用轨迹语料（16,000+ API）上对模型进行训练，使用基于深度优先搜索的决策树（depth-first search-based decision tree, DFSDT）生成解路径。所得到的模型学习到可泛化的工具选择策略，能迁移到未见过的 API，并显著优于仅基于 Prompt 的方法。
+- **检索增强的工具选择：** 在每一轮中，仅基于用户查询与工具描述之间的 Embedding 相似度检索 top-$k$ 最相关的工具。这与面向文档的检索增强生成（Retrieval-Augmented Generation, RAG）类似——只有与 Context 相关的工具被注入 Prompt。**Gorilla** [[321]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-patil2023gorilla)] 证明，将检索与检索感知训练（retriever-aware training, RAT）结合，可以让 LLM 在数千个相互重叠的 API 中准确选择，并在测试时适应版本变更。
+- **微调工具选择：** **ToolLLM** [[322]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-qin2024toolllm)] 在一个大规模工具使用轨迹语料（16,000+ API）上对模型进行训练，使用基于深度优先搜索的决策树（depth-first search-based decision tree, DFSDT）生成解路径。所得到的模型学习到可泛化的工具选择策略，能迁移到未见过的 API，并显著优于仅基于 Prompt 的方法。
 
 在实践中，生产级 harness 会组合这些策略：检索层预筛工具集合，Prompt 中纳入筛选后的工具，由模型原生的 function calling 能力完成最终选择。
 
@@ -417,7 +417,7 @@ MCP（见「模型上下文协议（MCP）」一节）提供了一种标准化�
 
 ### 模型上下文协议（MCP）
 
-**模型上下文协议（Model Context Protocol, MCP）** [anthropic-mcp-2024] 是一个用于连接 LLM 应用与外部工具、数据源的开放标准。它将工具*提供者*与工具*消费者*解耦。我们在第 21 章深入介绍 MCP；此处仅总结与 harness 设计相关的核心思想。
+**模型上下文协议（Model Context Protocol, MCP）** [[323]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-anthropic-mcp-2024)] 是一个用于连接 LLM 应用与外部工具、数据源的开放标准。它将工具*提供者*与工具*消费者*解耦。我们在第 21 章深入介绍 MCP；此处仅总结与 harness 设计相关的核心思想。
 
 **架构。**
 
@@ -446,7 +446,7 @@ MCP 采用客户端-服务器模型：
 
 ### ReAct 循环（Reason + Act）
 
-**ReAct** 模式 [yao2023react] 在一个紧凑循环中交替进行推理（"Thought"）、行动（"Act"）与观察（"Observe"）：
+**ReAct** 模式 [[108]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yao2023react)] 在一个紧凑循环中交替进行推理（"Thought"）、行动（"Act"）与观察（"Observe"）：
 
 $$
 \text{Thought}_t \to \text{Action}_t \to \text{Observation}_t \to \text{Thought}_{t+1} \to \cdots
@@ -456,14 +456,14 @@ $$
 
 **实现细节。**
 
-- "Thought" 步骤通常是一个 scratchpad——一条思维链（Chain-of-Thought，CoT）推理轨迹 [wei2022chain]，*不会*展示给用户。
+- "Thought" 步骤通常是一个 scratchpad——一条思维链（Chain-of-Thought，CoT）推理轨迹 [[103]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wei2022chain)]，*不会*展示给用户。
 - harness 解析模型输出，提取动作（工具名 + 参数）。
 - **最大迭代次数**守卫可防止无限循环。
 - 当模型输出 "Final Answer" 动作或停止 Token 时循环终止。
 
 ### Plan-and-Execute
 
-Agent 不是逐步决策，而是先生成一个完整的计划，然后依次执行每一步 [wang2023planandsolve]：
+Agent 不是逐步决策，而是先生成一个完整的计划，然后依次执行每一步 [[107]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2023planandsolve)]：
 
 1. **规划阶段：** 给定任务，生成结构化计划（带依赖关系的子任务列表）。
 2. **执行阶段：** 执行每个子任务，可能使用不同（更便宜）的模型。
@@ -495,7 +495,7 @@ Agent 之间直接通信，无中央协调者。每个 Agent 都可以将任何�
 
 **Swarm 模式。**
 
-该模式由 OpenAI 的 Swarm 库 [openai2024swarm] 推广，使用 **handoff（交接）**：一个 Agent 可以将控制权连同完整对话 Context 一起转交给另一个 Agent。核心概念：
+该模式由 OpenAI 的 Swarm 库 [[324]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-openai2024swarm)] 推广，使用 **handoff（交接）**：一个 Agent 可以将控制权连同完整对话 Context 一起转交给另一个 Agent。核心概念：
 
 - **Agent** 拥有指令与工具。
 - **Handoff** 是用于转移控制权的特殊工具。
@@ -523,8 +523,8 @@ Agent 之间直接通信，无中央协调者。每个 Agent 都可以将任何�
 
 对于复杂的、结构化的工作流，编排逻辑被表达为**有向无环图（directed acyclic graph, DAG）**或状态机：
 
-- **LangGraph** [langchain2024langgraph]：在 LangChain 之上扩展，提供基于图的执行模型。节点是 Agent 步骤；边是条件转移。支持环路（用于 ReAct 循环）和并行分支。
-- **AutoGen** [wu2023autogen]：Microsoft 的多 Agent 对话图框架。支持嵌套对话、群聊以及人机协同模式。
+- **LangGraph** [[325]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-langchain2024langgraph)]：在 LangChain 之上扩展，提供基于图的执行模型。节点是 Agent 步骤；边是条件转移。支持环路（用于 ReAct 循环）和并行分支。
+- **AutoGen** [[326]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wu2023autogen)]：Microsoft 的多 Agent 对话图框架。支持嵌套对话、群聊以及人机协同模式。
 - **状态机：** 显式状态（例如 `PLANNING`、`EXECUTING`、`WAITING_FOR_HUMAN`、`DONE`）与已定义的转移。比隐式循环逻辑更易推理和测试。
 
 $$
@@ -563,7 +563,7 @@ Agent 的内部状态包括：
 
 ### 持久化状态
 
-用于跨会话连续性 [packer2023memgpt, wang2023voyager]：
+用于跨会话连续性 [[304]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-packer2023memgpt), [216]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2023voyager)]：
 
 - **用户档案：** 偏好、过往交互、关于用户已学习到的事实。
 - **长期记忆：** 过往对话的向量数据库，可按语义相似度检索。
@@ -591,7 +591,7 @@ $$
 
 ### 循环检测
 
-Agent 可能陷入无限循环——反复以相同参数调用同一工具，或在两个状态之间振荡。检测与自我修正策略 [shinn2023reflexion]：
+Agent 可能陷入无限循环——反复以相同参数调用同一工具，或在两个状态之间振荡。检测与自我修正策略 [[212]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shinn2023reflexion)]：
 
 - **最大迭代守卫：** 对每个任务的步骤数设置硬上限（例如 50 步）。
 - **动作去重：** 对每个 (tool, args) 对进行哈希；如果同一调用出现 $k$ 次，则跳出循环。
@@ -636,7 +636,7 @@ $$
 ### 成本管理
 
 - **Token 预算：** 强制执行每任务和每用户的 Token 预算。接近上限时告警。
-- **模型路由：** 对简单步骤（工具选择、格式化）使用便宜且快速的模型（例如 GPT-4o-mini、Claude Haiku），仅在复杂推理时使用昂贵的模型（GPT-4o、Claude Opus） [chen2023frugalgpt]。
+- **模型路由：** 对简单步骤（工具选择、格式化）使用便宜且快速的模型（例如 GPT-4o-mini、Claude Haiku），仅在复杂推理时使用昂贵的模型（GPT-4o、Claude Opus） [[327]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chen2023frugalgpt)]。
 - **缓存：** 缓存确定性的工具输出（例如数据库查询、静态网页）以避免冗余 API 调用。
 
 具有 $T$ 个 LLM 步骤和 $K$ 次工具调用的 Agent 任务的总成本为：
@@ -660,7 +660,7 @@ $$
 - **A/B 测试：** 将一部分流量路由到新版本 Agent，比较成功率、成本与延迟。
 - **灰度（Canary）部署：** 在监控回归的同时，逐步将流量切到新版本。
 - **Shadow 模式：** 让新 Agent 与生产 Agent 并行运行，比较输出，但只将生产 Agent 的输出提供给用户。
-- **LLM-as-judge：** 使用另一个 LLM 在有用性、准确性与安全性等维度上评测 Agent 输出 [zheng2023judging]。
+- **LLM-as-judge：** 使用另一个 LLM 在有用性、准确性与安全性等维度上评测 Agent 输出 [[245]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zheng2023judging)]。
 
 ## 框架对比
 
@@ -676,12 +676,12 @@ $$
 
 **图例：** H = 高，M = 中，L = 低。**灵活性**、**复杂度**、**生产** = 生产就绪度。
 
-- **LangChain** [chase2022langchain]1 提供丰富的集成生态，但学习曲线陡峭，其抽象可能掩盖实际发生的事情。
-- **LangGraph** [langchain2024langgraph]2 为 LangChain 增加了显式的基于图的控制流，使复杂的多步 Agent 更易管理。
-- **AutoGen** [wu2023autogen]3 擅长多 Agent 对话与嵌套对话，对人机协同模式提供良好支持。
-- **CrewAI** [moura2023crewai]4 提供了高层、基于角色的抽象（“Agent 团队”），易于上手，但对自定义模式的灵活性较差。
+- **LangChain** [[328]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chase2022langchain)]1 提供丰富的集成生态，但学习曲线陡峭，其抽象可能掩盖实际发生的事情。
+- **LangGraph** [[325]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-langchain2024langgraph)]2 为 LangChain 增加了显式的基于图的控制流，使复杂的多步 Agent 更易管理。
+- **AutoGen** [[326]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wu2023autogen)]3 擅长多 Agent 对话与嵌套对话，对人机协同模式提供良好支持。
+- **CrewAI** [[329]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-moura2023crewai)]4 提供了高层、基于角色的抽象（“Agent 团队”），易于上手，但对自定义模式的灵活性较差。
 - **OpenAI Assistants API**5 完全托管（无需运维基础设施），但定制化有限且存在厂商锁定。
-- **OpenAI Swarm** [openai2024swarm]6 是一个轻量、教学性的框架，用于演示 handoff 模式；不适合生产使用。
+- **OpenAI Swarm** [[324]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-openai2024swarm)]6 是一个轻量、教学性的框架，用于演示 handoff 模式；不适合生产使用。
 - **自研 harness** 提供最大化的控制权，是具有特定需求的生产系统的正确选择，但需要大量工程投入。
 
 > **何时使用框架，何时自研？**

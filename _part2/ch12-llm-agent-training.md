@@ -78,12 +78,12 @@ LLM Agent 通过三种主要的优化方法论来利用专门的轨迹缓冲区�
 
 ### A. 自我纠正与思维细化
 
-此类别中的两种代表性方法是 STaR [zelikman2022star] 和 Reflexion [shinn2023reflexion]。当 Agent 在一次多步执行轨迹中失败时，次优序列会被保存到缓冲区。该框架随后采样此轨迹，并提示 LLM 对其过去的表现生成显式文本批评：
+此类别中的两种代表性方法是 STaR [[211]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zelikman2022star)] 和 Reflexion [[212]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shinn2023reflexion)]。当 Agent 在一次多步执行轨迹中失败时，次优序列会被保存到缓冲区。该框架随后采样此轨迹，并提示 LLM 对其过去的表现生成显式文本批评：
 $$
 \text{Critique} \leftarrow \text{LLM}(\mathcal{S}_{\text{failed}},\; \mathcal{A}_{\text{failed}},\; \mathcal{R}_{=0})
 $$
 
-一旦修正后的轨迹获得正向 reward，它就被移至最优经验池，用于通过微调（在成功轨迹上做 SFT）或 RL（采用二元通过/失败 reward 的 GRPO [shao2024deepseekmath]）来更新网络权重。
+一旦修正后的轨迹获得正向 reward，它就被移至最优经验池，用于通过微调（在成功轨迹上做 SFT）或 RL（采用二元通过/失败 reward 的 GRPO [[168]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shao2024deepseekmath)]）来更新网络权重。
 
 > **STaR：自学习推理者**
 >
@@ -104,13 +104,13 @@ $$
 
 ### B. 离策略探索
 
-此范式以 ReAct [yao2023react] 及相关工具使用框架为代表，涉及广泛的自主探索。在自主探索过程中（网页导航、数据库查询、代码生成），Agent 记录数千条探索性执行路径。轨迹缓冲区充当一个过滤器：
+此范式以 ReAct [[108]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yao2023react)] 及相关工具使用框架为代表，涉及广泛的自主探索。在自主探索过程中（网页导航、数据库查询、代码生成），Agent 记录数千条探索性执行路径。轨迹缓冲区充当一个过滤器：
 
 - **成功过滤**：只保留达成目标的轨迹用于训练。
 - **效率排序**：在成功轨迹中，优先选择最短/最高效的工具使用路径。
 - **多样性采样**：维持多样化的解决策略集合，以防止模式坍塌。
 
-优化算法（通常是 GRPO [shao2024deepseekmath] 或过滤后的 SFT）只在高效、成功的轨迹上计算 Loss，丢弃迂回曲折的运行。
+优化算法（通常是 GRPO [[168]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shao2024deepseekmath)] 或过滤后的 SFT）只在高效、成功的轨迹上计算 Loss，丢弃迂回曲折的运行。
 
 ### C. 非参数化的上下文学习（基于经验的 RAG）
 
@@ -146,18 +146,18 @@ Top-$k$ 个相似的成功历史运行作为 few-shot 示例直接注入到 Prom
 **用 RL 训练 LLM Agent 的关键方法。**
 | **方法** | **类型** | **核心思想** |
 | --- | --- | --- |
-| **STaR** [zelikman2022star] | 迭代 SFT | 通过在自身成功轨迹上微调来自举推理能力 |
-| **Reflexion** [shinn2023reflexion] | 上下文 RL | 语言式自我批评作为情节记忆存储；无权重更新 |
-| **ReAct** [yao2023react] | Prompt 方法 | 在单次生成中交错推理（“思考”）与行动（“工具调用”） |
-| **LATS** [zhou2024lats] | 树搜索 | 在动作序列上做蒙特卡洛树搜索；反向传播 reward |
-| **AgentQ** [putta2024agentq] | 离策略 RL | 在 Agent 轨迹上用 AI 生成的偏好对做 DPO |
-| **OpenHands** [wang2024openhands] | GRPO | 基于执行的 reward（测试通过/失败）做组相对优化 |
-| **Voyager** [wang2023voyager] | 技能库 | 存储并检索成功代码片段以组合复用 |
-| **RLEF** [le2024rlef] | 在线 RL | 从执行反馈中做 RL——来自代码/测试执行的二元 reward |
+| **STaR** [[211]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zelikman2022star)] | 迭代 SFT | 通过在自身成功轨迹上微调来自举推理能力 |
+| **Reflexion** [[212]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shinn2023reflexion)] | 上下文 RL | 语言式自我批评作为情节记忆存储；无权重更新 |
+| **ReAct** [[108]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yao2023react)] | Prompt 方法 | 在单次生成中交错推理（“思考”）与行动（“工具调用”） |
+| **LATS** [[213]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhou2024lats)] | 树搜索 | 在动作序列上做蒙特卡洛树搜索；反向传播 reward |
+| **AgentQ** [[214]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-putta2024agentq)] | 离策略 RL | 在 Agent 轨迹上用 AI 生成的偏好对做 DPO |
+| **OpenHands** [[215]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2024openhands)] | GRPO | 基于执行的 reward（测试通过/失败）做组相对优化 |
+| **Voyager** [[216]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2023voyager)] | 技能库 | 存储并检索成功代码片段以组合复用 |
+| **RLEF** [[217]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-le2024rlef)] | 在线 RL | 从执行反馈中做 RL——来自代码/测试执行的二元 reward |
 
 ### STaR：自学习推理者（详解）
 
-STaR [zelikman2022star] 是一种**迭代式自我改进**方法，无需外部 Reward Model 即可自举推理能力。核心洞见：如果模型偶尔能正确解决一个问题，它就可以从自身的成功中学习。
+STaR [[211]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zelikman2022star)] 是一种**迭代式自我改进**方法，无需外部 Reward Model 即可自举推理能力。核心洞见：如果模型偶尔能正确解决一个问题，它就可以从自身的成功中学习。
 
 **算法**：
 
@@ -200,13 +200,13 @@ $$
 
 > **面向 Agent 的 STaR 变体**
 >
-> - **Quiet-STaR** [zelikman2024quietstar]：在每个生成 Token 之间插入“思考 Token”。模型学会在没有显式 CoT 提示的情况下*隐式*推理。训练目标：在包含思考 Token 时更好地预测下一个 Token。
+> - **Quiet-STaR** [[218]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zelikman2024quietstar)]：在每个生成 Token 之间插入“思考 Token”。模型学会在没有显式 CoT 提示的情况下*隐式*推理。训练目标：在包含思考 Token 时更好地预测下一个 Token。
 > - **代码 Agent 的 STaR**：用测试执行替代答案验证。“正确” = 所有测试通过。合理化 = 以错误消息为条件生成新方法。
-> - **V-STaR** [hosseini2024vstar]：增加一个在 $(z, y, \text{correct/incorrect})$ 三元组上训练的验证器模型。该验证器提供过程级监督，过滤那些偶然到达正确答案的糟糕推理轨迹。
+> - **V-STaR** [[219]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hosseini2024vstar)]：增加一个在 $(z, y, \text{correct/incorrect})$ 三元组上训练的验证器模型。该验证器提供过程级监督，过滤那些偶然到达正确答案的糟糕推理轨迹。
 
 ### Reflexion：语言强化学习（详解）
 
-Reflexion [shinn2023reflexion] 引入了一种激进的范式：**无权重更新的 RL**。Agent 不通过基于梯度的学习，而是通过存储在情节记忆中的自然语言自我批评来改进。
+Reflexion [[212]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shinn2023reflexion)] 引入了一种激进的范式：**无权重更新的 RL**。Agent 不通过基于梯度的学习，而是通过存储在情节记忆中的自然语言自我批评来改进。
 
 **完整架构**：
 
@@ -259,7 +259,7 @@ $$
 
 ### ReAct：推理 + 行动（详解）
 
-ReAct [yao2023react] 通过在单个生成流中**交错显式推理步骤与环境动作**，确立了工具使用 Agent 的主导 Prompt 范式。
+ReAct [[108]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yao2023react)] 通过在单个生成流中**交错显式推理步骤与环境动作**，确立了工具使用 Agent 的主导 Prompt 范式。
 
 > **ReAct 系统 Prompt（典型）**
 >
@@ -322,7 +322,7 @@ ReAct [yao2023react] 通过在单个生成流中**交错显式推理步骤与环
 
 ### LATS：语言 Agent 树搜索（详解）
 
-LATS [zhou2024lats] 将**蒙特卡洛树搜索（Monte Carlo Tree Search, MCTS）**应用于 LLM Agent 的动作选择，以推理算力换取显著更好的轨迹。
+LATS [[213]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhou2024lats)] 将**蒙特卡洛树搜索（Monte Carlo Tree Search, MCTS）**应用于 LLM Agent 的动作选择，以推理算力换取显著更好的轨迹。
 
 **算法（针对 LLM Agent 改造）**：
 
@@ -381,7 +381,7 @@ $$
 
 ### AgentQ：在 Agent 轨迹上做 DPO（详解）
 
-AgentQ [putta2024agentq] 通过从轨迹结果自动生成偏好对，桥接了**离线偏好学习（DPO）**与**在线 Agent 执行**。
+AgentQ [[214]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-putta2024agentq)] 通过从轨迹结果自动生成偏好对，桥接了**离线偏好学习（DPO）**与**在线 Agent 执行**。
 
 **流水线**：
 
@@ -408,7 +408,7 @@ $$
 
 ### Voyager：通过技能库实现终身学习（详解）
 
-Voyager [wang2023voyager] 引入了**组合式技能积累**——Agent 构建一个不断增长的可复用代码函数库，作为高层动作。
+Voyager [[216]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2023voyager)] 引入了**组合式技能积累**——Agent 构建一个不断增长的可复用代码函数库，作为高层动作。
 
 **架构**：
 
@@ -466,7 +466,7 @@ $$
 
 ### RLEF：从执行反馈中做 RL（详解）
 
-RLEF [le2024rlef] 将**带确定性执行 reward 的在线 RL**应用于代码生成 Agent，确立了 Agent 训练最简单的有效范式。
+RLEF [[217]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-le2024rlef)] 将**带确定性执行 reward 的在线 RL**应用于代码生成 Agent，确立了 Agent 训练最简单的有效范式。
 
 **训练循环**：
 
@@ -488,7 +488,7 @@ $$
 
 ### OpenHands / SWE-Agent：用于软件工程的 GRPO
 
-OpenHands [wang2024openhands] 和 SWE-Agent [yang2024sweagent] 应用 GRPO 训练自主解决 GitHub Issue 的 Agent——读取代码、编写补丁、运行测试套件。
+OpenHands [[215]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2024openhands)] 和 SWE-Agent [[220]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yang2024sweagent)] 应用 GRPO 训练自主解决 GitHub Issue 的 Agent——读取代码、编写补丁、运行测试套件。
 
 **训练细节**：
 
@@ -1121,7 +1121,7 @@ $$
 
 ### 主导基线：用于 Agent 的 GRPO
 
-由 DeepSeek-R1 [deepseek2025r1] 推广，**GRPO** [shao2024deepseekmath] 正迅速成为 Agent 训练的标准。它为每个任务采样一组 $N$ 条完整轨迹，从而消除了内存密集的 critic 网络：
+由 DeepSeek-R1 [[156]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-deepseek2025r1)] 推广，**GRPO** [[168]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shao2024deepseekmath)] 正迅速成为 Agent 训练的标准。它为每个任务采样一组 $N$ 条完整轨迹，从而消除了内存密集的 critic 网络：
 
 对于任务 Prompt $q$，GRPO 从 $\pi_{\theta_{\text{old}}}$ 采样 $N$ 条 Agent 轨迹 $\{o_1, o_2, \dots, o_N\}$。每条轨迹的优势通过将其 reward 相对于组归一化来计算：
 $$
@@ -1141,7 +1141,7 @@ $$
 
 ### 用于交互式 Agent 的 PPO
 
-对于在高度随机环境中运行、且步骤级 Value 估计有所帮助的 Agent，**PPO** [schulman2017proximal] 仍然有价值。Critic 提供每步优势信号，在工具输出不可预测时实现更精细的信用分配：
+对于在高度随机环境中运行、且步骤级 Value 估计有所帮助的 Agent，**PPO** [[149]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-schulman2017proximal)] 仍然有价值。Critic 提供每步优势信号，在工具输出不可预测时实现更精细的信用分配：
 
 - 通过 GAE 进行步骤级优势估计，处理可变长度的工具输出
 - Value 头学习预测“从这里开始这条轨迹有多大可能成功”
@@ -1176,9 +1176,9 @@ Agent RL 的核心挑战是**稀疏 reward 问题**。如果 Agent 执行 20 个
 
 ### 替代范式
 
-- **迭代式 STaR（Self-Taught Reasoner）** [zelikman2022star]：不进行连续 RL，而是使用迭代离线循环。生成轨迹 $\rightarrow$ 过滤失败 $\rightarrow$ 在成功上 SFT $\rightarrow$ 重复。易于扩展，避免 RL 不稳定性。每次迭代都自举推理能力。
-- **强化世界模型学习（Reinforcement World Model Learning, RWML）** [yu2026rwml]：为对抗 reward hacking，训练 Agent 预测其动作的*语义后果*。Agent 因准确预测环境状态如何变化而获得辅助 reward（例如，在执行 SQL 之前预测数据库表的变化）。这迫使真正理解，而非表面的 reward 博弈。
-- **LATS（语言 Agent 树搜索）** [zhou2024lats]：在 Agent 动作序列上应用蒙特卡洛树搜索。在每一步，扩展多个候选动作，模拟其结果，并通过树反向传播 reward。将 RL 价值估计与搜索时算力扩展相结合。
+- **迭代式 STaR（Self-Taught Reasoner）** [[211]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zelikman2022star)]：不进行连续 RL，而是使用迭代离线循环。生成轨迹 $\rightarrow$ 过滤失败 $\rightarrow$ 在成功上 SFT $\rightarrow$ 重复。易于扩展，避免 RL 不稳定性。每次迭代都自举推理能力。
+- **强化世界模型学习（Reinforcement World Model Learning, RWML）** [[221]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yu2026rwml)]：为对抗 reward hacking，训练 Agent 预测其动作的*语义后果*。Agent 因准确预测环境状态如何变化而获得辅助 reward（例如，在执行 SQL 之前预测数据库表的变化）。这迫使真正理解，而非表面的 reward 博弈。
+- **LATS（语言 Agent 树搜索）** [[213]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhou2024lats)]：在 Agent 动作序列上应用蒙特卡洛树搜索。在每一步，扩展多个候选动作，模拟其结果，并通过树反向传播 reward。将 RL 价值估计与搜索时算力扩展相结合。
 
 ### 核心方法论比较
 
@@ -1186,8 +1186,8 @@ Agent RL 的核心挑战是**稀疏 reward 问题**。如果 Agent 执行 20 个
 **LLM Agent 的 RL 范式比较。**
 | **方法** | **Reward 密度** | **内存成本** | **主要优势** |
 | --- | --- | --- | --- |
-| **GRPO** [shao2024deepseekmath] | 序列 / 最终指标 | 低（无 critic） | 显著降低 GPU 内存；实现简单 |
-| **PPO** [schulman2017proximal] | 逐步（GAE） | 高（需 critic） | 细粒度信用分配；在噪声环境中稳定 |
-| **迭代式 STaR** [zelikman2022star] | 稀疏（过滤后的二元） | 极小（仅 SFT） | 易于扩展；避免 RL 优化不稳定性 |
-| **RWML** [yu2026rwml] | 密集（预测式） | 中 | 通过世界建模缓解 reward hacking |
-| **LATS** [zhou2024lats] | 反向传播 | 高（树扩展） | 每个任务的质量最佳；随推理算力扩展 |
+| **GRPO** [[168]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shao2024deepseekmath)] | 序列 / 最终指标 | 低（无 critic） | 显著降低 GPU 内存；实现简单 |
+| **PPO** [[149]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-schulman2017proximal)] | 逐步（GAE） | 高（需 critic） | 细粒度信用分配；在噪声环境中稳定 |
+| **迭代式 STaR** [[211]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zelikman2022star)] | 稀疏（过滤后的二元） | 极小（仅 SFT） | 易于扩展；避免 RL 优化不稳定性 |
+| **RWML** [[221]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yu2026rwml)] | 密集（预测式） | 中 | 通过世界建模缓解 reward hacking |
+| **LATS** [[213]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhou2024lats)] | 反向传播 | 高（树扩展） | 每个任务的质量最佳；随推理算力扩展 |

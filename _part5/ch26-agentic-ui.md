@@ -22,7 +22,7 @@ permalink: /part5/ch26-agentic-ui.html
 
 > **自动化偏差风险**
 >
-> 人机自动化交互的研究一致表明，用户会过度信任自动化系统，尤其是当这些系统自信地呈现输出而不附带不确定性信号时 [parasuraman1997humans]。Agent 化 UI 必须通过呈现不确定性、展示推理过程，以及让质疑或覆盖 Agent 决策变得容易，来主动对抗自动化偏差（automation bias）。
+> 人机自动化交互的研究一致表明，用户会过度信任自动化系统，尤其是当这些系统自信地呈现输出而不附带不确定性信号时 [[389]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-parasuraman1997humans)]。Agent 化 UI 必须通过呈现不确定性、展示推理过程，以及让质疑或覆盖 Agent 决策变得容易，来主动对抗自动化偏差（automation bias）。
 
 因此，Agent 化 UI 的设计位于人机交互（Human-Computer Interaction, HCI）、可解释 AI（Explainable AI, XAI）与软件工程的交汇处。核心设计目标包括：
 
@@ -197,7 +197,7 @@ LLM 是带有（已校准或未校准的）不确定性的概率系统。呈现�
 
 ### Vercel AI SDK
 
-Vercel AI SDK [vercel2024aisdk] 是一个 TypeScript/JavaScript 库，用于在 React、Next.js、Svelte 与 Vue 中构建流式 AI 界面。它是当前生产级 Web Agent UI 中应用最广泛的框架。
+Vercel AI SDK [[390]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-vercel2024aisdk)] 是一个 TypeScript/JavaScript 库，用于在 React、Next.js、Svelte 与 Vue 中构建流式 AI 界面。它是当前生产级 Web Agent UI 中应用最广泛的框架。
 
 **核心抽象：**
 
@@ -210,7 +210,7 @@ Vercel AI SDK [vercel2024aisdk] 是一个 TypeScript/JavaScript 库，用于在 
 
 ### Chainlit
 
-Chainlit [chainlit2024] 是一个 Python 框架，以极少的样板代码构建生产可用的 Agent UI。它在 LangChain 与 LlamaIndex 生态中尤其流行。
+Chainlit [[391]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chainlit2024)] 是一个 Python 框架，以极少的样板代码构建生产可用的 Agent UI。它在 LangChain 与 LlamaIndex 生态中尤其流行。
 
 **关键特性：**
 
@@ -255,7 +255,7 @@ async def on_message(message: cl.Message):
 
 ### Gradio
 
-Gradio [abid2019gradio] 是一个 Python 库，用于快速搭建 ML demo 与 Agent 界面。其 ``gr.ChatInterface`` 与 ``gr.Blocks`` API 使得用极少代码即可快速原型化对话式 Agent。
+Gradio [[392]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-abid2019gradio)] 是一个 Python 库，用于快速搭建 ML demo 与 Agent 界面。其 ``gr.ChatInterface`` 与 ``gr.Blocks`` API 使得用极少代码即可快速原型化对话式 Agent。
 
 **在 Agent 化 UI 方面的优势：**
 
@@ -268,7 +268,7 @@ Gradio [abid2019gradio] 是一个 Python 库，用于快速搭建 ML demo 与 Ag
 
 ### Streamlit
 
-Streamlit [streamlit2024] 是一个用于数据应用的 Python 框架，被广泛用于 Agent 仪表盘与监控 UI。其响应式执行模型——每次交互整个脚本重跑——简单直观，但对复杂的 Agent 化工作流可能受限。
+Streamlit [[393]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-streamlit2024)] 是一个用于数据应用的 Python 框架，被广泛用于 Agent 仪表盘与监控 UI。其响应式执行模型——每次交互整个脚本重跑——简单直观，但对复杂的 Agent 化工作流可能受限。
 
 **Agent 化用例：**
 
@@ -291,7 +291,7 @@ OpenAI Assistants Playground 可视为 Agent 化 UI 设计的参考实现。它�
 
 ### LangGraph Studio
 
-LangGraph Studio [langgraph2024studio] 是一个桌面应用，为 LangGraph Agent 提供可视化 IDE。它是目前最成熟的工具使用与工作流可视化环境。
+LangGraph Studio [[394]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-langgraph2024studio)] 是一个桌面应用，为 LangGraph Agent 提供可视化 IDE。它是目前最成熟的工具使用与工作流可视化环境。
 
 **特性：**
 
