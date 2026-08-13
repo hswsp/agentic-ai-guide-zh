@@ -44,33 +44,33 @@ $$
 \boxed{e_t = \left( \mathcal{S}_t,\; \mathcal{A}_t,\; \mathcal{R}_t,\; \mathcal{S}_{t+1} \right)}
 $$
 
-- $\mathcal{S}_t$：**完整上下文状态**——系统 Prompt、用户目标、对话历史，以及当前环境变量（例如 HTML 源代码、目录结构、数据库 Schema）。
-- $\mathcal{A}_t$：Agent 的**生成输出**，通常由一段思维链（Chain-of-Thought，CoT）推理字符串紧接一个结构化工具调用组成：
+- $$\mathcal{S}_t$$：**完整上下文状态**——系统 Prompt、用户目标、对话历史，以及当前环境变量（例如 HTML 源代码、目录结构、数据库 Schema）。
+- $$\mathcal{A}_t$$：Agent 的**生成输出**，通常由一段思维链（Chain-of-Thought，CoT）推理字符串紧接一个结构化工具调用组成：
 $$
 \mathcal{A}_t = \{\text{text}_{\text{reasoning}},\; \text{json}_{\text{tool\_call}}\}
 $$
-- $\mathcal{R}_t$：**评估信号**，来自外部执行环境（单元测试通过、编译器标志、API 响应码），或由 LLM-as-a-judge 系统验证。
-- $\mathcal{S}_{t+1}$：**更新后的上下文窗口**，将工具输出文本或错误日志直接附加到对话历史中。
+- $$\mathcal{R}_t$$：**评估信号**，来自外部执行环境（单元测试通过、编译器标志、API 响应码），或由 LLM-as-a-judge 系统验证。
+- $$\mathcal{S}_{t+1}$$：**更新后的上下文窗口**，将工具输出文本或错误日志直接附加到对话历史中。
 
 > **具体 Agent 轨迹：代码调试**
 >
-> **步骤 1**：$\mathcal{S}_1$ = “修复 `utils.py` 中失败的测试”\
+> **步骤 1**：$$\mathcal{S}_1$$ = “修复 `utils.py` 中失败的测试”\
 >
-> $\mathcal{A}_1$ = *“让我先读取该文件”* + `read_file("utils.py")`\
+> $$\mathcal{A}_1$$ = *“让我先读取该文件”* + `read_file("utils.py")`\
 >
-> $\mathcal{R}_1$ = 0（中间步骤）\
+> $$\mathcal{R}_1$$ = 0（中间步骤）\
 >
-> **步骤 2**：$\mathcal{S}_2$ = [先前上下文 + 文件内容]\
+> **步骤 2**：$$\mathcal{S}_2$$ = [先前上下文 + 文件内容]\
 >
-> $\mathcal{A}_2$ = *“Bug 在第 42 行，是一个差一错误”* + `edit_file("utils.py", ...)`\
+> $$\mathcal{A}_2$$ = *“Bug 在第 42 行，是一个差一错误”* + `edit_file("utils.py", ...)`\
 >
-> $\mathcal{R}_2$ = 0（中间步骤）\
+> $$\mathcal{R}_2$$ = 0（中间步骤）\
 >
-> **步骤 3**：$\mathcal{S}_3$ = [先前上下文 + 编辑确认]\
+> **步骤 3**：$$\mathcal{S}_3$$ = [先前上下文 + 编辑确认]\
 >
-> $\mathcal{A}_3$ = *“让我验证修复”* + `run_tests()`\
+> $$\mathcal{A}_3$$ = *“让我验证修复”* + `run_tests()`\
 >
-> $\mathcal{R}_3$ = +1.0（所有测试通过——稀疏终端 reward）
+> $$\mathcal{R}_3$$ = +1.0（所有测试通过——稀疏终端 reward）
 
 ## 操作范式
 
@@ -114,7 +114,7 @@ $$
 
 ### C. 非参数化的上下文学习（基于经验的 RAG）
 
-轨迹缓冲区可以不修改神经网络权重，而是作为一个**向量数据库**。给定一个新的用户目标 $\mathcal{G}_{\text{new}}$，系统检索最相关的过往经验：
+轨迹缓冲区可以不修改神经网络权重，而是作为一个**向量数据库**。给定一个新的用户目标 $$\mathcal{G}_{\text{new}}$$，系统检索最相关的过往经验：
 $$
 \boxed{\mathcal{E}_{\text{retrieved}} = \arg\max_{e \in \mathcal{B}} \text{sim}\!\left(\text{Embed}(\mathcal{G}_{\text{new}}),\; \text{Embed}(e)\right)}
 $$
@@ -161,17 +161,17 @@ STaR [[211]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zelikman2022star)]
 
 **算法**：
 
-1. **生成**：对数据集 $\mathcal{D}$ 中的每个问题 $x_i$，采样一条推理轨迹 $z_i \sim \pi_\theta(\cdot \mid x_i)$，后跟一个答案 $\hat{y}_i$。
-2. **过滤**：仅保留满足 $\hat{y}_i = y_i^*$（正确答案）的轨迹。定义成功集 $\mathcal{D}_{\text{pass}} = \{(x_i, z_i, y_i^*) : \hat{y}_i = y_i^*\}$。
-3. **合理化（Rationalization）**（关键创新）：对模型失败的问题，生成一条以正确答案为条件的“合理化”轨迹：$z_i^{\text{rat}} \sim \pi_\theta(\cdot \mid x_i, y_i^*)$。这教导模型从解*反向*推理。
-4. **微调**：在 $\mathcal{D}_{\text{pass}} \cup \mathcal{D}_{\text{rationalized}}$ 上通过 SFT 更新 $\theta$。
+1. **生成**：对数据集 $\mathcal{D}$ 中的每个问题 $$x_i$$，采样一条推理轨迹 $$z_i \sim \pi_\theta(\cdot \mid x_i)$$，后跟一个答案 $$\hat{y}_i$$。
+2. **过滤**：仅保留满足 $$\hat{y}_i = y_i^*$$（正确答案）的轨迹。定义成功集 $$\mathcal{D}_{\text{pass}} = \{(x_i, z_i, y_i^*) : \hat{y}_i = y_i^*\}$$。
+3. **合理化（Rationalization）**（关键创新）：对模型失败的问题，生成一条以正确答案为条件的“合理化”轨迹：$$z_i^{\text{rat}} \sim \pi_\theta(\cdot \mid x_i, y_i^*)$$。这教导模型从解*反向*推理。
+4. **微调**：在 $$\mathcal{D}_{\text{pass}} \cup \mathcal{D}_{\text{rationalized}}$$ 上通过 SFT 更新 $\theta$。
 5. **迭代**：用改进后的模型从步骤 1 重复。
 
 $$
 \boxed{\theta_{k+1} = \arg\min_\theta -\sum_{(x,z,y) \in \mathcal{D}_k^+} \log \pi_\theta(z, y \mid x)}
 $$
 
-**收敛动力学**：每次迭代 $k$ 都会提升模型的解题率 $p_k$。若 $p_0 = 0.3$（解出 30% 的问题），经过合理化 + SFT 后 $p_1 \approx 0.5$。通常 3--5 次迭代后收敛至 $p \approx 0.7$--$0.9$。
+**收敛动力学**：每次迭代 $k$ 都会提升模型的解题率 $$p_k$$。若 $$p_0 = 0.3$$（解出 30% 的问题），经过合理化 + SFT 后 $$p_1 \approx 0.5$$。通常 3--5 次迭代后收敛至 $p \approx 0.7$--$0.9$。
 
 > **STaR 合理化 Prompt**
 >
@@ -212,11 +212,11 @@ Reflexion [[212]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shinn2023refl
 
 1. **Actor**：在环境中执行动作的 LLM Agent $\pi$。
 2. **评估器**：二元信号（任务成功/失败）或标量启发式（如通过的测试用例数）。
-3. **自我反思生成器**：给定失败轨迹 $\tau_{\text{fail}}$ 和环境反馈，生成自然语言反思 $r_{\text{text}}$：
+3. **自我反思生成器**：给定失败轨迹 $$\tau_{\text{fail}}$$ 和环境反馈，生成自然语言反思 $$r_{\text{text}}$$：
 $$
 r_{\text{text}} = \text{LLM}_{\text{reflect}}\!\left(\tau_{\text{fail}}, \text{feedback}, \text{task}\right)
 $$
-4. **情节记忆**：过往反思的滑动窗口缓冲区 $\mathcal{M} = [r_1, r_2, \ldots, r_m]$（通常 $m \leq 3$ 以适应上下文）。
+4. **情节记忆**：过往反思的滑动窗口缓冲区 $$\mathcal{M} = [r_1, r_2, \ldots, r_m]$$（通常 $m \leq 3$ 以适应上下文）。
 5. **重试循环**：下一次尝试时，反思被注入到 Prompt 中：
 $$
 a_{t+1} \sim \pi\!\left(\cdot\; \mid\; \text{task},\; \mathcal{M},\; \text{current\_state}\right)
@@ -305,11 +305,11 @@ ReAct [[108]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yao2023react)] �
 > was released on June 29, 2007.")
 > ```
 
-**形式化定义**：一条 ReAct 轨迹是 $\tau = (t_1, a_1, o_1, t_2, a_2, o_2, \ldots)$，其中：
+**形式化定义**：一条 ReAct 轨迹是 $$\tau = (t_1, a_1, o_1, t_2, a_2, o_2, \ldots)$$，其中：
 
-- $t_i$：思考（内部推理，不被执行）
-- $a_i$：动作（工具调用，在环境中执行）
-- $o_i$：观测（环境响应，附加到上下文）
+- $$t_i$$：思考（内部推理，不被执行）
+- $$a_i$$：动作（工具调用，在环境中执行）
+- $$o_i$$：观测（环境响应，附加到上下文）
 
 **为什么有效**：思考创造了一种“内心独白”，帮助模型在行动前规划，减少冲动性工具调用。显式推理轨迹也让 Agent 的决策过程**可审计**且**可调试**。
 
@@ -318,7 +318,7 @@ ReAct [[108]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yao2023react)] �
 - **动作级 reward**：只有动作接收 reward 信号（思考是辅助的）。
 - **思考质量**：隐式优化——更好的思考 $\rightarrow$ 更好的动作 $\rightarrow$ 更高的 reward。
 - **格式强制**：在 reward 中加入对格式错误动作（缺失 JSON、幻觉工具）的格式惩罚。
-- **RL 目标**：$r(\tau) = r_{\text{task}} - \lambda_{\text{format}} \cdot \text{format\_violations} - \lambda_{\text{length}} \cdot \text{num\_steps}$
+- **RL 目标**：$$r(\tau) = r_{\text{task}} - \lambda_{\text{format}} \cdot \text{format\_violations} - \lambda_{\text{length}} \cdot \text{num\_steps}$$
 
 ### LATS：语言 Agent 树搜索（详解）
 
@@ -331,7 +331,7 @@ $$
 \text{UCB}(s, a) = \bar{Q}(s, a) + c \sqrt{\frac{\ln N(s)}{N(s, a)}}
 $$
 其中 $\bar{Q}$ = 子树平均 reward，$N$ = 访问计数，$c$ = 探索常数。
-2. **扩展**：在叶节点，通过 LLM 采样（温度 $> 0$）生成 $k$ 个候选动作：$\{a_1, \ldots, a_k\} \sim \pi_\theta(\cdot \mid s_{\text{leaf}})$
+2. **扩展**：在叶节点，通过 LLM 采样（温度 $> 0$）生成 $k$ 个候选动作：$$\{a_1, \ldots, a_k\} \sim \pi_\theta(\cdot \mid s_{\text{leaf}})$$
 3. **模拟**：对每个候选，在环境中执行该动作，然后用快速 rollout 策略（贪心解码）继续，直到终止状态或深度限制。
 4. **反向传播**：将终端 reward 沿所有祖先节点向上传播，更新 $\bar{Q}$ 和 $N$ 计数。
 5. **重复**：在固定计算预算（如 50--200 次迭代）下运行步骤 1--4。
@@ -385,7 +385,7 @@ AgentQ [[214]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-putta2024agentq)
 
 **流水线**：
 
-1. **Rollout**：使用当前 Policy $\pi_\theta$ 为每个任务执行 $N$ 条轨迹。
+1. **Rollout**：使用当前 Policy $$\pi_\theta$$ 为每个任务执行 $N$ 条轨迹。
 2. **评估**：用基于执行的 reward（二元通过/失败或标量指标）为每条轨迹打分。
 3. **偏好对构造**：对每个任务，构造偏好对：
 $$
@@ -396,7 +396,7 @@ $$
 $$
 \mathcal{L}_{\text{AgentQ}} = -\log \sigma\!\left(\beta \left[\log\frac{\pi_\theta(\tau_w)}{\pi_{\text{ref}}(\tau_w)} - \log\frac{\pi_\theta(\tau_l)}{\pi_{\text{ref}}(\tau_l)}\right]\right)
 $$
-5. **迭代**：更新后的 $\pi_\theta$ 在下一轮生成更好的轨迹。
+5. **迭代**：更新后的 $$\pi_\theta$$ 在下一轮生成更好的轨迹。
 
 **关键设计选择**：
 
@@ -471,7 +471,7 @@ RLEF [[217]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-le2024rlef)] 将**
 **训练循环**：
 
 1. **采样任务**：从训练集中抽取一个带测试用例的编程问题 $(x, \text{tests})$。
-2. **生成**：Agent 使用当前 Policy $\pi_\theta$ 产生一条解决轨迹（读文件、写代码、运行测试）。
+2. **生成**：Agent 使用当前 Policy $$\pi_\theta$$ 产生一条解决轨迹（读文件、写代码、运行测试）。
 3. **执行**：在沙盒环境中运行测试套件。Reward：
 $$
 r = \frac{\text{\# tests passed}}{\text{\# total tests}} \in [0, 1]
@@ -555,7 +555,7 @@ OpenHands [[215]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2024openh
 ### 架构概览
 
 
-![生产力副驾架构：LLM Agent（带 RL Policy $\pi_\theta$）接收用户意图并与多个应用 API 交互。基于任务成功、用户反馈和效率指标的 reward 信号驱动 Policy 改进。]({{ site.baseurl }}/figures/fig_043_fig43.png)
+![生产力副驾架构：LLM Agent（带 RL Policy $$\pi_\theta$$）接收用户意图并与多个应用 API 交互。基于任务成功、用户反馈和效率指标的 reward 信号驱动 Policy 改进。]({{ site.baseurl }}/figures/fig_043_fig43.png)
 
 ### 生产力副驾的形式化 MDP 定义
 
@@ -581,20 +581,20 @@ $$
 >
 > | **符号** | **具体实现** |
 > | --- | --- |
-> | $s_0$ | *真实状态*：收件箱中有 47 封来自过去 7 天提及 “Project Alpha” 的邮件；SharePoint 上的 PowerPoint 文件 “Q3_Status.pptx” 有 12 张幻灯片；用户拥有编辑权限。 |
-> | $o_0$ | *Agent 观测*：用户请求文本 + 系统 Prompt。Agent 此时*不知道*邮件数量或幻灯片内容。 |
-> | $a_1$ | `outlook.search({query: "Project Alpha", last_7_days: true})` |
-> | $\mathcal{T}(s_0, a_1)$ | $s_1$：系统检索出 47 封匹配邮件（确定性）。 |
-> | $o_1$ | API 返回前 10 封邮件主题 + 发件人 + 时间戳（因上下文限制被截断——$\mathcal{O}$ 在起作用）。 |
-> | $a_2$ | `outlook.read({ids: [top_5_thread_ids]})`——Agent 挑选最相关的会话。 |
-> | $o_2$ | 5 个邮件会话的完整正文（$\mathcal{O}$ 截断后约 8K Token）。 |
-> | $a_3$ | *内部推理动作*：Agent 综合关键决策：(1) 截止日期推迟到 11 月 15 日，(2) 预算已批准，(3) 供应商已选定。 |
-> | $a_4$ | `sharepoint.read({file: "Q3_Status.pptx", slides: "last"})`——检查当前最后一张幻灯片。 |
-> | $o_4$ | 最后一张幻灯片是 “Q2 Summary”（第 12 张）。Agent 决定添加第 13 张。 |
-> | $a_5$ | `powerpoint.add_slide({file: "Q3_Status.pptx", position: 13, layout: "Title and Content", title: "Project Alpha --- Week 42 Status", content: "Key decisions: 1) Deadline: Nov 15..."})` |
-> | $\mathcal{T}(s_4, a_5)$ | $s_5$：幻灯片添加到演示文稿（确定性）。 |
-> | $o_5$ | API 返回 `{success: true, slide_id: 13}`。 |
-> | $R(s_5)$ | Reward 组件：**+0.4** 任务完成（幻灯片已创建），**+0.3** 信息质量（提取的决策正确），**+0.2** 格式合规（使用正确布局），**+0.05** 效率（5 个动作，无错误），**-0.0** 安全惩罚。**总分：0.95**。 |
+> | $$s_0$$ | *真实状态*：收件箱中有 47 封来自过去 7 天提及 “Project Alpha” 的邮件；SharePoint 上的 PowerPoint 文件 “Q3_Status.pptx” 有 12 张幻灯片；用户拥有编辑权限。 |
+> | $$o_0$$ | *Agent 观测*：用户请求文本 + 系统 Prompt。Agent 此时*不知道*邮件数量或幻灯片内容。 |
+> | $$a_1$$ | `outlook.search({query: "Project Alpha", last_7_days: true})` |
+> | $$\mathcal{T}(s_0, a_1)$$ | $$s_1$$：系统检索出 47 封匹配邮件（确定性）。 |
+> | $$o_1$$ | API 返回前 10 封邮件主题 + 发件人 + 时间戳（因上下文限制被截断——$\mathcal{O}$ 在起作用）。 |
+> | $$a_2$$ | `outlook.read({ids: [top_5_thread_ids]})`——Agent 挑选最相关的会话。 |
+> | $$o_2$$ | 5 个邮件会话的完整正文（$\mathcal{O}$ 截断后约 8K Token）。 |
+> | $$a_3$$ | *内部推理动作*：Agent 综合关键决策：(1) 截止日期推迟到 11 月 15 日，(2) 预算已批准，(3) 供应商已选定。 |
+> | $$a_4$$ | `sharepoint.read({file: "Q3_Status.pptx", slides: "last"})`——检查当前最后一张幻灯片。 |
+> | $$o_4$$ | 最后一张幻灯片是 “Q2 Summary”（第 12 张）。Agent 决定添加第 13 张。 |
+> | $$a_5$$ | `powerpoint.add_slide({file: "Q3_Status.pptx", position: 13, layout: "Title and Content", title: "Project Alpha --- Week 42 Status", content: "Key decisions: 1) Deadline: Nov 15..."})` |
+> | $$\mathcal{T}(s_4, a_5)$$ | $$s_5$$：幻灯片添加到演示文稿（确定性）。 |
+> | $$o_5$$ | API 返回 `{success: true, slide_id: 13}`。 |
+> | $$R(s_5)$$ | Reward 组件：**+0.4** 任务完成（幻灯片已创建），**+0.3** 信息质量（提取的决策正确），**+0.2** 格式合规（使用正确布局），**+0.05** 效率（5 个动作，无错误），**-0.0** 安全惩罚。**总分：0.95**。 |
 >
 > **所体现的 POMDP 关键方面**：
 >
@@ -669,11 +669,11 @@ $$
 **生产力副驾训练的 Reward 组件。**
 | **组件** | **权重** | **信号类型** | **定义** |
 | --- | --- | --- | --- |
-| $R_{\text{task}}$ | 0.40 | 二元/标量 | 任务成功完成（邮件已发送、文档已创建、公式正确） |
-| $R_{\text{quality}}$ | 0.25 | LLM judge | 输出质量：格式化、清晰度、内容正确性 |
-| $R_{\text{efficiency}}$ | 0.15 | 标量 | 对过多步骤的惩罚：$-0.02 \times (\text{num\_steps} - \text{optimal\_steps})$ |
-| $R_{\text{safety}}$ | 0.15 | 二元 | 无不安全动作（未确认即删除、发到错误收件人、权限违规）。任何违规则 $R_{\text{safety}} = 0$。 |
-| $R_{\text{user}}$ | 0.05 | 稀疏 | 可用时的显式用户反馈（拇指向上/向下） |
+| $$R_{\text{task}}$$ | 0.40 | 二元/标量 | 任务成功完成（邮件已发送、文档已创建、公式正确） |
+| $$R_{\text{quality}}$$ | 0.25 | LLM judge | 输出质量：格式化、清晰度、内容正确性 |
+| $$R_{\text{efficiency}}$$ | 0.15 | 标量 | 对过多步骤的惩罚：$$-0.02 \times (\text{num\_steps} - \text{optimal\_steps})$$ |
+| $$R_{\text{safety}}$$ | 0.15 | 二元 | 无不安全动作（未确认即删除、发到错误收件人、权限违规）。任何违规则 $$R_{\text{safety}} = 0$$。 |
+| $$R_{\text{user}}$$ | 0.05 | 稀疏 | 可用时的显式用户反馈（拇指向上/向下） |
 
 **中间 reward（密集信号）**：
 
@@ -703,7 +703,7 @@ $$
 > **阶段 3：在线 RL 训练（GRPO）**
 >
 > 1. 采样任务 Batch（每次迭代 256 个任务）。
-> 2. 在沙盒环境中使用 $\pi_\theta$ 为每个任务生成 $N=8$ 条轨迹。
+> 2. 在沙盒环境中使用 $$\pi_\theta$$ 为每个任务生成 $N=8$ 条轨迹。
 > 3. 执行轨迹，从验证函数收集 reward。
 > 4. 计算 GRPO 优势（跨每个任务的 8 条轨迹做组归一化）。
 > 5. 用裁剪目标 + 相对于 SFT 模型的 KL 惩罚来更新 Policy。
@@ -923,9 +923,9 @@ $$
 
 > **研究 Agent MDP**
 >
-> - **状态** $s_t$：系统 Prompt + 研究问题 + 完整的动作/观测历史（工具输出、代码结果、搜索结果）。上下文窗口：128K Token。
-> - **动作** $a_t$：来自动作空间的结构化工具调用（见下文）+ 推理轨迹（CoT）。
-> - **转移** $T(s_{t+1}\mid s_t, a_t)$：确定性——将动作 + 工具输出附加到上下文。
+> - **状态** $$s_t$$：系统 Prompt + 研究问题 + 完整的动作/观测历史（工具输出、代码结果、搜索结果）。上下文窗口：128K Token。
+> - **动作** $$a_t$$：来自动作空间的结构化工具调用（见下文）+ 推理轨迹（CoT）。
+> - **转移** $$T(s_{t+1}\mid s_t, a_t)$$：确定性——将动作 + 工具输出附加到上下文。
 > - **Reward** $R$：基于报告质量的稀疏终端 reward（见下方 Reward 设计）。
 > - **视野**：20--100 步（典型研究轨迹）。
 > - **折扣** $\gamma = 1.0$（Episode 式；有限任务不折扣）。
@@ -969,11 +969,11 @@ $$
 >
 > | **组件** | **权重** | **度量方式** |
 > | --- | --- | --- |
-> | $R_{\text{quality}}$ | 0.30 | LLM-as-judge（GPT-4 在清晰度、深度、严谨性上对报告打 1--10 分） |
-> | $R_{\text{correctness}}$ | 0.30 | 代码无错误执行 + 结果可复现 |
-> | $R_{\text{novelty}}$ | 0.15 | LLM-judge：报告是否提供了超越论文综述的洞见？ |
-> | $R_{\text{efficiency}}$ | 0.15 | 步骤越少奖励越多：$R_{\text{eff}} = \max(0, 1 - \text{steps}/100)$ |
-> | $R_{\text{format}}$ | 0.10 | 报告包含所有所需章节（引言、方法、结果、结论） |
+> | $$R_{\text{quality}}$$ | 0.30 | LLM-as-judge（GPT-4 在清晰度、深度、严谨性上对报告打 1--10 分） |
+> | $$R_{\text{correctness}}$$ | 0.30 | 代码无错误执行 + 结果可复现 |
+> | $$R_{\text{novelty}}$$ | 0.15 | LLM-judge：报告是否提供了超越论文综述的洞见？ |
+> | $$R_{\text{efficiency}}$$ | 0.15 | 步骤越少奖励越多：$$R_{\text{eff}} = \max(0, 1 - \text{steps}/100)$$ |
+> | $$R_{\text{format}}$$ | 0.10 | 报告包含所有所需章节（引言、方法、结果、结论） |
 >
 > **中间塑形**：每次成功代码执行 +0.1；每次运行时错误 $-$0.05（鼓励一次写对代码）。
 
@@ -996,7 +996,7 @@ $$
   - Prompt 池：跨 10 个领域（ML、NLP、CV、系统等）的 500 个研究问题
   - 每个问题：生成 $N=4$ 条完整研究轨迹
   - 用多组件 reward 给每条轨迹打分
-  - GRPO 优势：$\hat{A}_i = (R_i - \mu_G) / \sigma_G$
+  - GRPO 优势：$$\hat{A}_i = (R_i - \mu_G) / \sigma_G$$
   - 用裁剪目标更新 Policy（clip $\epsilon=0.2$，KL $\beta=0.05$）
   - 课程：从简单的“总结关于 X 的发现”任务开始，进展到“设计并运行关于 X 的实验”
 3. **阶段 3——拒绝采样微调**（200 步）：
@@ -1013,42 +1013,42 @@ $$
 >
 > **研究问题**：“将 GRPO 组大小增加到 $N=16$ 之上能否改善数学推理表现？”
 >
-> 下面是一条完整轨迹，每一步都有显式 MDP 符号：状态 $s_t$、动作 $a_t$、转移 $T$、观测 $o_t$ 和累积 reward。
+> 下面是一条完整轨迹，每一步都有显式 MDP 符号：状态 $$s_t$$、动作 $$a_t$$、转移 $T$、观测 $$o_t$$ 和累积 reward。
 >
 > | $t$ | **元素** | **描述** |
 > | --- | --- | --- |
-> |  | $a_0$ | `think`：“我需要关于 GRPO 组大小消融的论文，然后进行一次受控实验。” |
-> |  | $o_0$ | 内部推理（无工具输出）。塑形 reward：$r_0 = 0$。 |
-> | 1 | $s_1$ | $s_0 \oplus (a_0, o_0)$——上下文现在包含推理计划。 |
-> |  | $a_1$ | `search_papers(query="GRPO group size ablation math")` |
-> |  | $o_1$ | 返回 5 篇论文：[DAPO, DeepSeek-Math, Dr. GRPO, ...]。$r_1 = 0$。 |
-> | 2 | $s_2$ | $s_1 \oplus (a_1, o_1)$——搜索结果进入上下文。 |
-> |  | $a_2$ | `read_paper(id="DAPO", sections=["experiments", "ablations"])` |
-> |  | $o_2$ | 关键发现：“在代码任务上超过 $N=16$ 收益递减；数学未测试。”$r_2 = 0$。 |
-> | 3 | $s_3$ | $s_2 \oplus (a_2, o_2)$——识别出文献空白。 |
-> |  | $a_3$ | `think`：“DAPO 只测了代码。我将在 GSM8K 上用 Llama-3 8B 测试 $N \in \{4, 8, 16, 32, 64\}$。对照：相同总训练 Token 数。” |
-> |  | $o_3$ | 假设形成。$r_3 = 0$。 |
-> | 4 | $s_4$ | $s_3 \oplus (a_3, o_3)$——实验方案进入上下文。 |
-> |  | $a_4$ | `write_code("train_grpo_gsm8k.py")`——85 行脚本，含 group_size 的 argparse、正确的随机种子、在 GSM8K 测试集上评估。 |
-> |  | $o_4$ | 文件写入成功。$r_4 = 0$。 |
-> | 5 | $s_5$ | $s_4 \oplus (a_4, o_4)$——代码在工作区可用。 |
-> |  | $a_5$ | `execute_code("python train_grpo_gsm8k.py --N 4 --seed 42")` |
-> |  | $o_5$ | `Accuracy: 67.2% (CI: 65.1--69.3)`。$r_5 = +0.1$（成功执行）。 |
-> | 6--8 | $a_{6\text{--}8}$ | 用 $N=8, 16, 32$ 执行 $\to$ 结果：71.4%、74.8%、75.9%。每个 $r_t = +0.1$。 |
-> | 9 | $s_9$ | 上下文包含 4 个数据点。 |
-> |  | $a_9$ | `execute_code("python train_grpo_gsm8k.py --N 64 --seed 42")` |
-> |  | $o_9$ | `Accuracy: 75.6% (CI: 73.4--77.8)`——比 $N=32$ 略*下降*！$r_9 = +0.1$。 |
-> | 10 | $s_{10}$ | 5 个结果全部可用。 |
-> |  | $a_{10}$ | `compute_stats(test="paired_t_test", data=[67.2, 71.4, 74.8, 75.9, 75.6], groups=[4,8,16,32,64])` |
-> |  | $o_{10}$ | $N=4$ 对比 $N=16$ 时 $p < 0.01$；$N=32$ 对比 $N=64$ 时 $p = 0.72$（不显著）。$r_{10} = 0$。 |
-> | 11 | $s_{11}$ | 收益递减的统计证据。 |
-> |  | $a_{11}$ | `plot_data(x=[4,8,16,32,64], y=[67.2,71.4,74.8,75.9,75.6], xlabel="Group Size N", ylabel="GSM8K Accuracy (%)", title="GRPO Group Size vs Math Reasoning")` |
-> |  | $o_{11}$ | 图保存到 `results/group_size_curve.png`。$r_{11} = 0$。 |
-> | 12 | $s_{12}$ | 完整证据组装完成。 |
-> |  | $a_{12}$ | `write_report`：4 节报告（引言、方法、带图的结果、结论：“$N=16$--32 是最优；$N=64$ 无增益且算力增加 4$\times$”）。 |
-> |  | $o_{12}$ | 报告写入完成（2,100 词）。$r_{12} = 0$。 |
-> | 13 | $a_{13}$ | `submit`——Episode 终止。 |
-> |  | $R_{\text{terminal}}$ | LLM-judge 打分：质量 = 8/10，代码正确，新颖（把 DAPO 扩展到数学），13 步，所有章节齐全。 |
+> |  | $$a_0$$ | `think`：“我需要关于 GRPO 组大小消融的论文，然后进行一次受控实验。” |
+> |  | $$o_0$$ | 内部推理（无工具输出）。塑形 reward：$$r_0 = 0$$。 |
+> | 1 | $$s_1$$ | $$s_0 \oplus (a_0, o_0)$$——上下文现在包含推理计划。 |
+> |  | $$a_1$$ | `search_papers(query="GRPO group size ablation math")` |
+> |  | $$o_1$$ | 返回 5 篇论文：[DAPO, DeepSeek-Math, Dr. GRPO, ...]。$$r_1 = 0$$。 |
+> | 2 | $$s_2$$ | $$s_1 \oplus (a_1, o_1)$$——搜索结果进入上下文。 |
+> |  | $$a_2$$ | `read_paper(id="DAPO", sections=["experiments", "ablations"])` |
+> |  | $$o_2$$ | 关键发现：“在代码任务上超过 $N=16$ 收益递减；数学未测试。”$$r_2 = 0$$。 |
+> | 3 | $$s_3$$ | $$s_2 \oplus (a_2, o_2)$$——识别出文献空白。 |
+> |  | $$a_3$$ | `think`：“DAPO 只测了代码。我将在 GSM8K 上用 Llama-3 8B 测试 $N \in \{4, 8, 16, 32, 64\}$。对照：相同总训练 Token 数。” |
+> |  | $$o_3$$ | 假设形成。$$r_3 = 0$$。 |
+> | 4 | $$s_4$$ | $$s_3 \oplus (a_3, o_3)$$——实验方案进入上下文。 |
+> |  | $$a_4$$ | `write_code("train_grpo_gsm8k.py")`——85 行脚本，含 group_size 的 argparse、正确的随机种子、在 GSM8K 测试集上评估。 |
+> |  | $$o_4$$ | 文件写入成功。$$r_4 = 0$$。 |
+> | 5 | $$s_5$$ | $$s_4 \oplus (a_4, o_4)$$——代码在工作区可用。 |
+> |  | $$a_5$$ | `execute_code("python train_grpo_gsm8k.py --N 4 --seed 42")` |
+> |  | $$o_5$$ | `Accuracy: 67.2% (CI: 65.1--69.3)`。$$r_5 = +0.1$$（成功执行）。 |
+> | 6--8 | $$a_{6\text{--}8}$$ | 用 $N=8, 16, 32$ 执行 $\to$ 结果：71.4%、74.8%、75.9%。每个 $$r_t = +0.1$$。 |
+> | 9 | $$s_9$$ | 上下文包含 4 个数据点。 |
+> |  | $$a_9$$ | `execute_code("python train_grpo_gsm8k.py --N 64 --seed 42")` |
+> |  | $$o_9$$ | `Accuracy: 75.6% (CI: 73.4--77.8)`——比 $N=32$ 略*下降*！$$r_9 = +0.1$$。 |
+> | 10 | $$s_{10}$$ | 5 个结果全部可用。 |
+> |  | $$a_{10}$$ | `compute_stats(test="paired_t_test", data=[67.2, 71.4, 74.8, 75.9, 75.6], groups=[4,8,16,32,64])` |
+> |  | $$o_{10}$$ | $N=4$ 对比 $N=16$ 时 $p < 0.01$；$N=32$ 对比 $N=64$ 时 $p = 0.72$（不显著）。$$r_{10} = 0$$。 |
+> | 11 | $$s_{11}$$ | 收益递减的统计证据。 |
+> |  | $$a_{11}$$ | `plot_data(x=[4,8,16,32,64], y=[67.2,71.4,74.8,75.9,75.6], xlabel="Group Size N", ylabel="GSM8K Accuracy (%)", title="GRPO Group Size vs Math Reasoning")` |
+> |  | $$o_{11}$$ | 图保存到 `results/group_size_curve.png`。$$r_{11} = 0$$。 |
+> | 12 | $$s_{12}$$ | 完整证据组装完成。 |
+> |  | $$a_{12}$$ | `write_report`：4 节报告（引言、方法、带图的结果、结论：“$N=16$--32 是最优；$N=64$ 无增益且算力增加 4$\times$”）。 |
+> |  | $$o_{12}$$ | 报告写入完成（2,100 词）。$$r_{12} = 0$$。 |
+> | 13 | $$a_{13}$$ | `submit`——Episode 终止。 |
+> |  | $$R_{\text{terminal}}$$ | LLM-judge 打分：质量 = 8/10，代码正确，新颖（把 DAPO 扩展到数学），13 步，所有章节齐全。 |
 >
 > **终端 reward 计算**：
 > $$
@@ -1065,7 +1065,7 @@ $$
 >
 > **所体现的关键 MDP 性质**：
 >
-> - **确定性 $T$**：每次工具调用产生可预测的状态扩展（$s_{t+1} = s_t \oplus (a_t, o_t)$）。
+> - **确定性 $T$**：每次工具调用产生可预测的状态扩展（$$s_{t+1} = s_t \oplus (a_t, o_t)$$）。
 > - **稀疏终端 reward**：真正的质量信号只在 `submit` 时给出；中间塑形很小。
 > - **长视野**：13 步且 $\gamma = 1.0$（Episode 式任务不折扣）。
 > - **自我纠正机会**：在第 9 步，Agent 观察到 $N=64$ 并未改进——据此调整其结论，而非挑选数据。
@@ -1123,7 +1123,7 @@ $$
 
 由 DeepSeek-R1 [[156]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-deepseek2025r1)] 推广，**GRPO** [[168]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shao2024deepseekmath)] 正迅速成为 Agent 训练的标准。它为每个任务采样一组 $N$ 条完整轨迹，从而消除了内存密集的 critic 网络：
 
-对于任务 Prompt $q$，GRPO 从 $\pi_{\theta_{\text{old}}}$ 采样 $N$ 条 Agent 轨迹 $\{o_1, o_2, \dots, o_N\}$。每条轨迹的优势通过将其 reward 相对于组归一化来计算：
+对于任务 Prompt $q$，GRPO 从 $$\pi_{\theta_{\text{old}}}$$ 采样 $N$ 条 Agent 轨迹 $$\{o_1, o_2, \dots, o_N\}$$。每条轨迹的优势通过将其 reward 相对于组归一化来计算：
 $$
 \boxed{A_i = \frac{r(o_i) - \frac{1}{N}\sum_{j=1}^N r(o_j)}{\text{std}(r(o_1), \dots, r(o_N))}}
 $$

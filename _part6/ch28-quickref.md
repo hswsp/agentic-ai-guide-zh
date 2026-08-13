@@ -40,13 +40,13 @@ $$
 
 | 方法 | 公式 / 规则 | 关键参数 |
 | --- | --- | --- |
-| Greedy | $y_t = \arg\max_v P(v\|y_{<t})$ | --- |
+| Greedy | $$y_t = \arg\max_v P(v\|y_{<t})$$ | --- |
 | Beam search | 按联合概率保留 top-$B$ 个部分序列 | $B=4$--$8$ |
-| Temperature | $P'(v) = \text{softmax}(\text{logit}_v / T)$ | $T \in [0.1, 1.5]$ |
+| Temperature | $$P'(v) = \text{softmax}(\text{logit}_v / T)$$ | $T \in [0.1, 1.5]$ |
 | Top-$k$ | 仅保留 top-$k$ 个 logit，其余置零后重新归一化 | $k=40$--$100$ |
-| Top-$p$ (nucleus) | 保留最小集合 $V'$ 使 $\sum_{v \in V'} P(v) \geq p$ | $p=0.9$--$0.95$ |
-| Min-$p$ | 保留满足 $P(v) \geq p_\text{min} \cdot P(v_\text{max})$ 的 token | $p_\text{min}=0.05$--$0.1$ |
-| Repetition penalty | 若 $v$ 已出现，则 $\text{logit}_v \leftarrow \text{logit}_v / \theta$ | $\theta=1.1$--$1.3$ |
+| Top-$p$ (nucleus) | 保留最小集合 $V'$ 使 $$\sum_{v \in V'} P(v) \geq p$$ | $p=0.9$--$0.95$ |
+| Min-$p$ | 保留满足 $$P(v) \geq p_\text{min} \cdot P(v_\text{max})$$ 的 token | $$p_\text{min}=0.05$$--$0.1$ |
+| Repetition penalty | 若 $v$ 已出现，则 $$\text{logit}_v \leftarrow \text{logit}_v / \theta$$ | $\theta=1.1$--$1.3$ |
 
 ## 系统与并行
 
@@ -55,7 +55,7 @@ $$
 | 模型显存 | $2P$ 字节 | $140$ GB（仅权重） |
 | Adam 优化器 | $2P \times 4$ 字节 (m + v) | $280$ GB |
 | 完整训练占用 | $\sim 8P$ 字节 | $560$ GB（权重 + 优化器 + 梯度） |
-| FSDP 每 GPU 显存 | $8P / N_\text{GPUs}$ | 8 卡时为 $70$ GB |
+| FSDP 每 GPU 显存 | $$8P / N_\text{GPUs}$$ | 8 卡时为 $70$ GB |
 | 生成算术强度 | $2P / 2P = 1$ FLOP/byte | 严重内存瓶颈 |
 | Token 速率（生成） | HBM\_BW $/ (2P)$ | $\sim$14 tok/s (A100, batch=1) |
 | TP AllReduce / 层 | $2 \times 2 \cdot \frac{T-1}{T} \cdot bsd$ 字节 | $\sim$188 MB (70B, TP=8) |
@@ -79,7 +79,7 @@ $$
 | $\epsilon$ (PPO clip) | 0.1--0.3 | 0.2 | 越大更新越激进 |
 | $\gamma$ (GAE 折扣) | 0.99--1.0 | 1.0 | 情景式任务使用 1.0 |
 | $\lambda$ (GAE) | 0.9--0.99 | 0.95 | 越小偏差越大、方差越小 |
-| KL 系数 ($\beta_\text{KL}$) | 0.01--0.2 | 0.05 | 自适应目标 KL $\approx$ 5--8 |
+| KL 系数 ($$\beta_\text{KL}$$) | 0.01--0.2 | 0.05 | 自适应目标 KL $\approx$ 5--8 |
 | 学习率 (RLHF) | 1e-7 -- 5e-6 | 5e-7 | 远低于预训练 |
 | 学习率 (SFT) | 1e-5 -- 5e-5 | 2e-5 | 标准微调范围 |
 | LoRA 秩 $r$ | 8--128 | 16--64 | 越大容量越大、显存越多 |

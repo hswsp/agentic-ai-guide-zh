@@ -18,7 +18,7 @@ $$
 \text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}} + M\right) V
 $$
 
-其中对于 $j > i$（未来位置）有 $M_{ij} = -\infty$，强制将这些 attention 权重置零。
+其中对于 $j > i$（未来位置）有 $$M_{ij} = -\infty$$，强制将这些 attention 权重置零。
 
 **实践含义**：这使得推理时的 KV-cache 优化成为可能——由于过去 Token 的 keys 和 values 永远不变，可被缓存复用，将每个新 Token 的生成代价从 $O(T^2)$ 降至 $O(T)$。
 
@@ -32,7 +32,7 @@ $$
 
 **关键技术**：
 
-1. **分块（Tiling）**：将 Q、K、V 拆成大小为 $B_r \times B_c$、可装入 SRAM 的块。
+1. **分块（Tiling）**：将 Q、K、V 拆成大小为 $$B_r \times B_c$$、可装入 SRAM 的块。
 2. **在线 Softmax（Online Softmax）**：维护一个滑动的 max 和 sum，以增量方式计算 softmax，无需访问完整一行。
 3. **重算（Recomputation）**：在反向传播时，从 Q、K、V 重新计算 attention（开销小），而不存储 $T \times T$ 矩阵（开销大）。
 
@@ -46,7 +46,7 @@ $$
 
 - **SFT（监督微调，Supervised Fine-Tuning）**：训练模型去模仿高质量示范。Loss：在精选数据上做下一个 Token 预测。教会模型*格式*与*风格*。
 - **RLHF**：从人类偏好训练一个 reward 模型，然后用 RL（PPO）针对它优化 policy。模型会探索示范数据之外的空间。教会模型*人类偏好什么*。
-- **DPO**：跳过 reward 模型。直接在偏好对 $(y_w, y_l)$ 上用对比 loss 优化 policy。目标与 RLHF 相同，但流水线更简单。
+- **DPO**：跳过 reward 模型。直接在偏好对 $$(y_w, y_l)$$ 上用对比 loss 优化 policy。目标与 RLHF 相同，但流水线更简单。
 
 **典型流水线**：先做 SFT（提供良好起点），再做 RLHF 或 DPO（细化偏好）。仅做 SFT 倾向产出冗长、过度模棱两可的回答。RLHF/DPO 让输出更直接、更贴合人类意图。
 
@@ -56,9 +56,9 @@ $$
 
 ### Q0d：什么是 reward 模型？它如何训练，可能出什么问题？
 
-**答**：reward 模型（Reward Model, RM）是一个神经网络，输入 (prompt, response) 对，输出一个表示质量的标量分数。它在人类偏好数据上训练：给定 $(y_w, y_l)$ 对（其中 $y_w$ 被偏好），RM 学习赋予 $R(y_w) > R(y_l)$。
+**答**：reward 模型（Reward Model, RM）是一个神经网络，输入 (prompt, response) 对，输出一个表示质量的标量分数。它在人类偏好数据上训练：给定 $$(y_w, y_l)$$ 对（其中 $$y_w$$ 被偏好），RM 学习赋予 $$R(y_w) > R(y_l)$$。
 
-**训练**：Bradley-Terry loss：$\mathcal{L} = -\log\sigma(R(y_w) - R(y_l))$。架构：通常与 policy 共用同一个 Transformer，将 LM head 替换为标量投影。
+**训练**：Bradley-Terry loss：$$\mathcal{L} = -\log\sigma(R(y_w) - R(y_l))$$。架构：通常与 policy 共用同一个 Transformer，将 LM head 替换为标量投影。
 
 **可能出什么问题**：
 
@@ -94,32 +94,32 @@ $$
 
 **答**：朴素 policy gradient：$\nabla J = \mathbb{E}[\nabla\log\pi(a\mid s) \cdot \hat{A}]$。问题：一个幸运/不幸的样本就能产生巨大的梯度 $\rightarrow$ policy 跳到糟糕区域 $\rightarrow$ 生成乱码 $\rightarrow$ 下一个梯度让情况更糟 $\rightarrow$ 进入无法挽回的“死亡螺旋”。
 
-**PPO 的方案**：将概率比 $r = \pi_\text{new}/\pi_\text{old}$ 裁剪到 $[0.8, 1.2]$。
+**PPO 的方案**：将概率比 $$r = \pi_\text{new}/\pi_\text{old}$$ 裁剪到 $[0.8, 1.2]$。
 
 **机制**：对好的动作（$\hat{A}>0$）：目标为 $\min(r\hat{A}, 1.2\hat{A})$。一旦 $r$ 超过 1.2，便不再有额外收益——防止 policy 在单个样本上过度承诺。对坏的动作（$\hat{A}<0$）：目标为 $\min(r\hat{A}, 0.8\hat{A})$。一旦 $r$ 降至 0.8 以下，惩罚便不再增长——防止灾难性遗忘（Catastrophic Forgetting）。
 
 **关键洞见**：它是对 TRPO 的 KL 约束的一阶近似，但无需昂贵的二阶优化。每次更新对 policy 的改变最多 $\pm$20\%。
 
-**对 LLM 而言**：Token 级比率 $r_t = \pi_\theta(y_t\mid y_{<t})/\pi_\text{old}(y_t\mid y_{<t})$ 防止任何单个 Token 的概率发生过大变化，从而维持生成的连贯性。
+**对 LLM 而言**：Token 级比率 $$r_t = \pi_\theta(y_t\mid y_{<t})/\pi_\text{old}(y_t\mid y_{<t})$$ 防止任何单个 Token 的概率发生过大变化，从而维持生成的连贯性。
 
 *复习：第 5 章（PPO）。*
 
 ### Q2：从第一原理推导 DPO。它做了哪些假设？
 
-**答**：从 RLHF 目标出发：$\max_\pi \mathbb{E}[r(x,y)] - \beta D_\text{KL}[\pi\|\pi_\text{ref}]$。
+**答**：从 RLHF 目标出发：$$\max_\pi \mathbb{E}[r(x,y)] - \beta D_\text{KL}[\pi\|\pi_\text{ref}]$$。
 
-**步骤 1**：写出 KKT 条件。最优 policy 有闭式解：$\pi^*(y\mid x) \propto \pi_\text{ref}(y\mid x)\exp(r(x,y)/\beta)$。
+**步骤 1**：写出 KKT 条件。最优 policy 有闭式解：$$\pi^*(y\mid x) \propto \pi_\text{ref}(y\mid x)\exp(r(x,y)/\beta)$$。
 
-**步骤 2**：反解出 reward 的表达：$r(x,y) = \beta\log(\pi^*/\pi_\text{ref}) + \beta\log Z(x)$。
+**步骤 2**：反解出 reward 的表达：$$r(x,y) = \beta\log(\pi^*/\pi_\text{ref}) + \beta\log Z(x)$$。
 
-**步骤 3**：代入 Bradley-Terry 模型 $P(y_w \succ y_l) = \sigma(r(y_w) - r(y_l))$。配分函数 $Z(x)$ 抵消（同一 prompt）。
+**步骤 3**：代入 Bradley-Terry 模型 $$P(y_w \succ y_l) = \sigma(r(y_w) - r(y_l))$$。配分函数 $Z(x)$ 抵消（同一 prompt）。
 
-**步骤 4**：将 $\pi^*$ 替换为 $\pi_\theta$（我们要训练的参数化 policy）：$\mathcal{L} = -\mathbb{E}[\log\sigma(\beta\log\frac{\pi_\theta(y_w)}{\pi_\text{ref}(y_w)} - \beta\log\frac{\pi_\theta(y_l)}{\pi_\text{ref}(y_l)})]$。
+**步骤 4**：将 $$\pi^*$$ 替换为 $$\pi_\theta$$（我们要训练的参数化 policy）：$$\mathcal{L} = -\mathbb{E}[\log\sigma(\beta\log\frac{\pi_\theta(y_w)}{\pi_\text{ref}(y_w)} - \beta\log\frac{\pi_\theta(y_l)}{\pi_\text{ref}(y_l)})]$$。
 
 **假设**：
 
 1. Bradley-Terry 偏好模型（成对、无平局、可传递）。
-2. 最优 policy 可被 $\pi_\theta$ 实现（容量足够）。
+2. 最优 policy 可被 $$\pi_\theta$$ 实现（容量足够）。
 3. 偏好与训练数据来自同一分布（无分布漂移）。
 4. 参考模型是固定且合理的。
 
@@ -153,13 +153,13 @@ $$
 
 ### Q4：GAE 如何工作？为 LLM 走一个具体例子。
 
-**答**：GAE = $n$-步 TD 误差的加权和：$\hat{A}_t = \sum_{l=0}^{T-t} (\gamma\lambda)^l \delta_{t+l}$。
+**答**：GAE = $n$-步 TD 误差的加权和：$$\hat{A}_t = \sum_{l=0}^{T-t} (\gamma\lambda)^l \delta_{t+l}$$。
 
-**具体例子**：回答有 5 个 Token。仅在末端有 reward（$r_5 = 0.8$）。Value 预测：$V_1=0.5, V_2=0.55, V_3=0.6, V_4=0.65, V_5=0.7$。
+**具体例子**：回答有 5 个 Token。仅在末端有 reward（$$r_5 = 0.8$$）。Value 预测：$$V_1=0.5, V_2=0.55, V_3=0.6, V_4=0.65, V_5=0.7$$。
 
-TD 误差（$\gamma=1$）：$\delta_1 = 0 + V_2 - V_1 = 0.05$，$\delta_2 = 0 + V_3 - V_2 = 0.05$，$\ldots$，$\delta_5 = 0.8 + 0 - 0.7 = 0.1$。
+TD 误差（$\gamma=1$）：$$\delta_1 = 0 + V_2 - V_1 = 0.05$$，$$\delta_2 = 0 + V_3 - V_2 = 0.05$$，$\ldots$，$$\delta_5 = 0.8 + 0 - 0.7 = 0.1$$。
 
-取 $\lambda = 0.95$：$\hat{A}_5 = 0.1$（仅是最后的 TD 误差），$\hat{A}_4 = 0.05 + 0.95 \times 0.1 = 0.145$，$\hat{A}_3 = 0.05 + 0.95 \times 0.145 = 0.188$，依此类推。
+取 $\lambda = 0.95$：$$\hat{A}_5 = 0.1$$（仅是最后的 TD 误差），$$\hat{A}_4 = 0.05 + 0.95 \times 0.1 = 0.145$$，$$\hat{A}_3 = 0.05 + 0.95 \times 0.145 = 0.188$$，依此类推。
 
 **解读**：Token 3 获得 advantage 0.188，因为它对一个得到高于预期 reward 的序列做出了贡献。更早的 Token 通过指数衰减获得信用。
 
@@ -175,7 +175,7 @@ TD 误差（$\gamma=1$）：$\delta_1 = 0 + V_2 - V_1 = 0.05$，$\delta_2 = 0 + 
 
 1. **KL 惩罚**（首要）：自适应控制器以 KL $\approx$ 6 为目标。若 KL 上升，$\beta$ 自动增大。防止过度偏离参考模型。
 2. **Reward 模型集成**（3--5 个模型）：取分数的 min 或 mean。各模型有不同的盲区——能骗过一个的漏洞很少能骗过所有。
-3. **长度惩罚**：$r' = r - c \cdot \max(0, \text{length} - L_\text{target})$。防止“只要更长就得高分”的作弊。
+3. **长度惩罚**：$$r' = r - c \cdot \max(0, \text{length} - L_\text{target})$$。防止“只要更长就得高分”的作弊。
 4. **周期性 RM 刷新**：每 2000 步，从当前 policy 生成数据、重新标注，并加入 RM 训练集。模型一找到作弊路径就立即堵上。
 5. **基于胜率的停训**：跟踪相对 SFT baseline 的胜率。如果 RM 分数上升但胜率停滞 200+ 步，立即停训。模型在作弊，而非进步。
 
@@ -263,7 +263,7 @@ TD 误差（$\gamma=1$）：$\delta_1 = 0 + V_2 - V_1 = 0.05$，$\delta_2 = 0 + 
 3. 增量压缩（可选）：仅发送变更参数（INT8 delta $\approx$ 5GB），作为偏移应用。带宽减少 10$\times$。
 4. 超大规模（256+ GPU）：流式同步——后台连续发送小块。平均陈旧度：5--10 步。
 
-**关键细节**：生成阶段计算的 log-probs 使用的是陈旧权重。PPO 比率 $\pi_\text{new}/\pi_\text{old}$ 用这些陈旧 log-probs 作为 $\pi_\text{old}$。这没问题，因为 PPO 本就被设计为处理 off-policy 修正。
+**关键细节**：生成阶段计算的 log-probs 使用的是陈旧权重。PPO 比率 $$\pi_\text{new}/\pi_\text{old}$$ 用这些陈旧 log-probs 作为 $$\pi_\text{old}$$。这没问题，因为 PPO 本就被设计为处理 off-policy 修正。
 
 *复习：第 11 章（系统架构与大规模基础设施）。*
 
@@ -504,7 +504,7 @@ TD 误差（$\gamma=1$）：$\delta_1 = 0 + V_2 - V_1 = 0.05$，$\delta_2 = 0 + 
 **阶段 3——训练**：
 
 - 架构：与 base LLM 相同 + 标量头（每个序列一个回归输出）。
-- Loss：$\mathcal{L} = -\mathbb{E}[\log\sigma(r(x,y_w) - r(x,y_l))]$（Bradley-Terry）。
+- Loss：$$\mathcal{L} = -\mathbb{E}[\log\sigma(r(x,y_w) - r(x,y_l))]$$（Bradley-Terry）。
 - 训练：**仅 1 个 epoch！** RM 过拟合极快。验证准确率 68--75\% 即为良好（更高往往意味着过拟合到标注 artifact）。
 - 技巧：将 reward 中心化到 0（减去滑动均值）。检查长度偏差（若长度与分数相关 $>$ 0.3，在训练中加长度惩罚）。
 
@@ -521,7 +521,7 @@ TD 误差（$\gamma=1$）：$\delta_1 = 0 + V_2 - V_1 = 0.05$，$\delta_2 = 0 + 
 
 **答**：
 
-**KL 衡量什么**：当前 policy 与参考之间的平均对数比：$D_\text{KL} = \mathbb{E}_{y\sim\pi_\theta}[\log(\pi_\theta(y\mid x)/\pi_\text{ref}(y\mid x))]$。KL=0 意味着与参考完全相同。KL=10 意味着 policy 对其偏好的输出多投放了 10 nats 的概率。
+**KL 衡量什么**：当前 policy 与参考之间的平均对数比：$$D_\text{KL} = \mathbb{E}_{y\sim\pi_\theta}[\log(\pi_\theta(y\mid x)/\pi_\text{ref}(y\mid x))]$$。KL=0 意味着与参考完全相同。KL=10 意味着 policy 对其偏好的输出多投放了 10 nats 的概率。
 
 **健康区间**：训练中 3--10。缓慢增长无妨。突发飙升 = 出问题。
 
@@ -613,13 +613,13 @@ TD 误差（$\gamma=1$）：$\delta_1 = 0 + V_2 - V_1 = 0.05$，$\delta_2 = 0 + 
 
 **答**：DAPO（动态自适应策略优化，Dynamic Adaptive Policy Optimization）引入了 5 项关键改动：
 
-**1. Clip-Higher（非对称裁剪）**：标准 PPO/GRPO 两侧都按 $\epsilon=0.2$ 等量裁剪。DAPO 使用 $\epsilon_\text{low}=0.2$ 但 $\epsilon_\text{high}=0.28$。这允许模型*更激进地提升*好动作的概率，同时仍限制对坏动作的抑制幅度。直觉：探索比利用需要更大的空间。
+**1. Clip-Higher（非对称裁剪）**：标准 PPO/GRPO 两侧都按 $\epsilon=0.2$ 等量裁剪。DAPO 使用 $$\epsilon_\text{low}=0.2$$ 但 $$\epsilon_\text{high}=0.28$$。这允许模型*更激进地提升*好动作的概率，同时仍限制对坏动作的抑制幅度。直觉：探索比利用需要更大的空间。
 
 **2. 超长过滤（Overlong Filtering）**：若回答达到最大长度上限（被截断，没有 EOS Token），就将其完全从 loss 中屏蔽。理由：截断的回答不包含自然停止信号——在其上训练会教会模型“句子中间停下”是可接受的。
 
 **3. Token 级 Loss**：loss 按所有序列的总 Token 数归一，而非按序列数。这防止更长的序列主导梯度。
 
-**4. 软超长惩罚（Soft Overlong Punishment）**：不再是二元截断过滤，而是在回答接近最大长度时施加渐进惩罚。$r_\text{soft} = -c \cdot \max(0, \text{len} - L_\text{soft})/(L_\text{max} - L_\text{soft})$。
+**4. 软超长惩罚（Soft Overlong Punishment）**：不再是二元截断过滤，而是在回答接近最大长度时施加渐进惩罚。$$r_\text{soft} = -c \cdot \max(0, \text{len} - L_\text{soft})/(L_\text{max} - L_\text{soft})$$。
 
 **5. 动态采样（Dynamic Sampling）**：训练中重采样 prompt，确保每个 batch 都有成功/失败的混合（TRL 中尚未实现）。
 
@@ -636,11 +636,11 @@ TD 误差（$\gamma=1$）：$\delta_1 = 0 + V_2 - V_1 = 0.05$，$\delta_2 = 0 + 
 - 精度处理不同（vLLM 用 FP8/INT8，训练用 BF16）。
 - 批处理差异影响 layer normalization 的数值。
 
-这会悄无声息地破坏 PPO 的 on-policy 假设：我们计算 $\pi_\theta/\pi_\text{old}$ 时，$\pi_\text{old}$ 来自 vLLM 而 $\pi_\theta$ 来自训练框架。从第零步起比率就是错的！
+这会悄无声息地破坏 PPO 的 on-policy 假设：我们计算 $$\pi_\theta/\pi_\text{old}$$ 时，$$\pi_\text{old}$$ 来自 vLLM 而 $$\pi_\theta$$ 来自训练框架。从第零步起比率就是错的！
 
-**TIS（截断重要性采样，Truncated Importance Sampling）**：通过乘以 $\min(\pi_\text{train}/\pi_\text{inference}, C)$ 修正梯度。$\min$ 与上限 $C$ 防止极端修正破坏训练稳定性。典型 $C=2.0$。
+**TIS（截断重要性采样，Truncated Importance Sampling）**：通过乘以 $$\min(\pi_\text{train}/\pi_\text{inference}, C)$$ 修正梯度。$\min$ 与上限 $C$ 防止极端修正破坏训练稳定性。典型 $C=2.0$。
 
-**MIS（掩码重要性采样，Masked Importance Sampling）**：更激进——直接丢弃任何 $\pi_\text{train}/\pi_\text{inference} > C$ 的 Token，对梯度贡献为零。防止任何估计糟糕的 Token 影响更新。
+**MIS（掩码重要性采样，Masked Importance Sampling）**：更激进——直接丢弃任何 $$\pi_\text{train}/\pi_\text{inference} > C$$ 的 Token，对梯度贡献为零。防止任何估计糟糕的 Token 影响更新。
 
 **序列级 vs Token 级**：序列级 IS 理论上正确（无偏）；Token 级 IS 有偏但方差更低。实践中，序列级带截断效果最好。
 
@@ -648,13 +648,13 @@ TD 误差（$\gamma=1$）：$\delta_1 = 0 + V_2 - V_1 = 0.05$，$\delta_2 = 0 + 
 
 ### Q23：GSPO vs GRPO——根本区别在哪？什么时候重要？
 
-**答**：**GRPO**：*逐 Token*计算重要性比 $w_{i,t} = \pi_\theta(o_{i,t}\mid q, o_{i,<t}) / \pi_\text{old}(o_{i,t}\mid q, o_{i,<t})$，然后独立裁剪每个 Token。
+**答**：**GRPO**：*逐 Token*计算重要性比 $$w_{i,t} = \pi_\theta(o_{i,t}\mid q, o_{i,<t}) / \pi_\text{old}(o_{i,t}\mid q, o_{i,<t})$$，然后独立裁剪每个 Token。
 
-**GSPO**：在*序列级*计算重要性比：$s_i(\theta) = (\pi_\theta(o_i\mid q)/\pi_\text{old}(o_i\mid q))^{1/\lvert o_i \rvert}$——Token 概率的几何均值。裁剪这单一的序列级比率。
+**GSPO**：在*序列级*计算重要性比：$$s_i(\theta) = (\pi_\theta(o_i\mid q)/\pi_\text{old}(o_i\mid q))^{1/\lvert o_i \rvert}$$——Token 概率的几何均值。裁剪这单一的序列级比率。
 
 **为何重要**：GRPO 的逐 Token 裁剪把每个 Token 视为独立，但语言中它们高度相关。序列前段的微小逐 Token 变化在多个 Token 上指数级放大。GSPO 通过审视完整序列概率来捕捉这一点。
 
-**长度归一化**：$1/\lvert o_i \rvert$ 指数保证不同长度序列间的公平比较。否则更长的序列总是有更低的概率比。
+**长度归一化**：$$1/\lvert o_i \rvert$$ 指数保证不同长度序列间的公平比较。否则更长的序列总是有更低的概率比。
 
 **何时用 GSPO**：当训练变为 off-policy 时（`steps_per_generation > 1` 或 `num_iterations > 1`）。如果完全 on-policy（比率 $\approx 1$），GRPO 与 GSPO 等价。
 
@@ -664,9 +664,9 @@ TD 误差（$\gamma=1$）：$\delta_1 = 0 + V_2 - V_1 = 0.05$，$\delta_2 = 0 + 
 
 **答**：关键洞见是 GRPO 的有效性并非来自精确的 advantage 估计（那需要大 $G$），而来自一个**隐式的对比目标**。
 
-$G=2$ 加二元 reward（一个对一个错）时：归一化后 $\hat{A}_\text{correct} = +1$，$\hat{A}_\text{wrong} = -1$。loss 变成：提升正确回答的概率、降低错误回答的概率。这本质上就是一个 DPO 风格的对比 loss！
+$G=2$ 加二元 reward（一个对一个错）时：归一化后 $$\hat{A}_\text{correct} = +1$$，$$\hat{A}_\text{wrong} = -1$$。loss 变成：提升正确回答的概率、降低错误回答的概率。这本质上就是一个 DPO 风格的对比 loss！
 
-**为什么大 $G$ 帮助不大**：归一化 advantage $\hat{A}_i = (r_i - \mu)/\sigma$ 本身已制造了好坏之间的对比。更多样本能更准确估计 $\mu$，但梯度方向由最好与最差之间的*对比*主导，而非 $\mu$ 的精度。
+**为什么大 $G$ 帮助不大**：归一化 advantage $$\hat{A}_i = (r_i - \mu)/\sigma$$ 本身已制造了好坏之间的对比。更多样本能更准确估计 $\mu$，但梯度方向由最好与最差之间的*对比*主导，而非 $\mu$ 的精度。
 
 **算力节省**：$G=2$ 意味着生成算力比 $G=16$ 少 8$\times$。由于生成占训练时间 60\%，整体训练加速 $\sim$4$\times$。
 
@@ -680,8 +680,8 @@ $G=2$ 加二元 reward（一个对一个错）时：归一化后 $\hat{A}_\text{
 
 **SAPO** 用平滑的 sigmoid 门控取代它：随着比率偏离 1，梯度被逐渐衰减，绝不会突兀归零。它使用非对称温度：
 
-- 对正 advantage 用 $\tau_+ = 1.0$（标准衰减）。
-- 对负 advantage 用 $\tau_- = 1.05$（对抑制略激进一些的衰减）。
+- 对正 advantage 用 $$\tau_+ = 1.0$$（标准衰减）。
+- 对负 advantage 用 $$\tau_- = 1.05$$（对抑制略激进一些的衰减）。
 
 **收益**：(1) 梯度地形上没有“悬崖”。(2) 略超出裁剪范围的 Token 仍有贡献（衰减而非归零）。(3) 优化轨迹更稳定。(4) 序列连贯——考虑了完整序列上下文。
 
@@ -693,7 +693,7 @@ $G=2$ 加二元 reward（一个对一个错）时：归一化后 $\hat{A}_\text{
 
 ### Q26：比较 f-DPO 的散度选择。前向 KL、JS 与反向 KL 各自何时使用？
 
-**答**：标准 DPO 隐式使用反向 KL（$D_\text{KL}[\pi_\theta \| \pi_\text{ref}]$）：
+**答**：标准 DPO 隐式使用反向 KL（$$D_\text{KL}[\pi_\theta \| \pi_\text{ref}]$$）：
 
 - **反向 KL**（默认）：寻峰（mode-seeking）。policy 把概率集中在参考概率高的位置。避免生成参考不会生成的文本。利于安全（保守）。
 - **前向 KL**：覆盖（mass-covering）。policy 试图覆盖参考的所有峰，甚至低概率的峰。利于多样性但可能生成低质量输出。
@@ -708,7 +708,7 @@ $G=2$ 加二元 reward（一个对一个错）时：归一化后 $\hat{A}_\text{
 
 **答**：按复杂度递增的三个方案：
 
-**1. Robust DPO**（已知噪声率时最佳）：解析地去偏 loss：$\mathcal{L}_\text{robust} = \frac{(1-\varepsilon)\mathcal{L}_\text{DPO}(y_w, y_l) - \varepsilon \mathcal{L}_\text{DPO}(y_l, y_w)}{1 - 2\varepsilon}$。设 $\varepsilon = 0.15$。在期望意义上可证明恢复干净的 DPO 目标。TRL：`loss_type="robust", label_smoothing=0.15`。
+**1. Robust DPO**（已知噪声率时最佳）：解析地去偏 loss：$$\mathcal{L}_\text{robust} = \frac{(1-\varepsilon)\mathcal{L}_\text{DPO}(y_w, y_l) - \varepsilon \mathcal{L}_\text{DPO}(y_l, y_w)}{1 - 2\varepsilon}$$。设 $\varepsilon = 0.15$。在期望意义上可证明恢复干净的 DPO 目标。TRL：`loss_type="robust", label_smoothing=0.15`。
 
 **2. IPO（Identity Preference Optimization, IPO）**（噪声率未知时最佳）：带目标 margin 的平方 loss。被误标的对影响有界（平方 loss 不发散）。对任意噪声模式更鲁棒，且无需知道 $\varepsilon$。TRL：`loss_type="ipo"`。
 
@@ -720,7 +720,7 @@ $G=2$ 加二元 reward（一个对一个错）时：归一化后 $\hat{A}_\text{
 
 ### Q28：什么是 SimPO？为什么“无参考模型”是优势？
 
-**答**：SimPO 用回答的平均对数概率作为隐式 reward 信号：$r(x,y) = \frac{1}{\lvert y \rvert}\sum_t \log \pi_\theta(y_t\mid x, y_{<t})$——无需参考模型。
+**答**：SimPO 用回答的平均对数概率作为隐式 reward 信号：$$r(x,y) = \frac{1}{\lvert y \rvert}\sum_t \log \pi_\theta(y_t\mid x, y_{<t})$$——无需参考模型。
 
 loss 中加入目标 margin $\gamma$：chosen 回答的平均 log-prob 应至少比 rejected 高 $\gamma$。
 
@@ -741,7 +741,7 @@ loss 中加入目标 margin $\gamma$：chosen 回答的平均 log-prob 应至少
 
 **为什么**：DPO 的梯度推高 chosen 的概率、压低 rejected 的概率。但 chosen 回答可能与模型自身会生成的东西差异巨大，以至于提升其概率并不能教会模型产出类似的推理模式。
 
-**RPO 的修复**：在 chosen 回答上添加负对数似然（NLL/SFT）loss：$\mathcal{L} = \mathcal{L}_\text{DPO} + \alpha \cdot \mathcal{L}_\text{NLL}(y_w)$。
+**RPO 的修复**：在 chosen 回答上添加负对数似然（NLL/SFT）loss：$$\mathcal{L} = \mathcal{L}_\text{DPO} + \alpha \cdot \mathcal{L}_\text{NLL}(y_w)$$。
 
 NLL 项显式训练模型逐步生成获胜回答。DPO 项确保模型同时学会避免落败回答。结合起来：模型同时学到“如何正确推理”（NLL）和“该避免什么”（DPO）。
 
@@ -777,9 +777,9 @@ TRL：`loss_type=["sigmoid", "sft"], loss_weights=[1.0, 1.0]`
 
 **算法**：
 
-1. 将 $Q$ 拆为 $B_r$ 行的块，$K/V$ 拆为 $B_c$ 行的块。
+1. 将 $Q$ 拆为 $$B_r$$ 行的块，$K/V$ 拆为 $$B_c$$ 行的块。
 2. 对每个 $Q$ 块：遍历所有 $K$ 块，计算部分 attention 分数。
-3. **Online softmax 技巧**：维护滑动 max $m$ 与滑动 sum $\ell$ 以做 softmax 归一。处理新的 $K$ 块时更新：$m_\text{new} = \max(m_\text{old}, \max(\text{scores}))$，将上一累加器按 $e^{m_\text{old} - m_\text{new}}$ 重新缩放，再加上新的贡献。
+3. **Online softmax 技巧**：维护滑动 max $m$ 与滑动 sum $\ell$ 以做 softmax 归一。处理新的 $K$ 块时更新：$$m_\text{new} = \max(m_\text{old}, \max(\text{scores}))$$，将上一累加器按 $$e^{m_\text{old} - m_\text{new}}$$ 重新缩放，再加上新的贡献。
 4. 输出以增量方式累加——从不需要完整的 $n \times n$ 矩阵。
 
 **关键洞见**：softmax 本来是全局操作（对所有元素取 $\max$ 和 $\sum$）。online 技巧将其分解为带修正因子的局部更新。数学上精确——并非近似。
@@ -794,7 +794,7 @@ TRL：`loss_type=["sigmoid", "sft"], loss_weights=[1.0, 1.0]`
 
 ### Q32：解释 PagedAttention。它如何解决 KV cache 问题？
 
-**答**：**问题**：生成期间，每条序列都需要 KV cache（存储所有先前 Token 的 K、V 张量）。对 70B 模型：每个 Token 需要 $2 \times n_\text{layers} \times d_\text{model} \times 2$ 字节 = $2 \times 80 \times 8192 \times 2 \approx 2.5$ MB。2048 Token 的序列：$\sim$5 GB 的 KV cache。
+**答**：**问题**：生成期间，每条序列都需要 KV cache（存储所有先前 Token 的 K、V 张量）。对 70B 模型：每个 Token 需要 $$2 \times n_\text{layers} \times d_\text{model} \times 2$$ 字节 = $2 \times 80 \times 8192 \times 2 \approx 2.5$ MB。2048 Token 的序列：$\sim$5 GB 的 KV cache。
 
 **传统分配**：为每条活跃序列预分配 max\_sequence\_length。若 max=2048 而平均=500，就浪费 75\% 已分配显存。50 条并发序列就浪费数百 GB。
 
@@ -845,9 +845,9 @@ TRL：`loss_type=["sigmoid", "sft"], loss_weights=[1.0, 1.0]`
 
 ### Q34：解释 Adam 与 AdamW。这一差异对 LLM 为何重要？
 
-**答**：**Adam 加 L2 正则化**：$\theta_{t+1} = \theta_t - \alpha \cdot (\hat{m}_t / (\sqrt{\hat{v}_t} + \epsilon) + \lambda\theta_t)$。权重衰减项 $\lambda\theta_t$ *位于*自适应缩放*内部*。梯度大（$v_t$ 大）的参数*衰减更少*（除以 $\sqrt{v_t}$）。这不是真正的权重衰减——它与尺度相关。
+**答**：**Adam 加 L2 正则化**：$$\theta_{t+1} = \theta_t - \alpha \cdot (\hat{m}_t / (\sqrt{\hat{v}_t} + \epsilon) + \lambda\theta_t)$$。权重衰减项 $$\lambda\theta_t$$ *位于*自适应缩放*内部*。梯度大（$$v_t$$ 大）的参数*衰减更少*（除以 $$\sqrt{v_t}$$）。这不是真正的权重衰减——它与尺度相关。
 
-**AdamW（解耦权重衰减）**：$\theta_{t+1} = (1 - \alpha\lambda)\theta_t - \alpha \cdot \hat{m}_t / (\sqrt{\hat{v}_t} + \epsilon)$。权重衰减在自适应更新*之外*且*之前*施加。无论梯度历史如何，每个参数都获得相同比例的衰减。
+**AdamW（解耦权重衰减）**：$$\theta_{t+1} = (1 - \alpha\lambda)\theta_t - \alpha \cdot \hat{m}_t / (\sqrt{\hat{v}_t} + \epsilon)$$。权重衰减在自适应更新*之外*且*之前*施加。无论梯度历史如何，每个参数都获得相同比例的衰减。
 
 **对 LLM 为何重要**：
 
@@ -861,15 +861,15 @@ TRL：`loss_type=["sigmoid", "sft"], loss_weights=[1.0, 1.0]`
 
 ### Q35：为什么学习率 warmup 是必要的？不做 warmup 会发生什么？
 
-**答**：**问题**：Adam 的二阶矩估计 $v_t = \beta_2 v_{t-1} + (1-\beta_2)g_t^2$ 从 $v_0 = 0$ 起步。偏置修正 $\hat{v}_t = v_t/(1-\beta_2^t)$ 在数学上做了补偿，但在实践中：
+**答**：**问题**：Adam 的二阶矩估计 $$v_t = \beta_2 v_{t-1} + (1-\beta_2)g_t^2$$ 从 $$v_0 = 0$$ 起步。偏置修正 $$\hat{v}_t = v_t/(1-\beta_2^t)$$ 在数学上做了补偿，但在实践中：
 
-- 头几步：$v_t$ 基于 1--5 个梯度样本。对真实方差的估计极不准确。
-- 若某参数初期恰好得到小梯度，$v_t$ 微小 $\rightarrow$ 有效 LR 巨大 $\rightarrow$ 灾难性更新。
-- 偏置修正放大早期更新：第 1 步时 $\hat{v}_1 = v_1/(1-0.999) = 1000 \cdot v_1$。
+- 头几步：$$v_t$$ 基于 1--5 个梯度样本。对真实方差的估计极不准确。
+- 若某参数初期恰好得到小梯度，$$v_t$$ 微小 $\rightarrow$ 有效 LR 巨大 $\rightarrow$ 灾难性更新。
+- 偏置修正放大早期更新：第 1 步时 $$\hat{v}_1 = v_1/(1-0.999) = 1000 \cdot v_1$$。
 
 **无 warmup 时**：头 10--100 步经常出现梯度尖峰，永久性损坏模型。在优化器稳定之前，早期表征就被打乱。
 
-**Warmup 的修复**：从 LR $\approx 0$ 起步，在 $W$ 步（通常为训练量的 3--10\%）内线性升至目标值。当 LR 到达满值时，$v_t$ 已积累了足够样本以变得准确。
+**Warmup 的修复**：从 LR $\approx 0$ 起步，在 $W$ 步（通常为训练量的 3--10\%）内线性升至目标值。当 LR 到达满值时，$$v_t$$ 已积累了足够样本以变得准确。
 
 **典型设置**：
 
@@ -883,13 +883,13 @@ TRL：`loss_type=["sigmoid", "sft"], loss_weights=[1.0, 1.0]`
 
 **答**：
 
-**余弦衰减（Cosine decay）**：$\eta_t = \eta_\text{min} + \frac{1}{2}(\eta_\text{max} - \eta_\text{min})(1 + \cos(\pi t/T))$。预训练与 SFT 的标准选择。衰减平滑，大部分时间停留在中等 LR。
+**余弦衰减（Cosine decay）**：$$\eta_t = \eta_\text{min} + \frac{1}{2}(\eta_\text{max} - \eta_\text{min})(1 + \cos(\pi t/T))$$。预训练与 SFT 的标准选择。衰减平滑，大部分时间停留在中等 LR。
 
-**线性衰减**：$\eta_t = \eta_\text{max}(1 - t/T)$。更简单，短训练下与余弦衰减效果相近。
+**线性衰减**：$$\eta_t = \eta_\text{max}(1 - t/T)$$。更简单，短训练下与余弦衰减效果相近。
 
 **预热-稳定-衰减（Warmup-Stable-Decay, WSD）**：warmup $\rightarrow$ 80\% 时间常数 LR $\rightarrow$ 最后 20\% 快速衰减。预训练的新标准。“稳定”阶段提供一致学习；最终衰减挤出剩余收益。
 
-**常数**：无衰减。warmup 之后 $\eta_t = \eta_\text{max}$。
+**常数**：无衰减。warmup 之后 $$\eta_t = \eta_\text{max}$$。
 
 **对 RL 微调（PPO/GRPO），我会选择：短 warmup + 常数**。理由：
 
@@ -908,7 +908,7 @@ TRL：`loss_type=["sigmoid", "sft"], loss_weights=[1.0, 1.0]`
 **RL（PPO/GRPO）**：梯度范数高度多变，因为：
 
 1. **Reward 方差**：一个 batch 可能全是高 reward 回答，下一个全是低的。advantage $\hat{A}$ 剧烈摆动。
-2. **比率爆炸**：若某个稀有 Token 的概率变化很大，$r_t = \pi_\text{new}/\pi_\text{old}$ 可能极大 $\rightarrow$ 在裁剪生效前就产生大梯度。
+2. **比率爆炸**：若某个稀有 Token 的概率变化很大，$$r_t = \pi_\text{new}/\pi_\text{old}$$ 可能极大 $\rightarrow$ 在裁剪生效前就产生大梯度。
 3. **稀疏 reward**：在二元 reward 的 GRPO 中，有些 prompt 全部正确（advantage $\approx 0$），突然一道难题给出极端 advantage。
 4. **KL 项**：当 policy 偏离时，KL 惩罚的梯度可能尖峰。
 
@@ -944,9 +944,9 @@ TRL：`loss_type=["sigmoid", "sft"], loss_weights=[1.0, 1.0]`
 
 ### Q39：推导 Bradley-Terry reward 模型的 loss。它有哪些局限？
 
-**答**：**Bradley-Terry 模型（Bradley-Terry Model）**：给定两个回答，更好的那个（$y_w$）被偏好的概率：$P(y_w \succ y_l \mid x) = \sigma(r(x, y_w) - r(x, y_l))$，其中 $\sigma$ 是 sigmoid。
+**答**：**Bradley-Terry 模型（Bradley-Terry Model）**：给定两个回答，更好的那个（$$y_w$$）被偏好的概率：$$P(y_w \succ y_l \mid x) = \sigma(r(x, y_w) - r(x, y_l))$$，其中 $\sigma$ 是 sigmoid。
 
-**MLE 推导**：给定 $N$ 个偏好对，最大化似然：$\prod_i P(y_w^i \succ y_l^i)$。取负对数：$\mathcal{L} = -\sum_i \log\sigma(r(x_i, y_w^i) - r(x_i, y_l^i))$。
+**MLE 推导**：给定 $N$ 个偏好对，最大化似然：$$\prod_i P(y_w^i \succ y_l^i)$$。取负对数：$$\mathcal{L} = -\sum_i \log\sigma(r(x_i, y_w^i) - r(x_i, y_l^i))$$。
 
 **局限**：
 
@@ -1019,18 +1019,18 @@ TRL：`DataCollatorForCompletionOnlyLM(response_template="<|assistant|>")`
 
 **答**：**架构**：每个目标使用独立 reward 模型：
 
-- $r_\text{helpful}$：在有用性偏好上训练（质量、准确性、完整性）。
-- $r_\text{safe}$：在安全偏好上训练（拒答、无害、无幻觉）。
-- $r_\text{format}$：基于规则（遵循指令、合适格式、合理长度）。
+- $$r_\text{helpful}$$：在有用性偏好上训练（质量、准确性、完整性）。
+- $$r_\text{safe}$$：在安全偏好上训练（拒答、无害、无幻觉）。
+- $$r_\text{format}$$：基于规则（遵循指令、合适格式、合理长度）。
 
 **组合策略**：
 
-1. **加权求和**（最简）：$r = w_1 r_\text{helpful} + w_2 r_\text{safe} + w_3 r_\text{format}$。问题：安全性可能被有用性压过。
-2. **约束式**（更安全）：在 $r_\text{safe} > \tau$ 约束下最大化 $r_\text{helpful}$。通过 $r = r_\text{helpful} - \lambda \cdot \max(0, \tau - r_\text{safe})$ 实现，$\lambda$ 取较大值。
-3. **GDPO 归一化**（对 GRPO 最佳）：在 group 内独立归一化每个 reward，再组合：$\hat{A} = w_1 \hat{A}_\text{helpful} + w_2 \hat{A}_\text{safe}$。防止某个 reward 因尺度差异而主导。
+1. **加权求和**（最简）：$$r = w_1 r_\text{helpful} + w_2 r_\text{safe} + w_3 r_\text{format}$$。问题：安全性可能被有用性压过。
+2. **约束式**（更安全）：在 $$r_\text{safe} > \tau$$ 约束下最大化 $$r_\text{helpful}$$。通过 $$r = r_\text{helpful} - \lambda \cdot \max(0, \tau - r_\text{safe})$$ 实现，$\lambda$ 取较大值。
+3. **GDPO 归一化**（对 GRPO 最佳）：在 group 内独立归一化每个 reward，再组合：$$\hat{A} = w_1 \hat{A}_\text{helpful} + w_2 \hat{A}_\text{safe}$$。防止某个 reward 因尺度差异而主导。
 4. **字典序（Lexicographic）**：安全是硬约束（必须通过），再优化有用性。分阶段训练：先做安全对齐，再做有用性。
 
-**实用权重**：从 $w_\text{safe}=2.0, w_\text{helpful}=1.0, w_\text{format}=0.5$ 起步。安全权重 2$\times$，因为它的失败模式（有害内容）远比有用性失败（平庸答案）更糟。
+**实用权重**：从 $$w_\text{safe}=2.0, w_\text{helpful}=1.0, w_\text{format}=0.5$$ 起步。安全权重 2$\times$，因为它的失败模式（有害内容）远比有用性失败（平庸答案）更糟。
 
 *复习：第 9 与 12 章（Reward 模型训练；LLM 智能体训练）。*
 
@@ -1043,7 +1043,7 @@ TRL：`DataCollatorForCompletionOnlyLM(response_template="<|assistant|>")`
 **投机解码**：
 
 1. **草稿**：小模型（1--7B）快速生成 $k$ 个候选 Token（全部 $k$ 个约 $\sim$5ms）。
-2. **验证**：大模型做一次前向，并行给所有 $k$ 个 Token 打分。$p_\text{large}(t_i) \geq p_\text{draft}(t_i)$ 的 Token 总是接受。其他按概率接受。
+2. **验证**：大模型做一次前向，并行给所有 $k$ 个 Token 打分。$$p_\text{large}(t_i) \geq p_\text{draft}(t_i)$$ 的 Token 总是接受。其他按概率接受。
 3. **结果**：每次验证步平均接受 3--4 个 Token。加速：2--3$\times$。
 
 **关键性质**：输出分布与单独从大模型采样*完全相同*。无质量损失。草稿模型只影响速度，不影响输出。
@@ -1107,11 +1107,11 @@ TRL：`DataCollatorForCompletionOnlyLM(response_template="<|assistant|>")`
 
 ### Q：解释 SwiGLU，以及它为何在现代 Transformer 中取代了 ReLU。
 
-**答**：SwiGLU：$\text{FFN}(x) = W_2 (\text{Swish}(W_1 x) \odot W_3 x)$，其中 $\text{Swish}(x) = x \cdot \sigma(x)$。
+**答**：SwiGLU：$$\text{FFN}(x) = W_2 (\text{Swish}(W_1 x) \odot W_3 x)$$，其中 $\text{Swish}(x) = x \cdot \sigma(x)$。
 
 **为什么它更好**：
 
-- *门控*机制（$\odot W_3 x$）让网络可以有选择地抑制或放大维度——比逐点 ReLU 更具表达力。
+- *门控*机制（$$\odot W_3 x$$）让网络可以有选择地抑制或放大维度——比逐点 ReLU 更具表达力。
 - Swish 是平滑的（不存在 ReLU 零梯度区那样的死神经元）。
 - 经验上：在相同 FLOP 预算下，语言建模基准上提升 1\%--2\%。
 - 权衡：需要 3 个权重矩阵而非 2 个（通过将隐藏维度从 $4d$ 降到 $8d/3$ 来解决）。
@@ -1170,13 +1170,13 @@ FlashAttention 对 attention 有帮助是因为 attention 严重受限于显存�
 
 ### Q：解释在线 Softmax 技巧，以及它对 FlashAttention 为何不可或缺。
 
-**答**：标准 Softmax 在计算任何输出之前都需要全局最大值 $m = \max_j x_j$——这要求先看到所有 $n$ 个 attention 分数，迫使物化完整的 $n \times n$ 矩阵。
+**答**：标准 Softmax 在计算任何输出之前都需要全局最大值 $$m = \max_j x_j$$——这要求先看到所有 $n$ 个 attention 分数，迫使物化完整的 $n \times n$ 矩阵。
 
 在线 Softmax 技巧按顺序处理块，维护一个滚动的 $(m, \ell, O)$ 状态：
 
-1. 处理新块 $\to$ 更新滚动最大值：$m_{\text{new}} = \max(m_{\text{old}}, \max(s_{\text{new}}))$
-2. 重新缩放旧的求和：$\ell_{\text{new}} = e^{m_{\text{old}} - m_{\text{new}}} \cdot \ell_{\text{old}} + \text{new terms}$
-3. 重新缩放输出：$O_{\text{new}} = \text{rescaled}(O_{\text{old}}) + \text{new contribution}$
+1. 处理新块 $\to$ 更新滚动最大值：$$m_{\text{new}} = \max(m_{\text{old}}, \max(s_{\text{new}}))$$
+2. 重新缩放旧的求和：$$\ell_{\text{new}} = e^{m_{\text{old}} - m_{\text{new}}} \cdot \ell_{\text{old}} + \text{new terms}$$
+3. 重新缩放输出：$$O_{\text{new}} = \text{rescaled}(O_{\text{old}}) + \text{new contribution}$$
 
 这在数学上是完全精确的——没有任何近似。它使得逐块处理成为可能，每块都能放进 SRAM，永远不需要在显存中保留完整的 $n \times n$ 矩阵。
 
@@ -1285,7 +1285,7 @@ AWQ 识别出 top 1\% 的“显著”通道（在校准数据上始终具有较�
 - 容量浪费：8 个专家中有 6 个未被使用，模型实际上缩小到 2 个专家的规模。
 - 计算不均衡：如果每个专家在不同 GPU 上，热门专家会成为瓶颈，其他专家闲置。
 
-**解决方案**：辅助负载均衡 Loss：$\mathcal{L}_{\text{bal}} = \alpha \cdot N \sum_{i=1}^N f_i \cdot p_i$，其中 $f_i$ = 路由到专家 $i$ 的 token 比例，$p_i$ = 专家 $i$ 的平均 router 概率。这会惩罚不均匀的分布。
+**解决方案**：辅助负载均衡 Loss：$$\mathcal{L}_{\text{bal}} = \alpha \cdot N \sum_{i=1}^N f_i \cdot p_i$$，其中 $$f_i$$ = 路由到专家 $i$ 的 token 比例，$$p_i$$ = 专家 $i$ 的平均 router 概率。这会惩罚不均匀的分布。
 
 **替代方案**：专家容量因子——对每个 Batch 中每个专家的最大 token 数做硬上限。溢出的 token 被丢弃或重新路由。
 
@@ -1297,7 +1297,7 @@ AWQ 识别出 top 1\% 的“显著”通道（在校准数据上始终具有较�
 
 ### Q：如果一个 GRPO 组中 N 个响应全部相同会怎样？
 
-**答**：如果全部 $N$ 个响应相同：所有 Reward $r_i$ 相等，因此 $\sigma_G = 0$，优势 $\hat{A}_i = (r_i - \mu_G)/\sigma_G$ 未定义（除以零）。实践中，实现把所有 $\hat{A}_i = 0$，意味着**零学习信号**——这一步被浪费。
+**答**：如果全部 $N$ 个响应相同：所有 Reward $$r_i$$ 相等，因此 $$\sigma_G = 0$$，优势 $$\hat{A}_i = (r_i - \mu_G)/\sigma_G$$ 未定义（除以零）。实践中，实现把所有 $$\hat{A}_i = 0$$，意味着**零学习信号**——这一步被浪费。
 
 **预防**：
 
@@ -1315,10 +1315,10 @@ AWQ 识别出 top 1\% 的“显著”通道（在校准数据上始终具有较�
 
 **检测模式坍缩**（训练期间均应监控）：
 
-1. **响应熵**：计算每个 token 的熵 $H = -\sum p_i \log p_i$。若快速下降 $\to$ 坍缩。
+1. **响应熵**：计算每个 token 的熵 $$H = -\sum p_i \log p_i$$。若快速下降 $\to$ 坍缩。
 2. **唯一 n-gram 比例**：同一 Prompt 不同响应间唯一 4-gram 的比例。健康：$>$0.6。
 3. **Reward 分布宽度**：若 $\sigma(\text{rewards})$ 收缩到接近零 $\to$ 所有响应质量相同 $\to$ 可能完全一致。
-4. **KL 散度**：若 $D_\text{KL}[\pi_\theta \| \pi_\text{ref}]$ 快速增长，Policy 正远离参考 $\to$ 通常朝向某个狭窄模式。
+4. **KL 散度**：若 $$D_\text{KL}[\pi_\theta \| \pi_\text{ref}]$$ 快速增长，Policy 正远离参考 $\to$ 通常朝向某个狭窄模式。
 5. **长度直方图**：若所有响应收敛到相同长度 $\to$ 模板化行为。
 
 **修复**：提高 KL 系数 $\beta$、增大熵奖励、提高采样温度，或回滚到更早的 checkpoint。
@@ -1336,7 +1336,7 @@ AWQ 识别出 top 1\% 的“显著”通道（在校准数据上始终具有较�
 - 以概率 $\min(1, p(\hat{x})/q(\hat{x}))$ 接受
 - 拒绝时：从*残差分布* $\propto \max(0, p(x) - q(x))$ 中采样
 
-这在数学上等价于直接从 $p$（目标）采样。证明草图：输出 token $x$ 的概率为 $q(x) \cdot \min(1, p(x)/q(x)) + P(\text{reject}) \cdot \frac{\max(0, p(x)-q(x))}{\sum_y \max(0, p(y)-q(y))} = p(x)$。
+这在数学上等价于直接从 $p$（目标）采样。证明草图：输出 token $x$ 的概率为 $$q(x) \cdot \min(1, p(x)/q(x)) + P(\text{reject}) \cdot \frac{\max(0, p(x)-q(x))}{\sum_y \max(0, p(y)-q(y))} = p(x)$$。
 
 加速来自摊销：当 draft 质量好（接受率高）时，一次目标模型前向就能确认多个 token。无论 draft 质量如何，这一保证始终成立——糟糕的 draft 只是带来更低的加速比（更多拒绝），而不是更差的质量。
 
@@ -1433,7 +1433,7 @@ AWQ 识别出 top 1\% 的“显著”通道（在校准数据上始终具有较�
 
 **答**：对于具有 20--100 步轨迹的研究型 Agent：
 
-**PPO 需要一个 Value 模型**：$V(s_t)$ 必须预测从当前状态出发的期望总 Reward。对于研究场景（其中状态 = 128K token 的上下文，包括论文、代码和结果），训练一个精确的 Value 函数极其困难——“读过 3 篇论文并写了一部分代码”的价值难以预测。
+**PPO 需要一个 Value 模型**：$$V(s_t)$$ 必须预测从当前状态出发的期望总 Reward。对于研究场景（其中状态 = 128K token 的上下文，包括论文、代码和结果），训练一个精确的 Value 函数极其困难——“读过 3 篇论文并写了一部分代码”的价值难以预测。
 
 **GRPO 完全避免了 Value 估计**：它对每个研究问题生成 $N$ 条完整轨迹，并把组内排名作为优势。无需预测中间价值——只需比较结果。
 
@@ -1453,10 +1453,10 @@ $$
 R = 0.5 \cdot R_{\text{tests}} + 0.2 \cdot R_{\text{quality}} + 0.2 \cdot R_{\text{efficiency}} + 0.1 \cdot R_{\text{safety}}
 $$
 
-- $R_{\text{tests}}$：单元测试通过比例（0--1）。可基于真值验证。
-- $R_{\text{quality}}$：LLM 评判代码风格、文档、可维护性。
-- $R_{\text{efficiency}}$：$\max(0, 1 - \text{steps}/30)$——快速完成给奖励。
-- $R_{\text{safety}}$：无危险操作（rm -rf、沙箱外网络访问）。
+- $$R_{\text{tests}}$$：单元测试通过比例（0--1）。可基于真值验证。
+- $$R_{\text{quality}}$$：LLM 评判代码风格、文档、可维护性。
+- $$R_{\text{efficiency}}$$：$\max(0, 1 - \text{steps}/30)$——快速完成给奖励。
+- $$R_{\text{safety}}$$：无危险操作（rm -rf、沙箱外网络访问）。
 
 **Reward hacking 风险**：
 
@@ -1471,7 +1471,7 @@ $$
 
 ### Q：解释 Plackett-Luce 模型。它如何推广 Bradley-Terry？
 
-**答**：Bradley-Terry 建模*成对*偏好：$P(y_1 \succ y_2) = \sigma(r(y_1) - r(y_2))$。
+**答**：Bradley-Terry 建模*成对*偏好：$$P(y_1 \succ y_2) = \sigma(r(y_1) - r(y_2))$$。
 
 Plackett-Luce 把 $K$ 项的*完整排序*建模为顺序选择：
 
@@ -1481,7 +1481,7 @@ $$
 
 解释：依次挑选剩余项中最好的。位置 1 = 对全部 $K$ 做 Softmax；位置 2 = 对剩余 $K-1$ 做 Softmax；以此类推。
 
-**推广关系**：当 $K=2$ 时，PL 恰好退化为 BT：$P(y_1 \succ y_2) = \frac{e^{r(y_1)}}{e^{r(y_1)} + e^{r(y_2)}} = \sigma(r(y_1) - r(y_2))$。
+**推广关系**：当 $K=2$ 时，PL 恰好退化为 BT：$$P(y_1 \succ y_2) = \frac{e^{r(y_1)}}{e^{r(y_1)} + e^{r(y_2)}} = \sigma(r(y_1) - r(y_2))$$。
 
 **优势**：$K=8$ 项的排序提供 $\binom{8}{2} = 28$ 个隐式成对比较，外加相对差距信息——比单一成对样本丰富得多。
 
@@ -1489,9 +1489,9 @@ $$
 
 ### Q：什么是过程奖励模型（PRM），它在什么情况下优于结果奖励模型（Outcome Reward Model, ORM）？
 
-**答**：**ORM**：仅对最终输出打分。$r(x, y_{\text{final}})$ = 整个响应一个标量。
+**答**：**ORM**：仅对最终输出打分。$$r(x, y_{\text{final}})$$ = 整个响应一个标量。
 
-**PRM**：对每一*步*推理打分。$r(x, y_{\text{step } t})$ = 每一中间步一个标量。
+**PRM**：对每一*步*推理打分。$$r(x, y_{\text{step } t})$$ = 每一中间步一个标量。
 
 **PRM 更好的场景**：
 
@@ -1589,9 +1589,9 @@ $$
 
 **答**：**ELO 推导**：
 
-玩家 A 对 B 的期望得分：$E_A = \frac{1}{1 + 10^{(R_B - R_A)/400}}$（逻辑斯蒂模型）。
+玩家 A 对 B 的期望得分：$$E_A = \frac{1}{1 + 10^{(R_B - R_A)/400}}$$（逻辑斯蒂模型）。
 
-对局后，实际得分 $S_A \in \{0, 0.5, 1\}$：$R_A' = R_A + K(S_A - E_A)$
+对局后，实际得分 $$S_A \in \{0, 0.5, 1\}$$：$$R_A' = R_A + K(S_A - E_A)$$
 
 $K$ 因子控制更新幅度（$K$ 越大对近期结果反应越敏感）。
 
@@ -1623,7 +1623,7 @@ $$
 1. 一次性生成 $n$ 个样本（例如 $n=200$），从同一批样本算出 pass@1、pass@10、pass@100
 2. 无需将整个评估重复 $k$ 次
 3. 统计上精确（组合论证：不含任何正确样本的 $k$-子集占比）
-4. 通过对数空间数值稳定计算：$\text{pass@}k = 1 - \exp\left(\sum_{i=0}^{k-1} \log(n-c-i) - \log(n-i)\right)$
+4. 通过对数空间数值稳定计算：$$\text{pass@}k = 1 - \exp\left(\sum_{i=0}^{k-1} \log(n-c-i) - \log(n-i)\right)$$
 
 **直觉**：若 50/200 个样本通过（$c=50$，$n=200$），pass@1 $\approx 0.25$，pass@10 $\approx 0.94$。该估计器统计大小为 $k$ 的抽取中至少包含一个成功的比例。
 
@@ -1748,8 +1748,8 @@ $$
 
 **动态分配策略**：
 
-1. **固定下限**：$S_{\min}$、$R_{\min}$ 不可妥协
-2. **自适应历史**：当 $H > H_{\max}$ 时摘要旧轮次。保留最近 $k$ 轮原样；其余做摘要。
+1. **固定下限**：$$S_{\min}$$、$$R_{\min}$$ 不可妥协
+2. **自适应历史**：当 $$H > H_{\max}$$ 时摘要旧轮次。保留最近 $k$ 轮原样；其余做摘要。
 3. **按需工具**：仅包含与当前查询相关的工具描述（而非全部 50 个）。用分类器或 Embedding 相似度选 top-$k$ 工具。
 4. **惰性记忆**：仅在需要时（分析查询之后）检索记忆，而非预先加载。
 
@@ -1936,8 +1936,8 @@ $$
 
 **CTDE 方案**：
 
-- **训练时**：一个中心化 critic 可访问所有 Agent 的观察和动作：$V(s_1, s_2, \ldots, s_n, a_1, a_2, \ldots, a_n)$。这通过把非平稳性从 Value 函数中剔除来稳定训练。
-- **执行时**：每个 Agent 仅基于自身观察行动：$a_i = \pi_i(o_i)$。推理时没有通信开销。
+- **训练时**：一个中心化 critic 可访问所有 Agent 的观察和动作：$$V(s_1, s_2, \ldots, s_n, a_1, a_2, \ldots, a_n)$$。这通过把非平稳性从 Value 函数中剔除来稳定训练。
+- **执行时**：每个 Agent 仅基于自身观察行动：$$a_i = \pi_i(o_i)$$。推理时没有通信开销。
 
 **对 LLM Agent 而言**：中心化 critic 可以是一个 Reward 模型，评估所有 Agent 的*联合*输出（例如，Agent 团队是否产出了一个正确的软件系统？），而每个 Agent 通过反事实信用分配被训练以最大化其对团队 Reward 的贡献。
 
@@ -2029,7 +2029,7 @@ $$
 r_{\text{shaped}}(s, a, s') = r(s, a, s') + \gamma \Phi(s') - \Phi(s)
 $$
 
-其中 $\Phi(s) = -\text{min\_steps\_to\_goal}(s)$（由启发式或学习到的 Value 函数估计）。
+其中 $$\Phi(s) = -\text{min\_steps\_to\_goal}(s)$$（由启发式或学习到的 Value 函数估计）。
 
 **挑战**：部分可观察（无法总是判断是否更接近目标）；随机环境（页面内容会变）；Reward hacking（Agent 找到满足 Reward 但不满足用户意图的捷径）。
 

@@ -28,9 +28,9 @@ PPO 的 value model（critic）在语言任务上存在三大问题：
 
 ## 算法
 
-1. 对每个 prompt $x$，采样 $G$ 条 completion：$\{y_1, \ldots, y_G\} \sim \pi_\theta(\cdot\mid x)$
-2. 对每条打分：$r_i = R(x, y_i)$
-3. 组内归一化：$\hat{A}_i = \frac{r_i - \mu_G}{\sigma_G}$，其中 $\mu_G = \frac{1}{G}\sum_j r_j$，$\sigma_G = \text{std}(\{r_j\})$
+1. 对每个 prompt $x$，采样 $G$ 条 completion：$$\{y_1, \ldots, y_G\} \sim \pi_\theta(\cdot\mid x)$$
+2. 对每条打分：$$r_i = R(x, y_i)$$
+3. 组内归一化：$$\hat{A}_i = \frac{r_i - \mu_G}{\sigma_G}$$，其中 $$\mu_G = \frac{1}{G}\sum_j r_j$$，$$\sigma_G = \text{std}(\{r_j\})$$
 4. 用这些 advantage 应用 PPO 风格的 clipped 更新
 
 $$
@@ -41,16 +41,16 @@ $$
 >
 > **组均值近似 $V(s)$**：若对同一 prompt 采样足够多的响应，其平均 reward 就是期望 reward 的蒙特卡洛估计，即 value function。
 >
-> **高于均值 = 好动作**：$\hat{A}_i > 0$ 表示该响应对该 prompt 比平均更好，应强化。
+> **高于均值 = 好动作**：$$\hat{A}_i > 0$$ 表示该响应对该 prompt 比平均更好，应强化。
 >
-> **低于均值 = 坏动作**：$\hat{A}_i < 0$ 表示比平均更差，应抑制。
+> **低于均值 = 坏动作**：$$\hat{A}_i < 0$$ 表示比平均更差，应抑制。
 >
-> **归一化**：除以 $\sigma_G$ 确保 advantage 在不同 reward 量级的 prompt 之间具有尺度不变性。
+> **归一化**：除以 $$\sigma_G$$ 确保 advantage 在不同 reward 量级的 prompt 之间具有尺度不变性。
 >
 > **DeepSeek-R1 突破** [[156]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-deepseek2025r1)]：纯 GRPO 配合二值正确性 reward（答对 $r=1$，答错 $r=0$）在数学/代码上训练时，模型自发涌现出思维链（Chain-of-Thought，CoT）推理、自我验证和错误纠正——完全没有被显式指示这么做。
 
 
-![GRPO 实战：对一个数学 prompt 采样 $G{=}5$ 条响应。三条正确（$r{=}1$），两条错误（$r{=}0$）。组均值 $\mu_G{=}0.6$ 充当 baseline；正确响应获得正 advantage（强化），错误响应获得负 advantage（抑制）。]({{ site.baseurl }}/figures/fig_029_fig29.png)
+![GRPO 实战：对一个数学 prompt 采样 $G{=}5$ 条响应。三条正确（$r{=}1$），两条错误（$r{=}0$）。组均值 $$\mu_G{=}0.6$$ 充当 baseline；正确响应获得正 advantage（强化），错误响应获得负 advantage（抑制）。]({{ site.baseurl }}/figures/fig_029_fig29.png)
 
 ## TRL 实现
 
@@ -120,7 +120,7 @@ trainer.train()
 
 > **关键：组内必须同时包含成功与失败**
 >
-> 若 $G$ 条响应全对（$r_i = 1 \;\forall i$）：所有 advantage = 0，无学习信号！\
+> 若 $G$ 条响应全对（$$r_i = 1 \;\forall i$$）：所有 advantage = 0，无学习信号！\
 >
 > 若全错：同样的问题。Prompt 难度必须与模型能力匹配。\
 >
@@ -139,7 +139,7 @@ trainer.train()
 > - Reward hacking 变得更容易（狭窄输出更容易被利用）
 > - 泛化能力受损：模型记住的是 reward 模式而非推理
 >
-> KL 惩罚 $\beta D_\text{KL}[\pi_\theta \| \pi_\text{ref}]$ 是主要的多样性机制，但单靠它并不够。
+> KL 惩罚 $$\beta D_\text{KL}[\pi_\theta \| \pi_\text{ref}]$$ 是主要的多样性机制，但单靠它并不够。
 
 > **GRPO 组多样性**
 >
@@ -157,8 +157,8 @@ trainer.train()
 **RL 训练中促进多样性的方法。**
 | **方法** | **如何促进多样性** |
 | --- | --- |
-| 熵奖励（Entropy bonus） | 在 reward 中加入 $\alpha H(\pi_\theta)$。直接惩罚低熵（确定性）policy。 |
-| KL 惩罚 | $-\beta D_\text{KL}[\pi_\theta \| \pi_\text{ref}]$ 防止坍塌到单一模式。 |
+| 熵奖励（Entropy bonus） | 在 reward 中加入 $$\alpha H(\pi_\theta)$$。直接惩罚低熵（确定性）policy。 |
+| KL 惩罚 | $$-\beta D_\text{KL}[\pi_\theta \| \pi_\text{ref}]$$ 防止坍塌到单一模式。 |
 | 拒绝采样（Rejection Sampling） | 生成大量候选，按 reward 保留 top-$k$。自然筛选出多样的高质量响应。 |
 | Best-of-N | 推理时：生成 $N$ 条响应，全部评分，返回最佳。多样性来自采样。 |
 | 带多样性 pair 的 DPO | 在 chosen/rejected 不仅质量不同、*方法*也不同的 pair 上训练。 |
@@ -231,7 +231,7 @@ def verbalized_sample(model, tokenizer, task, n=5):
 
 > **GRPO 基线回顾**
 >
-> 给定 prompt $q$，从当前 policy $\pi_\theta$ 采样 $G$ 条 completion $\{o_1,\dots,o_G\}$。计算 reward $\{r_1,\dots,r_G\}$ 并归一化：
+> 给定 prompt $q$，从当前 policy $$\pi_\theta$$ 采样 $G$ 条 completion $$\{o_1,\dots,o_G\}$$。计算 reward $$\{r_1,\dots,r_G\}$$ 并归一化：
 > $$
 > \hat{A}_i = \frac{r_i - \mu_r}{\sigma_r + \epsilon}, \qquad
 > \mu_r = \frac{1}{G}\sum_{i=1}^G r_i, \quad
@@ -246,7 +246,7 @@ def verbalized_sample(model, tokenizer, task, n=5):
 > clip(\rho_{i,t},1{-}\epsilon,1{+}\epsilon)\,\hat{A}_i
 > \Bigr),
 > $$
-> 其中 $\rho_{i,t} = \pi_\theta(o_{i,t}\mid q,o_{i,<t})\,/\,\pi_{\text{old}}(o_{i,t}\mid q,o_{i,<t})$。
+> 其中 $$\rho_{i,t} = \pi_\theta(o_{i,t}\mid q,o_{i,<t})\,/\,\pi_{\text{old}}(o_{i,t}\mid q,o_{i,<t})$$。
 
 ### DAPO —— Dynamic Adaptive Policy Optimization
 
@@ -267,7 +267,7 @@ clip(\rho,\, 1-\epsilon,\, 1+\epsilon) & if  A \le 0
 \end{cases}
 $$
 
-其中 $\epsilon_{\text{high}} > \epsilon$（典型取值：$\epsilon=0.2$，$\epsilon_{\text{high}}=0.28$）。当 advantage 为正时，允许 policy 更进一步偏向好 token；当 advantage 为负时，应用常规的保守 clipping 以避免过度抑制。
+其中 $$\epsilon_{\text{high}} > \epsilon$$（典型取值：$\epsilon=0.2$，$$\epsilon_{\text{high}}=0.28$$）。当 advantage 为正时，允许 policy 更进一步偏向好 token；当 advantage 为负时，应用常规的保守 clipping 以避免过度抑制。
 
 #### 组件 2 —— Token 级 Loss 聚合
 
@@ -295,13 +295,13 @@ $$
 
 #### 组件 4 —— 软过长惩罚（Soft Overlong Punishment）
 
-比起硬 mask，更软的变体应用一个长度惩罚，随着 completion 接近最大长度 $L_{\max}$ 平滑增长：
+比起硬 mask，更软的变体应用一个长度惩罚，随着 completion 接近最大长度 $$L_{\max}$$ 平滑增长：
 
 $$
 r_i \leftarrow r_i - \lambda \cdot \max\!\left(0,\, \frac{\lvert o_i \rvert - L_{cache}}{L_{\max} - L_{cache}}\right),
 $$
 
-其中 $L_{\text{cache}}$ 是一个“安全”长度阈值。
+其中 $$L_{\text{cache}}$$ 是一个“安全”长度阈值。
 
 #### 组件 5 —— 动态采样（Dynamic Sampling）
 
@@ -348,7 +348,7 @@ DAPO 会重新采样那些整组 completion 获得相同 reward（全对或全�
 >
 > GRPO *逐 token* 地 clip importance ratio。但一条 500 token 的序列，即使每个单独的 ratio 都在 $[1-\epsilon, 1+\epsilon]$ 内，逐 token ratio 的乘积可能大或小到天文数字。当在同一 batch 上进行多次 gradient 步（off-policy）时，这种不匹配迅速放大，clipping 界限在序列级别上变得毫无意义。
 
-GSPO [[170]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chen2025gspo)] 将 *序列级* importance weight 定义为逐 token ratio 的几何平均，等价于完整序列概率比的 $\lvert o_i \rvert$ 次方根：
+GSPO [[170]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chen2025gspo)] 将 *序列级* importance weight 定义为逐 token ratio 的几何平均，等价于完整序列概率比的 $$\lvert o_i \rvert$$ 次方根：
 
 $$
 \boxed{
@@ -366,7 +366,7 @@ $$
 
 > **GSPO 与 GRPO 的 Clipping 对比**
 >
-> - **GRPO**：独立 clip $\lvert o_i \rvert$ 个逐 token ratio。一条序列可以所有 ratio 都在界内、却拥有 $10^{50}$ 的乘积 ratio。
+> - **GRPO**：独立 clip $$\lvert o_i \rvert$$ 个逐 token ratio。一条序列可以所有 ratio 都在界内、却拥有 $10^{50}$ 的乘积 ratio。
 > - **GSPO**：对每条序列 clip 一次几何平均。保证 *序列级* policy 变化有界。
 > - GSPO 在 off-policy 重要性采样上理论正确；GRPO 只是近似。
 
@@ -394,7 +394,7 @@ $$
 
 > **何时使用 GSPO**
 >
-> GSPO 在 `steps_per_generation > 1`（off-policy 训练）时最有用。对于纯 on-policy 训练（$\text{steps\_per\_generation}=1$），它与 GRPO 的差异可忽略。Off-policy 训练能极大降低生成成本（最昂贵的步骤），使得 GSPO + off-policy 成为强力的效率选择。
+> GSPO 在 `steps_per_generation > 1`（off-policy 训练）时最有用。对于纯 on-policy 训练（$$\text{steps\_per\_generation}=1$$），它与 GRPO 的差异可忽略。Off-policy 训练能极大降低生成成本（最昂贵的步骤），使得 GSPO + off-policy 成为强力的效率选择。
 
 ### Dr. GRPO —— Debiased Reward GRPO
 
@@ -408,7 +408,7 @@ $$
 w_{i,t} = \hat{A}_i \cdot \bigl(1 - \pi_{ref}(o_{i,t}\mid q,o_{i,<t})\bigr),
 $$
 
-其中 $\pi_{\text{ref}}$ 是参考（预训练）模型。这是一种 *token 效率* 形式：gradient 被集中到 policy 真正需要改变的 token 上。
+其中 $$\pi_{\text{ref}}$$ 是参考（预训练）模型。这是一种 *token 效率* 形式：gradient 被集中到 policy 真正需要改变的 token 上。
 
 > **TRL 中的 Dr. GRPO**
 >
@@ -507,12 +507,12 @@ $$
 \end{cases}
 $$
 
-其中 $\sigma$ 是 sigmoid 函数，$\tau_+, \tau_-$ 是非对称温度参数。温度越高 gate 越软（更多探索）；温度越低越接近硬 clipping。
+其中 $\sigma$ 是 sigmoid 函数，$$\tau_+, \tau_-$$ 是非对称温度参数。温度越高 gate 越软（更多探索）；温度越低越接近硬 clipping。
 
 > **SAPO 温度直觉**
 >
-> - $\tau_+ = 1.0$：正 advantage 的中等 gate（允许探索）。
-> - $\tau_- = 1.05$：负 advantage 略软的 gate（避免过度抑制）。
+> - $$\tau_+ = 1.0$$：正 advantage 的中等 gate（允许探索）。
+> - $$\tau_- = 1.05$$：负 advantage 略软的 gate（避免过度抑制）。
 > - $\tau \to 0$：恢复硬 PPO clipping。
 > - $\tau \to \infty$：恢复未 clip 的 policy gradient。
 
@@ -551,7 +551,7 @@ $$
 w_{TIS}(o_i) = \min\!\left(C,\; \frac{\pi_{train}(o_i\mid q)}{\pi_{vllm}(o_i\mid q)}\right),
 $$
 
-其中 $\pi_{\text{train}}$ 是训练前向传播给出的概率，$\pi_{\text{vllm}}$ 是 vLLM 报告的概率。在 $C$ 处截断可防止极端修正破坏训练稳定性。
+其中 $$\pi_{\text{train}}$$ 是训练前向传播给出的概率，$$\pi_{\text{vllm}}$$ 是 vLLM 报告的概率。在 $C$ 处截断可防止极端修正破坏训练稳定性。
 
 #### Masked Importance Sampling（MIS）
 
@@ -612,7 +612,7 @@ $$
 g(\tau) = W(\tau)^k \cdot \exp\!\bigl(\lambda(1 - W(\tau))\bigr),
 $$
 
-其中 $W(\tau) = \pi_\theta(\tau)/\pi_{\text{old}}(\tau)$ 是序列级 importance weight，$k$ 控制加权的锐度，$\lambda$ 控制对陈旧（低权重）trajectory 的指数衰减。该核：
+其中 $$W(\tau) = \pi_\theta(\tau)/\pi_{\text{old}}(\tau)$$ 是序列级 importance weight，$k$ 控制加权的锐度，$\lambda$ 控制对陈旧（低权重）trajectory 的指数衰减。该核：
 
 - 处处平滑（在 clip 边界没有不连续 gradient）。
 - 通过指数项天然地降权陈旧 trajectory（$W \ll 1$）。
@@ -655,8 +655,8 @@ $$
 
 其中 $D$ 是所选的散度度量。在实践中，DPPO 用 token 级二值或 top-$k$ mask 来近似：
 
-- **binary_tv**：mask 掉 $\lvert \pi_\theta - \pi_{\text{old}} \rvert > \delta$ 的 token。
-- **binary_kl**：mask 掉 $\pi_\theta \log(\pi_\theta/\pi_{\text{old}}) > \delta$ 的 token。
+- **binary_tv**：mask 掉 $$\lvert \pi_\theta - \pi_{\text{old}} \rvert > \delta$$ 的 token。
+- **binary_kl**：mask 掉 $$\pi_\theta \log(\pi_\theta/\pi_{\text{old}}) > \delta$$ 的 token。
 - **topk_tv**：仅保留按 TV 贡献排序的 top-$k$ token。
 - **topk_kl**：仅保留按 KL 贡献排序的 top-$k$ token。
 
@@ -695,7 +695,7 @@ $$
 \hat{A}_i = \frac{r_i - \mu_{batch}}{\sigma_{batch} + \epsilon},
 $$
 
-其中 $\mu_{\text{batch}}$ 和 $\sigma_{\text{batch}}$ 在当前训练 batch 的所有 reward 上计算。这提供更稳定的 baseline，并防止任何单一 prompt 主导 gradient。
+其中 $$\mu_{\text{batch}}$$ 和 $$\sigma_{\text{batch}}$$ 在当前训练 batch 的所有 reward 上计算。这提供更稳定的 baseline，并防止任何单一 prompt 主导 gradient。
 
 #### CISPO Loss
 
@@ -709,7 +709,7 @@ $$
 clip_{DAPO}(\rho_{i,t},\hat{A}_i)\,\hat{A}_i\bigr),
 $$
 
-其中 $m_{i,t}$ 是过长过滤 mask。
+其中 $$m_{i,t}$$ 是过长过滤 mask。
 
 > **TRL 中的 CISPO**
 >
@@ -755,12 +755,12 @@ $$
 \hat{A}^{(i)} = \sum_{n=1}^N w_n \hat{A}_n^{(i)},
 $$
 
-其中 $r_n^{(i)}$ 是 completion $i$ 的第 $n$ 项 reward，$\mu_n$ 和 $\sigma_n$ 是组内第 $n$ 项 reward 的均值与标准差，$w_n$ 是用户指定权重。
+其中 $$r_n^{(i)}$$ 是 completion $i$ 的第 $n$ 项 reward，$$\mu_n$$ 和 $$\sigma_n$$ 是组内第 $n$ 项 reward 的均值与标准差，$$w_n$$ 是用户指定权重。
 
 > **GDPO 与标准多 reward GRPO 的对比**
 >
-> - **标准**：$\hat{A}^{(i)} = \frac{\sum_n w_n r_n^{(i)} - \mu_{\text{combined}}}{\sigma_{\text{combined}}}$。高方差 reward 占主导。
-> - **GDPO**：单独归一化每项 reward 后再组合。每项 reward 按其权重 $w_n$ 按比例贡献。
+> - **标准**：$$\hat{A}^{(i)} = \frac{\sum_n w_n r_n^{(i)} - \mu_{\text{combined}}}{\sigma_{\text{combined}}}$$。高方差 reward 占主导。
+> - **GDPO**：单独归一化每项 reward 后再组合。每项 reward 按其权重 $$w_n$$ 按比例贡献。
 > - 当 reward 量级或方差差异极大时，GDPO 不可或缺。
 
 > **TRL 中的 GDPO**
@@ -794,9 +794,9 @@ GOPO [[179]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-choi2025gopo)] 始
 
 **关键洞见**：完全丢弃 reward 幅度。仅使用组内 reward 的 **序数排名**。
 
-**算法**：给定一组 $N$ 条响应 $\{o_1, \ldots, o_N\}$ 及其 reward $\{r_1, \ldots, r_N\}$：
+**算法**：给定一组 $N$ 条响应 $$\{o_1, \ldots, o_N\}$$ 及其 reward $$\{r_1, \ldots, r_N\}$$：
 
-1. 按 reward 对响应排名：赋予 rank $\text{rank}(o_i) \in \{1, \ldots, N\}$（1 = 最差，$N$ = 最佳）。
+1. 按 reward 对响应排名：赋予 rank $$\text{rank}(o_i) \in \{1, \ldots, N\}$$（1 = 最差，$N$ = 最佳）。
 2. 用基于 rank 的分数替换原始 advantage：
 $$
 \boxed{\hat{A}_i^{\text{GOPO}} = f\!\left(\frac{\text{rank}(o_i)}{N}\right)}
@@ -808,7 +808,7 @@ $$
 
 | **方面** | **GRPO** | **GOPO** |
 | --- | --- | --- |
-| Advantage 信号 | $\hat{A}_i = (r_i - \mu)/\sigma$（使用幅度） | $\hat{A}_i = f(\text{rank}_i / N)$（仅使用序数 rank） |
+| Advantage 信号 | $$\hat{A}_i = (r_i - \mu)/\sigma$$（使用幅度） | $$\hat{A}_i = f(\text{rank}_i / N)$$（仅使用序数 rank） |
 | 对 reward 尺度的敏感性 | 高 —— 校准不良的 RM 分数会扭曲 advantage | 无 —— 对单调 reward 变换不变 |
 | 最适合 | 可验证 reward（二值、校准良好） | 不可验证 reward（基于 RM、幅度嘈杂） |
 

@@ -176,7 +176,7 @@ $$
 p_k = \frac{N_k}{\sum_{j=1}^K N_j},
 $$
 
-其中 $N_k$ 是数据集 $k$ 中的样本数。这是大多数框架的默认方式,在数据集质量相近时效果良好。
+其中 $$N_k$$ 是数据集 $k$ 中的样本数。这是大多数框架的默认方式,在数据集质量相近时效果良好。
 
 #### 温度混合
 
@@ -196,7 +196,7 @@ $$
 p_k \propto N_k \cdot q_k,
 $$
 
-其中 $q_k$ 是数据集 $k$ 的质量分数。
+其中 $$q_k$$ 是数据集 $k$ 的质量分数。
 
 > **TRL 中的数据混合**
 >
@@ -233,7 +233,7 @@ $$
 
 > **灾难性遗忘(Catastrophic Forgetting)**
 >
-> 灾难性遗忘是一种**非故意的优化失败**:当一个在分布 $\mathcal{D}_A$ 上优化过的网络随后在与之不相交的分布 $\mathcal{D}_B$ 上训练时,为 $\mathcal{D}_B$ 所需的权重更新*物理上覆盖*了编码 $\mathcal{D}_A$ 的参数结构:
+> 灾难性遗忘是一种**非故意的优化失败**:当一个在分布 $$\mathcal{D}_A$$ 上优化过的网络随后在与之不相交的分布 $$\mathcal{D}_B$$ 上训练时,为 $$\mathcal{D}_B$$ 所需的权重更新*物理上覆盖*了编码 $$\mathcal{D}_A$$ 的参数结构:
 > $$
 > \theta_{t+1} = \theta_t - \eta \nabla_\theta \mathcal{L}_B(\theta_t) \quad \implies \quad \mathcal{L}_A(\theta_{t+1}) \gg \mathcal{L}_A(\theta_t)
 > $$
@@ -246,17 +246,17 @@ $$
 - 在微调阶段未被强化的知识上,事实准确性下降
 - 仅在英语数据上 SFT 后多语言能力下降
 
-**机制根源 —— Fisher 信息视角**:任务 A 的 Fisher 信息矩阵 $F$ 标识了哪些参数对 $\mathcal{D}_A$ “重要”:
+**机制根源 —— Fisher 信息视角**:任务 A 的 Fisher 信息矩阵 $F$ 标识了哪些参数对 $$\mathcal{D}_A$$ “重要”:
 $$
 F = \mathbb{E}_{x \sim \mathcal{D}_A}\!\left[\nabla_\theta \log \pi_\theta(x)\, \nabla_\theta \log \pi_\theta(x)^T\right]
 $$
-Fisher 特征值高的参数对任务 A 至关重要。无约束的任务 B 梯度下降完全忽略这些特征值 —— $\Delta\theta$ 沿 $\nabla\mathcal{L}_B$ 方向移动,而不管是否摧毁了 $\mathcal{L}_A$ 的高 Fisher 方向。
+Fisher 特征值高的参数对任务 A 至关重要。无约束的任务 B 梯度下降完全忽略这些特征值 —— $\Delta\theta$ 沿 $$\nabla\mathcal{L}_B$$ 方向移动,而不管是否摧毁了 $$\mathcal{L}_A$$ 的高 Fisher 方向。
 
 ### 对齐税(行为约束)
 
 对齐税(Alignment Tax)是**一种有意为之、可预期的权衡**:模型的原始能力(无约束生成、最大化推理带宽)下降,是因为 Policy 被约束去生成安全、格式良好、与偏好对齐的输出。
 
-**机制**:在 DPO/PPO 期间,Policy $\pi_\theta$ 通过 KL 散度被惩罚以防偏离参考 $\pi_{\text{ref}}$:
+**机制**:在 DPO/PPO 期间,Policy $$\pi_\theta$$ 通过 KL 散度被惩罚以防偏离参考 $$\pi_{\text{ref}}$$:
 $$
 r_{\text{implicit}}(x, y) = \beta \log \frac{\pi_\theta(y\mid x)}{\pi_{\text{ref}}(y\mid x)}
 $$
@@ -290,8 +290,8 @@ $$
 **针对灾难性遗忘**:
 
 1. **数据回放(Data replay)**:将 5--10% 的预训练数据混入 SFT 数据集。确保 Gradient 更新不会完全忽视预训练分布。
-2. **弹性权重整合(Elastic Weight Consolidation, EWC)** [[192]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kirkpatrick2017overcoming)]:添加正则项 $\Omega(\theta) = \frac{\lambda}{2}\sum_i F_i(\theta_i - \theta_i^*)^2$,惩罚对原任务而言 Fisher 信息高的参数的变化。
-3. **LoRA / 参数高效微调**:只训练低秩 adapter(参数量 $<1\%$),基础权重完全冻结。这避免了预训练知识的*永久性摧毁* —— 你随时可以移除 adapter 来恢复原模型。然而,**当 adapter 处于激活状态时**,组合系统 $(W_0 + BA)$ 仍可能表现出遗忘:adapter 可能将模型的有效行为推离旧技能。LoRA 保护的是 checkpoint,而非激活时的推理行为。
+2. **弹性权重整合(Elastic Weight Consolidation, EWC)** [[192]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kirkpatrick2017overcoming)]:添加正则项 $$\Omega(\theta) = \frac{\lambda}{2}\sum_i F_i(\theta_i - \theta_i^*)^2$$,惩罚对原任务而言 Fisher 信息高的参数的变化。
+3. **LoRA / 参数高效微调**:只训练低秩 adapter(参数量 $<1\%$),基础权重完全冻结。这避免了预训练知识的*永久性摧毁* —— 你随时可以移除 adapter 来恢复原模型。然而,**当 adapter 处于激活状态时**,组合系统 $$(W_0 + BA)$$ 仍可能表现出遗忘:adapter 可能将模型的有效行为推离旧技能。LoRA 保护的是 checkpoint,而非激活时的推理行为。
 4. **保守的学习率**:使用 $1$--$5 \times 10^{-6}$ 配合较少的 Epoch(1--3)。更大的学习率会加速遗忘。
 5. **渐进式训练**:逐步混合分布,随时间增加 SFT 数据比例,而非突然切换。
 

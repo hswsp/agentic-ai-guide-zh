@@ -255,7 +255,7 @@ $$\text{CrossAttn}(Q_{\text{dec}}, K_{\text{enc}}, V_{\text{enc}}) = \text{softm
 
 $$\text{embed}(x_t) = \mathbf{E}[x_t] \in \mathbb{R}^d$$
 
-对于一个 Token ID 序列 $[x_1, x_2, \ldots, x_n]$，嵌入只是一个简单的表查询（索引操作）：
+对于一个 Token ID 序列 $$[x_1, x_2, \ldots, x_n]$$，嵌入只是一个简单的表查询（索引操作）：
 
 $$
 \mathbf{H}_0 = [\mathbf{E}[x_1];\; \mathbf{E}[x_2];\; \ldots;\; \mathbf{E}[x_n]] \in \mathbb{R}^{n \times d}
@@ -265,7 +265,7 @@ $$
 >
 > - **尺寸**：$\lvert \mathcal{V} \rvert \times d$。对于 Llama-3：$128{,}256 \times 4{,}096 = 525$M 参数（占 8B 模型的 6.5%）。
 > - **初始化**：随机（Xavier/正态分布），然后通过反向传播学习。
-> - **权重共享（Weight tying）**：许多模型*共享*嵌入矩阵与输出投影头：$W_{\text{head}} = \mathbf{E}^T$。这节省参数并创建对称的编码-解码结构。
+> - **权重共享（Weight tying）**：许多模型*共享*嵌入矩阵与输出投影头：$$W_{\text{head}} = \mathbf{E}^T$$。这节省参数并创建对称的编码-解码结构。
 > - **输入**：Token ID（整数）$\to$ **输出**：$\mathbb{R}^d$ 中的稠密向量。
 > - **梯度流**：在训练期间，只有当前批次中 Token 对应的行接收梯度更新（稀疏更新）。
 
@@ -291,7 +291,7 @@ $$
 
 $$\tilde{\mathbf{h}} = \mathbf{D}^{-1/2} \mathbf{U}^T (\mathbf{h} - \boldsymbol{\mu})$$
 
-其中 $\boldsymbol{\mu}$ 是平均嵌入，$\mathbf{U}\mathbf{D}\mathbf{U}^T$ 是协方差矩阵 $\Sigma = \frac{1}{N}\sum_i (\mathbf{h}_i - \boldsymbol{\mu})(\mathbf{h}_i - \boldsymbol{\mu})^T$ 的特征分解。
+其中 $\boldsymbol{\mu}$ 是平均嵌入，$\mathbf{U}\mathbf{D}\mathbf{U}^T$ 是协方差矩阵 $$\Sigma = \frac{1}{N}\sum_i (\mathbf{h}_i - \boldsymbol{\mu})(\mathbf{h}_i - \boldsymbol{\mu})^T$$ 的特征分解。
 
 > **白化的实践**
 >
@@ -317,7 +317,7 @@ $$\tilde{\mathbf{h}} = \mathbf{D}^{-1/2} \mathbf{U}^T (\mathbf{h} - \boldsymbol{
 > \text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^T}{\sqrt{d_k}} + M\right) V
 > $$
 >
-> 其中 $M$ 是**因果掩码**（用于自回归模型）：若 $i \geq j$ 则 $M_{ij} = 0$，否则为 $-\infty$。
+> 其中 $M$ 是**因果掩码**（用于自回归模型）：若 $i \geq j$ 则 $$M_{ij} = 0$$，否则为 $-\infty$。
 >
 > **直觉**：每个 Token"关注"所有先前的 Token，基于 query-key 相似度计算其 value 的加权平均。
 
@@ -325,7 +325,7 @@ $$\tilde{\mathbf{h}} = \mathbf{D}^{-1/2} \mathbf{U}^T (\mathbf{h} - \boldsymbol{
 
 朴素的注意力计算在序列长度上具有**平方代价**：
 
-- **时间**：$O(n^2 \cdot d)$——计算 $QK^T$ 需要 $n^2$ 个点积，每个维度为 $d_k$。
+- **时间**：$O(n^2 \cdot d)$——计算 $QK^T$ 需要 $n^2$ 个点积，每个维度为 $$d_k$$。
 - **内存**：$O(n^2)$——必须物化完整的注意力矩阵才能应用 Softmax。
 
 对于一个 $d = 4096$ 的 128K Token 上下文，仅注意力矩阵就是 $128\text{K} \times 128\text{K} = 164$ 亿个元素（FP32 下为 64 GB）。这种平方扩展是长上下文 LLM 的根本瓶颈。
@@ -348,7 +348,7 @@ $$\tilde{\mathbf{h}} = \mathbf{D}^{-1/2} \mathbf{U}^T (\mathbf{h} - \boldsymbol{
 2. **滑动窗口 / 局部注意力**：每个 Token 只关注最近的 $w$ 个 Token（例如 $w = 4096$）。代价变为 $O(n \cdot w)$——在 $n$ 上是线性的。被 Mistral[[4]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jiang2023mistral)]（窗口 $= 4096$）和 Longformer[[18]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-beltagy2020longformer)] 采用。以全局上下文换效率；之所以有效，是因为实践中大部分注意力是局部的。在现代技术栈中，滑动窗口掩码在 [FlashAttention kernel](https://jwzheng96.github.io/learn-cuda-from-scratch/ch11-attention/index.html) *内部*执行。
 3. **稀疏注意力模式**：将局部窗口与周期性的全局 Token 结合（例如，每隔 512 个 Token 关注全部）。BigBird[[19]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zaheer2020bigbird)] 和 LongT5[[20]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-guo2022longt5)] 使用此方法。以 $O(n\sqrt{n})$ 代价保留一些长程连通性。同样，FlashAttention 作为非零注意力块的底层内核。
 4. **线性注意力 / 状态空间模型**：利用结合律将 $\text{softmax}(QK^T)V$ 替换为 $\phi(Q)(\phi(K)^T V)$，或重构为递归形式（Mamba[[21]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-gu2023mamba)]、RWKV[[22]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-peng2023rwkv)]）。理论上总代价为 $O(n \cdot d^2)$。与上面方法 2--3 不同，这些是*架构上的替换*，改变了模型的表达能力——无 Softmax 的注意力本质上表达力更弱，经验上这些模型在需要精确长程检索或复杂推理的任务上仍然落后于 Transformer。
-5. **KV 缓存压缩**：在推理时，压缩或驱逐旧的 KV 对以限制内存。技术包括：H$_2$O[[23]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhang2023h2o)]（重击者预言机——只保留高注意力的 Key）、StreamingLLM[[24]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-xiao2024streamingllm)]（保留初始"注意力陷阱（Attention Sink）"Token + 最近窗口），以及量化 KV 缓存[[25]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2024kivi)]。
+5. **KV 缓存压缩**：在推理时，压缩或驱逐旧的 KV 对以限制内存。技术包括：H$$_2$$O[[23]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhang2023h2o)]（重击者预言机——只保留高注意力的 Key）、StreamingLLM[[24]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-xiao2024streamingllm)]（保留初始"注意力陷阱（Attention Sink）"Token + 最近窗口），以及量化 KV 缓存[[25]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2024kivi)]。
 
 > **FlashAttention + 稀疏模式 = 两全其美**
 >
@@ -362,7 +362,7 @@ $$\tilde{\mathbf{h}} = \mathbf{D}^{-1/2} \mathbf{U}^T (\mathbf{h} - \boldsymbol{
 
 > **多头注意力（Multi-Head Attention）**
 >
-> 不使用一个 $d$ 维 Key/Value 的注意力函数，而是使用 $H$ 个维度为 $d_k = d/H$ 的并行头：
+> 不使用一个 $d$ 维 Key/Value 的注意力函数，而是使用 $H$ 个维度为 $$d_k = d/H$$ 的并行头：
 >
 > $$
 > \text{MultiHead}(X) = \text{Concat}(\text{head}_1, \ldots, \text{head}_H) W_O
@@ -404,7 +404,7 @@ $$
 
 **学习的绝对位置嵌入。**
 
-被 GPT-2[[7]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-radford2019gpt2)] 和 BERT[[5]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-devlin2019bert)] 采用：一个可学习的嵌入矩阵 $\mathbf{E}_{\text{pos}} \in \mathbb{R}^{L_{\max} \times d}$ 被加到 Token 嵌入上：
+被 GPT-2[[7]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-radford2019gpt2)] 和 BERT[[5]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-devlin2019bert)] 采用：一个可学习的嵌入矩阵 $$\mathbf{E}_{\text{pos}} \in \mathbb{R}^{L_{\max} \times d}$$ 被加到 Token 嵌入上：
 
 $$
 h_0^{(pos)} = \text{TokenEmbed}(x_{pos}) + \mathbf{E}_{\text{pos}}[pos]
@@ -414,7 +414,7 @@ $$
 
 **优点：**最大的灵活性；实现简单；对短序列通常优于正弦编码。
 
-**缺点：**硬编码的最大长度 $L_{\max}$；无法泛化到其之外；$L_{\max}$ 末尾附近的嵌入训练不足；增加 $L_{\max} \times d$ 个参数。
+**缺点：**硬编码的最大长度 $$L_{\max}$$；无法泛化到其之外；$$L_{\max}$$ 末尾附近的嵌入训练不足；增加 $$L_{\max} \times d$$ 个参数。
 
 **旋转位置编码（Rotary Position Embedding，RoPE）。**
 
@@ -430,7 +430,7 @@ $$
   \begin{pmatrix} \sin m\theta_1 \\ \sin m\theta_1 \\ \vdots \\ \sin m\theta_{d/2} \\ \sin m\theta_{d/2} \end{pmatrix}
 $$
 
-其中 $\theta_i = 10000^{-2i/d}$，$m$ 是位置索引。关键性质是：旋转后的 Query 与 Key 之间的点积只依赖于相对位置：
+其中 $$\theta_i = 10000^{-2i/d}$$，$m$ 是位置索引。关键性质是：旋转后的 Query 与 Key 之间的点积只依赖于相对位置：
 
 $$
 \langle \text{RoPE}(q_m, m),\; \text{RoPE}(k_n, n) \rangle = f(q_m, k_n, m-n)
@@ -458,7 +458,7 @@ $$
 \text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^T}{\sqrt{d_k}} - m \cdot \bigl[\lvert i-j \rvert\bigr]_{i,j}\right) V
 $$
 
-其中 $m$ 是头特定的斜率（几何设置：对总共 $H$ 个头中的第 $h$ 个头取 $m_h = 2^{-8h/H}$）。偏置 $-m\lvert i-j \rvert$ 创建了一个软局部注意力窗口，其宽度因头而异。
+其中 $m$ 是头特定的斜率（几何设置：对总共 $H$ 个头中的第 $h$ 个头取 $$m_h = 2^{-8h/H}$$）。偏置 $-m\lvert i-j \rvert$ 创建了一个软局部注意力窗口，其宽度因头而异。
 
 **动机：**位置应使注意力偏向邻近 Token（近因先验），同时不干扰嵌入空间。通过纯粹在注意力分数空间中操作，ALiBi 避免了用位置信号污染 Token 表征。
 
@@ -470,7 +470,7 @@ $$
 
 |  | 正弦（Sinusoidal） | 学习绝对位置 | RoPE | ALiBi |
 | --- | --- | --- | --- | --- |
-| 额外参数 | 无 | $L_{\max} \times d$ | 无 | 无 |
+| 额外参数 | 无 | $$L_{\max} \times d$$ | 无 | 无 |
 | 位置类型 | 绝对 | 绝对 | 相对 | 相对（隐式） |
 | 长度外推 | 差 | 无 | 好（带缩放） | 优秀 |
 | 计算开销 | 可忽略 | 可忽略 | 小 | 可忽略 |
@@ -505,14 +505,14 @@ $$
 \text{FFN}(x) = W_2 \cdot \sigma(W_1 x + b_1) + b_2
 $$
 
-其中 $W_1 \in \mathbb{R}^{d \times 4d}$，$W_2 \in \mathbb{R}^{4d \times d}$。现代 LLM 使用：
+其中 $$W_1 \in \mathbb{R}^{d \times 4d}$$，$$W_2 \in \mathbb{R}^{4d \times d}$$。现代 LLM 使用：
 
-- **SwiGLU 激活**：$\text{FFN}(x) = W_2 (\text{Swish}(W_1 x) \odot W_3 x)$——被 Llama[[3]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-grattafiori2024llama3)]、Mistral[[4]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jiang2023mistral)] 采用。需要 3 个权重矩阵，但带来更好的性能。
+- **SwiGLU 激活**：$$\text{FFN}(x) = W_2 (\text{Swish}(W_1 x) \odot W_3 x)$$——被 Llama[[3]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-grattafiori2024llama3)]、Mistral[[4]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-jiang2023mistral)] 采用。需要 3 个权重矩阵，但带来更好的性能。
 - 隐藏维度通常为 $8/3 \times d$（取整到 256 的倍数以适配 Tensor Core 效率）。
 
 > **FFN 作为存储器**
 >
-> 近期工作[[36]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-geva2021transformer)] 表明 FFN 层充当一种*键值存储器*：$W_1$ 的行是 Key（要匹配的模式），$W_2$ 的列是 Value（要输出的信息）。FFN 基于当前隐藏状态"检索"存储的知识。
+> 近期工作[[36]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-geva2021transformer)] 表明 FFN 层充当一种*键值存储器*：$$W_1$$ 的行是 Key（要匹配的模式），$$W_2$$ 的列是 Value（要输出的信息）。FFN 基于当前隐藏状态"检索"存储的知识。
 
 ### 层归一化（Layer Normalization）
 
@@ -526,8 +526,8 @@ $$\text{LayerNorm}(\mathbf{x}) = \gamma \odot \frac{\mathbf{x} - \mu}{\sqrt{\sig
 
 其中：
 
-- $\mu = \frac{1}{d}\sum_{i=1}^{d} x_i$（在 $d$ 个特征维度上的均值）
-- $\sigma^2 = \frac{1}{d}\sum_{i=1}^{d} (x_i - \mu)^2$（在特征上的方差）
+- $$\mu = \frac{1}{d}\sum_{i=1}^{d} x_i$$（在 $d$ 个特征维度上的均值）
+- $$\sigma^2 = \frac{1}{d}\sum_{i=1}^{d} (x_i - \mu)^2$$（在特征上的方差）
 - $\gamma, \beta \in \mathbb{R}^d$ 是**学习的**缩放和平移参数（按维度）
 - $\epsilon \approx 10^{-5}$ 防止除以零
 
@@ -580,7 +580,7 @@ Xiao 等[[42]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-xiao2024efficien
 
 **为什么会发生。**
 
-Softmax 注意力必须产生有效的概率分布（$\sum_j \alpha_j = 1$）。当没有 Key 对 Query 特别相关时，模型需要一个"倾倒"位置来安放未使用的注意力质量。在训练期间，第一个 Token 成为这个默认陷阱，因为它总是存在且在位置上可预测。它作为一个*无操作的注意力目标*——模型已经学会将不相关的注意力路由到那里，而不是不可预测地分配它。
+Softmax 注意力必须产生有效的概率分布（$$\sum_j \alpha_j = 1$$）。当没有 Key 对 Query 特别相关时，模型需要一个"倾倒"位置来安放未使用的注意力质量。在训练期间，第一个 Token 成为这个默认陷阱，因为它总是存在且在位置上可预测。它作为一个*无操作的注意力目标*——模型已经学会将不相关的注意力路由到那里，而不是不可预测地分配它。
 
 $$
 \alpha_{\text{sink}} = \frac{\exp(q^\top k_0 / \sqrt{d})}{\sum_{j} \exp(q^\top k_j / \sqrt{d})} \gg \frac{1}{n} \quad \text{(even when } k_0 \text{ is semantically irrelevant)}
@@ -651,7 +651,7 @@ $$
 R^{(l)} = A^{(l)} \cdot R^{(l-1)}, \quad R^{(0)} = I
 $$
 
-其中 $A^{(l)}$ 是第 $l$ 层的注意力矩阵（跨头平均），经过调整以包含残差连接：$A^{(l)} = 0.5 \cdot A^{(l)}_{\text{raw}} + 0.5 \cdot I$。
+其中 $A^{(l)}$ 是第 $l$ 层的注意力矩阵（跨头平均），经过调整以包含残差连接：$$A^{(l)} = 0.5 \cdot A^{(l)}_{\text{raw}} + 0.5 \cdot I$$。
 
 **梯度加权的注意力。**
 
@@ -681,7 +681,7 @@ $$
 h = W_{\text{dec}} \cdot \text{ReLU}(W_{\text{enc}} \cdot x + b_{\text{enc}}) + b_{\text{dec}}
 $$
 
-其中 $W_{\text{enc}} \in \mathbb{R}^{m \times d}$，$m \gg d$（超完备基），ReLU + 稀疏惩罚确保每个输入只有少数特征被激活。
+其中 $$W_{\text{enc}} \in \mathbb{R}^{m \times d}$$，$m \gg d$（超完备基），ReLU + 稀疏惩罚确保每个输入只有少数特征被激活。
 
 **SAE 可解释性的关键发现：**
 
@@ -693,8 +693,8 @@ $$
 > **SAE 训练配方**
 >
 > 1. 从特定模型层在一个大型语料上收集激活。
-> 2. 在隐藏层上以 $L_1$ 惩罚训练稀疏自编码器：$\mathcal{L} = \|x - \hat{x}\|_2^2 + \lambda \|z\|_1$。
-> 3. 学到的编码器方向（$W_{\text{enc}}$ 的行）即候选特征。
+> 2. 在隐藏层上以 $$L_1$$ 惩罚训练稀疏自编码器：$$\mathcal{L} = \|x - \hat{x}\|_2^2 + \lambda \|z\|_1$$。
+> 3. 学到的编码器方向（$$W_{\text{enc}}$$ 的行）即候选特征。
 > 4. 验证：对每个特征，找出最大激活样本并检查语义一致性。
 > 5. 可选：测量*特征吸收（feature absorption）*和*死特征（dead features）*以评估 SAE 质量。
 
@@ -733,7 +733,7 @@ NLAE 引入了一个"语言模型在回路中"的设计，使其计算昂贵，�
 
 ## 预测头：Transformer 的输出
 
-Transformer 主干网络为每个位置产生上下文隐藏状态 $\mathbf{h}_t \in \mathbb{R}^d$。我们*如何处理*这些隐藏状态——即**预测头（Prediction Head）**——定义了任务本身。同一个 Transformer 主干网络只需更换预测头，就能服务于完全不同的目的。
+Transformer 主干网络为每个位置产生上下文隐藏状态 $$\mathbf{h}_t \in \mathbb{R}^d$$。我们*如何处理*这些隐藏状态——即**预测头（Prediction Head）**——定义了任务本身。同一个 Transformer 主干网络只需更换预测头，就能服务于完全不同的目的。
 
 ![同一个 Transformer 主干网络通过更换预测头即可支持不同任务。本文使用的全部三种预测头在最终投影层之下具有完全相同的架构。]({{ site.baseurl }}/figures/fig_008_prediction-heads.png)
 
@@ -743,12 +743,12 @@ Transformer 主干网络为每个位置产生上下文隐藏状态 $\mathbf{h}_t
 
 $$P(x_{t+1} \mid x_{\leq t}) = \text{softmax}(\mathbf{W}_{\text{head}} \cdot \mathbf{h}_t + \mathbf{b})$$
 
-其中 $\mathbf{W}_{\text{head}} \in \mathbb{R}^{\lvert \mathcal{V} \rvert \times d}$（通常与 embedding 矩阵权重共享：$\mathbf{W}_{\text{head}} = \mathbf{E}^T$）。
+其中 $$\mathbf{W}_{\text{head}} \in \mathbb{R}^{\lvert \mathcal{V} \rvert \times d}$$（通常与 embedding 矩阵权重共享：$$\mathbf{W}_{\text{head}} = \mathbf{E}^T$$）。
 
 > **LM 头的特性**
 >
 > - **训练目标**：因果语言建模（对每个位置预测下一个 token）
-> - **损失**：$\mathcal{L}_{\text{LM}} = -\frac{1}{T}\sum_{t=1}^{T} \log P(x_t \mid x_{<t})$
+> - **损失**：$$\mathcal{L}_{\text{LM}} = -\frac{1}{T}\sum_{t=1}^{T} \log P(x_t \mid x_{<t})$$
 > - **标签**：每个 token 同时作为输入（右移一位）和目标（左移一位）
 > - **使用阶段**：在大规模语料上的预训练（万亿级 token）
 > - **关键洞察**：模型在下一 token 预测的副产品中学到通用语言理解能力
@@ -768,7 +768,7 @@ $$\mathcal{L}_{\text{SFT}} = -\frac{1}{\lvert y \rvert}\sum_{t=1}^{\lvert y \rve
 
 > **同一个头 -- 不同的训练信号**
 >
-> LM 头和 SFT 头在架构上完全相同（同一个 $\mathbf{W}_{\text{head}}$）。唯一的区别是 SFT 阶段会掩码掉 prompt token 的损失。这个细微的改动就把一个通用文本预测器转变为一个指令跟随助手。预测头学会根据上下文条件「激活」不同的生成模式。
+> LM 头和 SFT 头在架构上完全相同（同一个 $$\mathbf{W}_{\text{head}}$$）。唯一的区别是 SFT 阶段会掩码掉 prompt token 的损失。这个细微的改动就把一个通用文本预测器转变为一个指令跟随助手。预测头学会根据上下文条件「激活」不同的生成模式。
 
 ### 价值头（用于 RL 的回归头）
 
@@ -776,12 +776,12 @@ $$\mathcal{L}_{\text{SFT}} = -\frac{1}{\lvert y \rvert}\sum_{t=1}^{\lvert y \rve
 
 $$V(s_t) = \mathbf{w}_{\text{value}}^T \cdot \mathbf{h}_t + b \in \mathbb{R}$$
 
-其中 $\mathbf{w}_{\text{value}} \in \mathbb{R}^d$，$b \in \mathbb{R}$。
+其中 $$\mathbf{w}_{\text{value}} \in \mathbb{R}^d$$，$b \in \mathbb{R}$。
 
 > **价值头的特性**
 >
 > - **输出**：单个标量（从该状态出发的期望累计奖励）
-> - **损失**：预测回报与真实回报之间的均方误差：$\mathcal{L}_V = \frac{1}{T}\sum_t (V(s_t) - R_t)^2$
+> - **损失**：预测回报与真实回报之间的均方误差：$$\mathcal{L}_V = \frac{1}{T}\sum_t (V(s_t) - R_t)^2$$
 > - **架构**：线性层 $\mathbb{R}^d \to \mathbb{R}^1$（有时会用一个小型 MLP：$d \to 256 \to 1$）
 > - **主干共享**：通常与策略共享 Transformer 主干（但有独立的价值头），也可能使用完全独立的 critic 网络
 > - **使用阶段**：PPO 优势估计（GAE）、奖励模型评分
@@ -885,13 +885,13 @@ reward_score = reward_model(**inputs).logits  # 形状：(batch, 1)
 
 **什么是梯度？**
 
-梯度 $\nabla_\theta \mathcal{L}$ 是一个指向损失函数*最陡上升方向*的向量。每个分量 $\frac{\partial \mathcal{L}}{\partial \theta_i}$ 告诉我们：如果对参数 $\theta_i$ 略微增加一点，损失会变化多少。为了*降低*损失，我们沿相反方向移动：
+梯度 $$\nabla_\theta \mathcal{L}$$ 是一个指向损失函数*最陡上升方向*的向量。每个分量 $$\frac{\partial \mathcal{L}}{\partial \theta_i}$$ 告诉我们：如果对参数 $$\theta_i$$ 略微增加一点，损失会变化多少。为了*降低*损失，我们沿相反方向移动：
 
 $$\theta_{t+1} = \theta_t - \eta \nabla_\theta \mathcal{L}(\theta_t)$$
 
 其中 $\eta > 0$ 是**学习率（Learning Rate）**——也就是步长。这就是**梯度下降（Gradient Descent）**[[56]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-rumelhart1986learning)]。
 
-![梯度下降：从随机初始化 $\theta_0$ 开始，每一步都将参数沿降低损失的方向移动，步长由学习率 $\eta$ 控制。该过程会向某个（局部）最小值收敛。]({{ site.baseurl }}/figures/fig_009_fig9.png)
+![梯度下降：从随机初始化 $$\theta_0$$ 开始，每一步都将参数沿降低损失的方向移动，步长由学习率 $\eta$ 控制。该过程会向某个（局部）最小值收敛。]({{ site.baseurl }}/figures/fig_009_fig9.png)
 
 **为何全梯度下降不可行。**
 
@@ -909,7 +909,7 @@ $$
 
 > **为何小批量 SGD 有效**
 >
-> - **计算效率**：每步开销是 $O(B)$ 而非 $O(N_{\text{total}})$。当 $B = 4096$ 而总 token 为 15T 时，每步开销约便宜 40 亿倍。
+> - **计算效率**：每步开销是 $O(B)$ 而非 $$O(N_{\text{total}})$$。当 $B = 4096$ 而总 token 为 15T 时，每步开销约便宜 40 亿倍。
 > - **噪声即正则化**：随机噪声有助于逃离尖锐的局部极小值，找到泛化性更好的平坦区域。
 > - **GPU 利用率**：小批量足够大，能充分占满 GPU 并行度（矩阵乘法变为计算受限而非显存受限）。
 > - **收敛性**：理论上以 $O(1/\sqrt{T})$ 的速率收敛到局部极小值（比精确 GD 的 $O(1/T)$ 慢，但每步开销便宜数百万倍）。
@@ -939,7 +939,7 @@ Adam[[58]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kingma2015adam)] 为
 
 > **Adam 更新方程**
 >
-> 给定梯度 $g_t = \nabla_\theta \mathcal{L}(\theta_t)$ 与超参数 $\beta_1, \beta_2, \epsilon, \eta$：
+> 给定梯度 $$g_t = \nabla_\theta \mathcal{L}(\theta_t)$$ 与超参数 $$\beta_1, \beta_2, \epsilon, \eta$$：
 >
 > **第 1 步 -- 更新有偏一阶矩估计：**
 >
@@ -965,13 +965,13 @@ Adam[[58]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kingma2015adam)] 为
 > \theta_{t+1} = \theta_t - \eta \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}
 > $$
 >
-> **典型取值：**$\beta_1 = 0.9$，$\beta_2 = 0.95$ 或 $0.999$，$\epsilon = 10^{-8}$，$\eta = 10^{-4}$ 至 $10^{-5}$。
+> **典型取值：**$$\beta_1 = 0.9$$，$$\beta_2 = 0.95$$ 或 $0.999$，$\epsilon = 10^{-8}$，$\eta = 10^{-4}$ 至 $10^{-5}$。
 
 > **每一项的作用**
 >
-> - $m_t$（**动量**）：梯度的指数移动平均，可平滑噪声梯度估计。$\beta_1 = 0.9$ 意味着当前梯度贡献 10%，历史贡献 90%。
-> - $v_t$（**自适应学习率**）：梯度平方的 EMA。梯度持续较大的参数获得较小的有效学习率（$\eta / \sqrt{v_t}$）；梯度较小的参数获得较大的有效学习率。这是应对各层梯度尺度差异的关键。
-> - $\hat{m}_t, \hat{v}_t$（**偏差校正**）：在 $t=1$ 时，$m_1 = (1-\beta_1)g_1$ 远小于真实均值。除以 $(1-\beta_1^t)$ 可以校正这种初始化偏差。如果不做校正，早期更新步长会过小。
+> - $$m_t$$（**动量**）：梯度的指数移动平均，可平滑噪声梯度估计。$$\beta_1 = 0.9$$ 意味着当前梯度贡献 10%，历史贡献 90%。
+> - $$v_t$$（**自适应学习率**）：梯度平方的 EMA。梯度持续较大的参数获得较小的有效学习率（$$\eta / \sqrt{v_t}$$）；梯度较小的参数获得较大的有效学习率。这是应对各层梯度尺度差异的关键。
+> - $$\hat{m}_t, \hat{v}_t$$（**偏差校正**）：在 $t=1$ 时，$$m_1 = (1-\beta_1)g_1$$ 远小于真实均值。除以 $$(1-\beta_1^t)$$ 可以校正这种初始化偏差。如果不做校正，早期更新步长会过小。
 > - $\epsilon$（**数值稳定性**）：防止除零；同时也作为有效学习率的下限。
 
 ### AdamW --- 解耦权重衰减（Decoupled Weight Decay, AdamW）
@@ -980,13 +980,13 @@ AdamW[[59]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-loshchilov2019adamw
 
 > **为何在 Adam 中 L2 正则 $\neq$ 权重衰减**
 >
-> 在 L2 正则化下，损失变为 $\mathcal{L} + \frac{\lambda}{2}\|\theta\|^2$，因此梯度为 $g_t + \lambda \theta_t$。在 Adam 中，这部分正则化梯度会*被自适应因子* $1/\sqrt{\hat{v}_t}$ *缩放*：
+> 在 L2 正则化下，损失变为 $\mathcal{L} + \frac{\lambda}{2}\|\theta\|^2$，因此梯度为 $$g_t + \lambda \theta_t$$。在 Adam 中，这部分正则化梯度会*被自适应因子* $$1/\sqrt{\hat{v}_t}$$ *缩放*：
 >
 > $$
 > \theta_{t+1} = \theta_t - \eta \cdot \frac{\hat{m}_t + \lambda \theta_t}{\sqrt{\hat{v}_t} + \epsilon}
 > $$
 >
-> $v_t$ 较大（梯度方差大）的参数受到的正则化反而*更弱*。这并不是我们想要的——权重衰减本应是均匀的。
+> $$v_t$$ 较大（梯度方差大）的参数受到的正则化反而*更弱*。这并不是我们想要的——权重衰减本应是均匀的。
 
 > **AdamW -- 解耦权重衰减**
 >
@@ -997,7 +997,7 @@ AdamW[[59]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-loshchilov2019adamw
 >   - \eta \lambda \theta_t
 > $$
 >
-> 权重衰减项 $\eta \lambda \theta_t$ 不再被 $\sqrt{\hat{v}_t}$ 缩放。这样无论参数的梯度历史如何，所有参数都能获得均匀的正则化。
+> 权重衰减项 $$\eta \lambda \theta_t$$ 不再被 $$\sqrt{\hat{v}_t}$$ 缩放。这样无论参数的梯度历史如何，所有参数都能获得均匀的正则化。
 >
 > **典型取值：**LLM 训练时 $\lambda = 0.1$。
 
@@ -1022,11 +1022,11 @@ AdamW[[59]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-loshchilov2019adamw
 
 > **为何需要预热**
 >
-> 训练开始时，$v_t$（二阶矩估计）被初始化为零。偏差校正后：$\hat{v}_t = v_t / (1 - \beta_2^t)$。在 $t=1$、$\beta_2 = 0.999$ 时：$\hat{v}_1 = v_1 / (1 - 0.999) = 1000 v_1$。这意味着有效学习率是 $\eta / \sqrt{1000 v_1}$，远小于预期。
+> 训练开始时，$$v_t$$（二阶矩估计）被初始化为零。偏差校正后：$$\hat{v}_t = v_t / (1 - \beta_2^t)$$。在 $t=1$、$$\beta_2 = 0.999$$ 时：$$\hat{v}_1 = v_1 / (1 - 0.999) = 1000 v_1$$。这意味着有效学习率是 $$\eta / \sqrt{1000 v_1}$$，远小于预期。
 >
-> 另一方面，如果第一步的梯度异常大（在初始化时常见），二阶矩估计会被这个离群值主导，导致早期更新极不稳定。预热（Warmup）通过从极小的学习率开始、逐步增大来缓解这一问题，让 $v_t$ 有时间积累一个可靠的估计。
+> 另一方面，如果第一步的梯度异常大（在初始化时常见），二阶矩估计会被这个离群值主导，导致早期更新极不稳定。预热（Warmup）通过从极小的学习率开始、逐步增大来缓解这一问题，让 $$v_t$$ 有时间积累一个可靠的估计。
 
-- **线性预热：**$\eta_t = \eta_{\max} \times t / T_{\text{warmup}}$
+- **线性预热：**$$\eta_t = \eta_{\max} \times t / T_{\text{warmup}}$$
 - **典型预热时长：**预训练为总步数的 1--5%；微调为 3--10%（更短的训练任务通常需要按比例更长的预热）
 - **SFT 场景：**通常预热 50--200 步
 
@@ -1045,7 +1045,7 @@ $$
   \left(1 + \cos\!\left(\frac{t - T_{\text{warmup}}}{T - T_{\text{warmup}}} \pi\right)\right)
 $$
 
-预训练与 SFT 的标准选择。平滑衰减避免了学习率的突变。$\eta_{\min}$ 通常取 $\eta_{\max} / 10$。
+预训练与 SFT 的标准选择。平滑衰减避免了学习率的突变。$$\eta_{\min}$$ 通常取 $$\eta_{\max} / 10$$。
 
 **(c) 线性衰减（Linear Decay）。**
 
@@ -1055,15 +1055,15 @@ $$
 
 大规模预训练的新标准[[60]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hu2024minicpm), [3]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-grattafiori2024llama3)]。包含三个阶段：
 
-1. **预热：**线性升至 $\eta_{\max}$（占总步数的 1--5%）
-2. **稳定：**在训练的大部分时间保持恒定的 $\eta_{\max}$
-3. **衰减：**以快速余弦或线性方式衰减到 $\eta_{\min}$（最后 10--20% 的步数）
+1. **预热：**线性升至 $$\eta_{\max}$$（占总步数的 1--5%）
+2. **稳定：**在训练的大部分时间保持恒定的 $$\eta_{\max}$$
+3. **衰减：**以快速余弦或线性方式衰减到 $$\eta_{\min}$$（最后 10--20% 的步数）
 
 核心优势在于：稳定阶段允许在任意时刻打 checkpoint 并继续训练；而衰减阶段可在任一训练任务结束时再施加。
 
 **(e) 带重启的余弦调度 --- 带重启的随机梯度下降（Stochastic Gradient Descent with Warm Restarts, SGDR）。**
 
-周期性重启会将学习率重置为 $\eta_{\max}$，有助于逃离局部极小值。在 LLM 中并不常用，更适合较小的模型。
+周期性重启会将学习率重置为 $$\eta_{\max}$$，有助于逃离局部极小值。在 LLM 中并不常用，更适合较小的模型。
 
 ### 梯度裁剪（Gradient Clipping）
 
@@ -1286,7 +1286,7 @@ for batch in train_dataloader:
 > | SFT | AdamW | $2\text{e-}5$ | 0.01 | 100 步 | Cosine |
 > | LoRA SFT | AdamW | $2\text{e-}4$ | 0.01 | 100 步 | Cosine |
 >
-> *以上均使用：$\beta_1{=}0.9$、$\beta_2{=}0.95$、$\epsilon{=}10^{-8}$、`max_grad_norm`=1.0、BF16。RL 相关设置参见 §RL 优化器配置。*
+> *以上均使用：$$\beta_1{=}0.9$$、$$\beta_2{=}0.95$$、$\epsilon{=}10^{-8}$、`max_grad_norm`=1.0、BF16。RL 相关设置参见 §RL 优化器配置。*
 
 > **示例：诊断训练不稳定**
 >
@@ -1378,11 +1378,11 @@ $$
 
 > **在线 Softmax 更新规则**
 >
-> 给定运行状态 $(m_{\text{old}}, \ell_{\text{old}}, O_{\text{old}})$ 和一个新的分数块 $s_{\text{new}}$：
+> 给定运行状态 $$(m_{\text{old}}, \ell_{\text{old}}, O_{\text{old}})$$ 和一个新的分数块 $$s_{\text{new}}$$：
 >
-> 1. $m_{\text{new}} = \max(m_{\text{old}},\; \max(s_{\text{new}}))$
-> 2. $\ell_{\text{new}} = e^{m_{\text{old}} - m_{\text{new}}} \cdot \ell_{\text{old}} + \sum_j e^{s_{\text{new},j} - m_{\text{new}}}$
-> 3. $O_{\text{new}} = \frac{1}{\ell_{\text{new}}} \left( e^{m_{\text{old}} - m_{\text{new}}} \cdot \ell_{\text{old}} \cdot O_{\text{old}} + e^{s_{\text{new}} - m_{\text{new}}} \cdot V_{\text{new}} \right)$
+> 1. $$m_{\text{new}} = \max(m_{\text{old}},\; \max(s_{\text{new}}))$$
+> 2. $$\ell_{\text{new}} = e^{m_{\text{old}} - m_{\text{new}}} \cdot \ell_{\text{old}} + \sum_j e^{s_{\text{new},j} - m_{\text{new}}}$$
+> 3. $$O_{\text{new}} = \frac{1}{\ell_{\text{new}}} \left( e^{m_{\text{old}} - m_{\text{new}}} \cdot \ell_{\text{old}} \cdot O_{\text{old}} + e^{s_{\text{new}} - m_{\text{new}}} \cdot V_{\text{new}} \right)$$
 >
 > 这在数学上等价于一次性对所有块计算 Softmax。
 
@@ -1390,21 +1390,21 @@ $$
 
 > **示例：FlashAttention 前向传播——分块（Block Tiling）**
 >
-> **设定：** SRAM 大小 $M$。块大小 $B_r = \lceil M / (4d) \rceil$，$B_c = \min(\lceil M / (4d) \rceil, d)$。
+> **设定：** SRAM 大小 $M$。块大小 $$B_r = \lceil M / (4d) \rceil$$，$$B_c = \min(\lceil M / (4d) \rceil, d)$$。
 >
-> 1. 将 $Q$ 划分为 $T_r = \lceil n / B_r \rceil$ 块 $Q_1, \ldots, Q_{T_r}$
-> 2. 将 $K, V$ 划分为 $T_c = \lceil n / B_c \rceil$ 块 $K_1, \ldots, K_{T_c}$
+> 1. 将 $Q$ 划分为 $$T_r = \lceil n / B_r \rceil$$ 块 $$Q_1, \ldots, Q_{T_r}$$
+> 2. 将 $K, V$ 划分为 $$T_c = \lceil n / B_c \rceil$$ 块 $$K_1, \ldots, K_{T_c}$$
 > 3. 初始化输出 $O \in \mathbb{R}^{n \times d}$、运行最大值 $m \in \mathbb{R}^n$、运行求和 $\ell \in \mathbb{R}^n$（均在 HBM 中）
-> 4. 对 $j = 1, \ldots, T_c$ 进行 **外循环**：
->    1. 将 $K_j, V_j$ 从 HBM 加载到 SRAM
->    2. 对 $i = 1, \ldots, T_r$ 进行 **内循环**：
->       1. 将 $Q_i, O_i, m_i, \ell_i$ 从 HBM 加载到 SRAM
->       2. 计算 $S_{ij} = Q_i K_j^T / \sqrt{d}$（保留在 SRAM 中）
->       3. 应用在线 Softmax 更新得到新的 $m_i, \ell_i, O_i$
->       4. 将 $O_i, m_i, \ell_i$ 写回 HBM
+> 4. 对 $$j = 1, \ldots, T_c$$ 进行 **外循环**：
+>    1. 将 $$K_j, V_j$$ 从 HBM 加载到 SRAM
+>    2. 对 $$i = 1, \ldots, T_r$$ 进行 **内循环**：
+>       1. 将 $$Q_i, O_i, m_i, \ell_i$$ 从 HBM 加载到 SRAM
+>       2. 计算 $$S_{ij} = Q_i K_j^T / \sqrt{d}$$（保留在 SRAM 中）
+>       3. 应用在线 Softmax 更新得到新的 $$m_i, \ell_i, O_i$$
+>       4. 将 $$O_i, m_i, \ell_i$$ 写回 HBM
 > 5. 返回 $O$
 >
-> **关键：** $S_{ij}$（Attention 块）在 SRAM 中计算并丢弃。它*从不写入 HBM*。
+> **关键：** $$S_{ij}$$（Attention 块）在 SRAM 中计算并丢弃。它*从不写入 HBM*。
 
 > **FlashAttention 复杂度**
 >
@@ -1488,7 +1488,7 @@ $$
 
 ### 扩展律
 
-Hoffmann 等[[64]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hoffmann2022chinchilla)]表明，算力最优的训练需要平衡模型大小 $N$ 和数据大小 $D$：$N_\text{opt} \propto C^{0.50}$，$D_\text{opt} \propto C^{0.50}$。70B 模型的算力最优点约在 1.4T Token。实际中，模型通常被*过训练*（Token 数超过 Chinchilla 最优值），因为推理成本随模型大小而非训练 Token 数扩展——较小的过训练模型部署成本更低。
+Hoffmann 等[[64]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hoffmann2022chinchilla)]表明，算力最优的训练需要平衡模型大小 $N$ 和数据大小 $D$：$$N_\text{opt} \propto C^{0.50}$$，$$D_\text{opt} \propto C^{0.50}$$。70B 模型的算力最优点约在 1.4T Token。实际中，模型通常被*过训练*（Token 数超过 Chinchilla 最优值），因为推理成本随模型大小而非训练 Token 数扩展——较小的过训练模型部署成本更低。
 
 ### 关键超参数
 
@@ -1698,7 +1698,7 @@ LoRA 变体及其创新。
 
 **DoRA——权重分解低秩适配（Weight-Decomposed Low-Rank Adaptation，DoRA）。**
 
-DoRA[[76]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2024dora)]观察到，全量微调倾向于改变权重向量的*方向*多于幅度。标准 LoRA 把二者混在一起。DoRA 将每个权重列分解为幅度 $m = \|W\|_\text{col}$ 和方向 $\hat{V} = W / \|W\|_\text{col}$，然后只对方向应用 LoRA：
+DoRA[[76]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2024dora)]观察到，全量微调倾向于改变权重向量的*方向*多于幅度。标准 LoRA 把二者混在一起。DoRA 将每个权重列分解为幅度 $$m = \|W\|_\text{col}$$ 和方向 $$\hat{V} = W / \|W\|_\text{col}$$，然后只对方向应用 LoRA：
 
 $$
 W' = m \odot \hat{V}', \quad \hat{V}' = \frac{W + BA}{\|W + BA\|_\text{col}}
@@ -1708,7 +1708,7 @@ $$
 
 **LoRA+——非对称学习率。**
 
-Hayou 等[[77]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hayou2024loraplus)]表明，LoRA 中的矩阵 $A$ 和 $B$ 拥有不同的最优学习率。由于 $B$ 初始化为零，它与从 $\mathcal{N}(0, \sigma^2)$ 初始化的 $A$ 处于截然不同的状态。设置 $\eta_B \approx 16 \times \eta_A$ 可提升收敛速度并将最终质量提高约 2%——一个仅需一行配置改动的免费收益：
+Hayou 等[[77]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-hayou2024loraplus)]表明，LoRA 中的矩阵 $A$ 和 $B$ 拥有不同的最优学习率。由于 $B$ 初始化为零，它与从 $\mathcal{N}(0, \sigma^2)$ 初始化的 $A$ 处于截然不同的状态。设置 $$\eta_B \approx 16 \times \eta_A$$ 可提升收敛速度并将最终质量提高约 2%——一个仅需一行配置改动的免费收益：
 
 ```python
 # PEFT 中的 LoRA+：为每个矩阵设置不同的学习率
@@ -1722,7 +1722,7 @@ optimizer_grouped_parameters = [
 
 **VeRA——基于向量的随机矩阵适配（Vector-based Random Matrix Adaptation，VeRA）。**
 
-VeRA[[79]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kopiczko2024vera)]把参数效率推向极致：它不学习 $A$ 和 $B$，而是将它们*冻结*为所有层之间共享的随机矩阵，仅训练两个对角缩放向量 $d_b \in \mathbb{R}^r$ 和 $d_a \in \mathbb{R}^d$：
+VeRA[[79]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kopiczko2024vera)]把参数效率推向极致：它不学习 $A$ 和 $B$，而是将它们*冻结*为所有层之间共享的随机矩阵，仅训练两个对角缩放向量 $$d_b \in \mathbb{R}^r$$ 和 $$d_a \in \mathbb{R}^d$$：
 
 $$
 \Delta W = B \cdot \text{diag}(d_b) \cdot A \cdot \text{diag}(d_a)
@@ -1806,8 +1806,8 @@ LoRA 主导了现代实践，但并非唯一的参数高效方法。为完整起
 > \text{MoE}(x) = \sum_{i=1}^{N} g_i(x) \cdot E_i(x), \quad g(x) = \text{TopK}(\text{softmax}(W_r x))
 > $$
 >
-> - $E_i$ 是专家网络（标准的 FFN 层）
-> - $g_i(x)$ 是来自路由器的门控权重（只有 top-$K$ 个非零）
+> - $$E_i$$ 是专家网络（标准的 FFN 层）
+> - $$g_i(x)$$ 是来自路由器的门控权重（只有 top-$K$ 个非零）
 > - 通常每个 Token 在 $N=8$--64 个专家中激活 $K=2$ 个
 > - 总参数量随 $N$ 增长；**激活参数量** 按 FFN 大小的 $K/N$ 比例增长
 
@@ -1825,7 +1825,7 @@ LoRA 主导了现代实践，但并非唯一的参数高效方法。为完整起
 > \mathcal{L}_{\text{bal}} = \alpha \cdot N \sum_{i=1}^{N} f_i \cdot p_i
 > $$
 >
-> 其中 $f_i$ 表示路由到专家 $i$ 的 Token 比例，$p_i$ 表示专家 $i$ 的平均路由概率。这鼓励了对专家的均匀利用。
+> 其中 $$f_i$$ 表示路由到专家 $i$ 的 Token 比例，$$p_i$$ 表示专家 $i$ 的平均路由概率。这鼓励了对专家的均匀利用。
 
 ### 噪声 Top-K 门控（Noisy Top-K Gating）：让离散路由变得可训练
 
@@ -1833,7 +1833,7 @@ MoE 的核心挑战在于 **top-$k$ 选择是不可微的**——你无法通过
 
 > **路由可微性问题**
 >
-> 路由器为每个专家计算 logits $h(x) = W_r \cdot x$，然后选择 top-$k$。但是：
+> 路由器为每个专家计算 logits $$h(x) = W_r \cdot x$$，然后选择 top-$k$。但是：
 >
 > - *被选中* 的专家会通过其门控权重获得梯度（在被选中者上做 softmax）
 > - *选择决策本身*（挑选哪 $k$ 个）的梯度为零
@@ -1852,7 +1852,7 @@ $$
 \end{aligned}
 $$
 
-- $W_{\text{noise}}$ 是 *学习得到的* 噪声幅度——模型会学习每个专家需要多少探索量
+- $$W_{\text{noise}}$$ 是 *学习得到的* 噪声幅度——模型会学习每个专家需要多少探索量
 - 在训练过程中，噪声偶尔会将"弱势"专家提升到 top-$k$ 中，使其获得梯度信号
 - 在推理时去除噪声：使用干净的 logits $h(x)$ 进行确定性路由
 - Softplus 确保噪声尺度始终为正
@@ -1865,9 +1865,9 @@ $$
   z = \arg\max_i \left[ \log \pi_i + G_i \right], \quad G_i \sim \text{Gumbel}(0,1)
 $$
 
-其中 Gumbel 噪声由 $G_i = -\log(-\log(U_i)),\; U_i \sim \text{Uniform}(0,1)$ 生成。
+其中 Gumbel 噪声由 $$G_i = -\log(-\log(U_i)),\; U_i \sim \text{Uniform}(0,1)$$ 生成。
 
-对于 **top-$k$ 路由**：取 $(\log \pi_i + G_i)$ 的 top-$k$，等价于从由 $\pi$ 定义的类别分布中 *无放回地* 抽取 $k$ 个样本。
+对于 **top-$k$ 路由**：取 $$(\log \pi_i + G_i)$$ 的 top-$k$，等价于从由 $\pi$ 定义的类别分布中 *无放回地* 抽取 $k$ 个样本。
 
 由于 $\arg\max$ 是不可微的，**Gumbel-Softmax** 松弛将其替换为一个由温度控制的 softmax：
 
@@ -1905,10 +1905,10 @@ $$
 
 > **用于多样化生成的采样策略**
 >
-> - **温度 $\tau$**：$P(x_i) \propto \exp(\text{logit}_i / \tau)$。更高的 $\tau$ = 更均匀的分布 = 更多样化。典型值：RLHF 生成中使用 $\tau=0.7$--$1.0$。
+> - **温度 $\tau$**：$$P(x_i) \propto \exp(\text{logit}_i / \tau)$$。更高的 $\tau$ = 更均匀的分布 = 更多样化。典型值：RLHF 生成中使用 $\tau=0.7$--$1.0$。
 > - **Top-$k$**：只从概率最高的 $k$ 个 Token 中采样。防止退化的低概率 Token。
 > - **Top-$p$（核采样，Nucleus Sampling）**：从累计概率 $\geq p$ 的最小 Token 集合中采样。自适应：模型不确定时更多样。
-> - **Min-$p$**：仅保留满足 $P \geq p_{\min} \times P_{\max}$ 的 Token。比 top-$k$ 更具原理性。
+> - **Min-$p$**：仅保留满足 $$P \geq p_{\min} \times P_{\max}$$ 的 Token。比 top-$k$ 更具原理性。
 > - **频率/出现惩罚（Frequency/presence penalty）**：对已在回复中出现过的 Token 进行惩罚。鼓励词汇多样性。
 
 ### 训练数据多样性
@@ -1930,7 +1930,7 @@ $$
 
 ## 文本生成：解码方法
 
-一个训练好的语言模型在每一步都会输出一个在词表上的概率分布：$P(x_t \mid x_{<t})$。**解码策略** 决定了我们如何从该分布中选择下一个 Token。这个选择深刻地影响输出质量、多样性和连贯性。
+一个训练好的语言模型在每一步都会输出一个在词表上的概率分布：$$P(x_t \mid x_{<t})$$。**解码策略** 决定了我们如何从该分布中选择下一个 Token。这个选择深刻地影响输出质量、多样性和连贯性。
 
 ### 贪心解码（Greedy Decoding）
 
@@ -2036,7 +2036,7 @@ $$
 \text{Min-}p = \left\{ v \in \mathcal{V} : P(v \mid x_{<t}) \geq p_{\min} \cdot \max_{v'} P(v' \mid x_{<t}) \right\}
 $$
 
-只有概率至少为最高 Token 概率 $p_{\min}$ 倍的 Token 才会被保留。
+只有概率至少为最高 Token 概率 $$p_{\min}$$ 倍的 Token 才会被保留。
 
 **直觉：** "只考虑那些其可能性至少为最优 Token 10% 的 Token。" 如果最高 Token 的概率为 0.8，那么只有概率高于 0.08 的 Token 能留下。如果最高 Token 的概率为 0.05（非常不确定），概率高于 0.005 的 Token 都能留下——自然地扩大了候选池。
 
@@ -2067,7 +2067,7 @@ $$
 x_t = \arg\max_{v \in \mathcal{V}(x_{<t})} \left[ \log P_{\text{expert}}(v \mid x_{<t}) - \log P_{\text{amateur}}(v \mid x_{<t}) \right]
 $$
 
-其中 $\mathcal{V}(x_{<t}) = \{v : P_{\text{expert}}(v \mid x_{<t}) \geq \alpha \cdot \max_{v'} P_{\text{expert}}(v' \mid x_{<t})\}$ 是一个自适应的合理性约束。
+其中 $$\mathcal{V}(x_{<t}) = \{v : P_{\text{expert}}(v \mid x_{<t}) \geq \alpha \cdot \max_{v'} P_{\text{expert}}(v' \mid x_{<t})\}$$ 是一个自适应的合理性约束。
 
 **直觉：** 业余模型捕捉到的是泛泛的、显而易见的模式（常用词、重复）。减去其对数概率就去除了这种"泛泛信号"，留下专家独有的知识和推理。就像从录音中去除背景噪声以听见信号一样。
 
@@ -2077,7 +2077,7 @@ $$
 
 ### 重复惩罚
 
-与采样策略正交，重复惩罚（repetition penalties）阻止模型重复 Token。给定 Token $v$ 的原始 logit $z_v$（即 LM 头在 softmax *之前* 输出的未归一化得分），惩罚后的 logit 为：
+与采样策略正交，重复惩罚（repetition penalties）阻止模型重复 Token。给定 Token $v$ 的原始 logit $$z_v$$（即 LM 头在 softmax *之前* 输出的未归一化得分），惩罚后的 logit 为：
 
 $$
 z_v' = \begin{cases}
@@ -2105,7 +2105,7 @@ LLM 文本生成中各解码方法的对比。
 | Diverse Beam Search | 是 | 中等 | 高 | 用于重排序的候选生成 |
 | Top-$k$（$k$=50） | 否 | 中等 | 中等 | 通用生成 |
 | Top-$p$（$p$=0.9） | 否 | 自适应 | 高 | 开放式任务的默认选择 |
-| Min-$p$（$p_{\min}$=0.1） | 否 | 自适应 | 高 | top-$p$ 的稳健替代 |
+| Min-$p$（$$p_{\min}$$=0.1） | 否 | 自适应 | 高 | top-$p$ 的稳健替代 |
 | Contrastive | 是 | 低 | 非常高 | 事实性、连贯的长文本 |
 
 > **示例：实际中的解码："Once upon a time"**
@@ -2125,7 +2125,7 @@ LLM 文本生成中各解码方法的对比。
 
 **核心机制。**
 
-在每个解码步 $t$，会根据当前解析器状态计算一个 **Token 掩码（token mask）** $M_t \subseteq \mathcal{V}$。只有 $M_t$ 中的 Token 保留其原始 logits；在 softmax 之前，所有其它 Token 都被设为 $-\infty$：
+在每个解码步 $t$，会根据当前解析器状态计算一个 **Token 掩码（token mask）** $$M_t \subseteq \mathcal{V}$$。只有 $$M_t$$ 中的 Token 保留其原始 logits；在 softmax 之前，所有其它 Token 都被设为 $-\infty$：
 
 $$
 P'(v \mid x_{<t}) = \begin{cases}
@@ -2134,7 +2134,7 @@ P'(v \mid x_{<t}) = \begin{cases}
   \end{cases}
 $$
 
-其中 $Z = \sum_{v \in M_t} P(v \mid x_{<t})$ 用于重新归一化。由于掩码每一步都会变化（它取决于到目前为止已经生成的内容），约束是 *逐步* 强制实施的——模型在任何位置都不可能生成一个非法前缀。
+其中 $$Z = \sum_{v \in M_t} P(v \mid x_{<t})$$ 用于重新归一化。由于掩码每一步都会变化（它取决于到目前为止已经生成的内容），约束是 *逐步* 强制实施的——模型在任何位置都不可能生成一个非法前缀。
 
 **从模式到掩码。**
 
@@ -2641,12 +2641,12 @@ $T^2$ 因子补偿了软化分布造成的梯度幅度下降。典型取值：$T
 
 > **投机解码框架**
 >
-> 1. 一个快速的**草稿（draft）机制**提议 $k$ 个候选 token：$\hat{x}_1, \ldots, \hat{x}_k$
+> 1. 一个快速的**草稿（draft）机制**提议 $k$ 个候选 token：$$\hat{x}_1, \ldots, \hat{x}_k$$
 > 2. 大的**目标模型**对所有 $k$ 个 token 进行一次（批量）前向传递
-> 3. **验证**：从左到右依次接受 token，只要 $P_{\text{target}}(\hat{x}_i) \geq r_i \cdot P_{\text{draft}}(\hat{x}_i)$（其中 $r_i \sim U[0,1]$）
-> 4. 在位置 $j$ 首次被拒绝时：从调整后的分布重新采样 $x_j$，并丢弃 $\hat{x}_{j+1}, \ldots, \hat{x}_k$
+> 3. **验证**：从左到右依次接受 token，只要 $$P_{\text{target}}(\hat{x}_i) \geq r_i \cdot P_{\text{draft}}(\hat{x}_i)$$（其中 $$r_i \sim U[0,1]$$）
+> 4. 在位置 $j$ 首次被拒绝时：从调整后的分布重新采样 $$x_j$$，并丢弃 $$\hat{x}_{j+1}, \ldots, \hat{x}_k$$
 >
-> **关键性质**：这一接受/拒绝方案保证最终分布与 $P_{\text{target}}$ 完全一致。
+> **关键性质**：这一接受/拒绝方案保证最终分布与 $$P_{\text{target}}$$ 完全一致。
 >
 > **加速比**：若接受率为 $\alpha$，每步期望 token 数 $= \frac{1 - \alpha^{k+1}}{1 - \alpha}$。在 $\alpha=0.8$、$k=5$ 时：每步期望 3.4 个 token，相较标准解码的 1 个。
 
@@ -2778,8 +2778,8 @@ LLM 会生成流畅但可能事实错误的文本——这种现象称为**幻�
 
 | 方法 | 机制 | 信号 |
 | --- | --- | --- |
-| Token 级熵 | 生成时的高熵表示不确定[[130]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kadavath2022language)] | $H(P(x_t)) > \tau$ |
-| 序列对数概率 | 输出的平均对数概率较低提示存在虚构 | $\frac{1}{T}\sum_t \log P(x_t)$ |
+| Token 级熵 | 生成时的高熵表示不确定[[130]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kadavath2022language)] | $$H(P(x_t)) > \tau$$ |
+| 序列对数概率 | 输出的平均对数概率较低提示存在虚构 | $$\frac{1}{T}\sum_t \log P(x_t)$$ |
 | 一致性采样 | 生成 $N$ 个回复；一致性低 $=$ 可能幻觉[[131]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-manakul2023selfcheckgpt)] | 矛盾率 |
 | 语义熵（Semantic Entropy） | 对语义（而非字符串）聚类；语义熵高 $=$ 不确定[[132]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kuhn2023semantic)] | 聚类多样性 |
 | DoLA | 对比后层与前层的 logits；放大事实知识[[133]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-chuang2024dola)] | 层间差异 |
@@ -2854,7 +2854,7 @@ LLM 安全威胁类别。
 > \max_\theta \; \mathbb{E}[R_\text{helpful}] \quad \text{subject to} \quad \mathbb{E}[R_\text{safety}] \geq \tau
 > $$
 >
-> 在实践中，这通过加权奖励实现：$R = \alpha R_\text{helpful} + (1-\alpha) R_\text{safety}$，并仔细调整 $\alpha$（通常 0.6--0.8）。Meta 的 Llama-3 报告称使用独立的安全与有用性奖励模型，并采用基于 margin 的加权[[3]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-grattafiori2024llama3)]。
+> 在实践中，这通过加权奖励实现：$$R = \alpha R_\text{helpful} + (1-\alpha) R_\text{safety}$$，并仔细调整 $\alpha$（通常 0.6--0.8）。Meta 的 Llama-3 报告称使用独立的安全与有用性奖励模型，并采用基于 margin 的加权[[3]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-grattafiori2024llama3)]。
 
 ### 评测
 

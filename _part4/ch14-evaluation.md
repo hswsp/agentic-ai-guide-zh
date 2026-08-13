@@ -79,7 +79,7 @@ permalink: /part4/ch14-evaluation.html
 
 **Cohen's Kappa。**
 
-给定两位标注者将 $N$ 个样本标注为 $k$ 个类别，令 $p_o$ 为观察到的一致率，$p_e$ 为独立性假设下的期望一致率：
+给定两位标注者将 $N$ 个样本标注为 $k$ 个类别，令 $$p_o$$ 为观察到的一致率，$$p_e$$ 为独立性假设下的期望一致率：
 
 $$
 \kappa = \frac{p_o - p_e}{1 - p_e}
@@ -97,11 +97,11 @@ $$
 p_e = \sum_{c=1}^{k} p_{1c} \cdot p_{2c}
 $$
 
-其中 $p_{jc}$ 是标注者 $j$ 将样本判为类别 $c$ 的比例。Cohen's $\kappa$ 的取值从 $-1$（完全不一致）经 $0$（偶然一致）到 $1$（完全一致）。一般认为 $0.6$ 以上可以接受；$0.8$ 以上为强一致。
+其中 $$p_{jc}$$ 是标注者 $j$ 将样本判为类别 $c$ 的比例。Cohen's $\kappa$ 的取值从 $-1$（完全不一致）经 $0$（偶然一致）到 $1$（完全一致）。一般认为 $0.6$ 以上可以接受；$0.8$ 以上为强一致。
 
 **Fleiss' Kappa。**
 
-对于 $n$ 位标注者将 $N$ 个样本标注为 $k$ 个类别，令 $n_{ij}$ 为将样本 $i$ 标注为类别 $j$ 的标注者人数。定义：
+对于 $n$ 位标注者将 $N$ 个样本标注为 $k$ 个类别，令 $$n_{ij}$$ 为将样本 $i$ 标注为类别 $j$ 的标注者人数。定义：
 
 $$
 \bar{P}_i = \frac{1}{n(n-1)} \sum_{j=1}^{k} n_{ij}(n_{ij} - 1), \qquad \bar{P} = \frac{1}{N}\sum_{i=1}^{N}\bar{P}_i
@@ -148,15 +148,15 @@ $$
 
 ### 用于校准的 LLM-as-Judge
 
-当用 LLM 生成评估标签时，校准至关重要：评判者的分数必须与人类判断对齐。令 $h_i \in [0,1]$ 为样本 $i$ 的人类偏好分数，$\hat{h}_i$ 为评判者预测分数。校准误差由期望校准误差（Expected Calibration Error, ECE）[[242]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-guo2017calibration)] 度量：
+当用 LLM 生成评估标签时，校准至关重要：评判者的分数必须与人类判断对齐。令 $$h_i \in [0,1]$$ 为样本 $i$ 的人类偏好分数，$$\hat{h}_i$$ 为评判者预测分数。校准误差由期望校准误差（Expected Calibration Error, ECE）[[242]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-guo2017calibration)] 度量：
 
 $$
 \text{ECE} = \sum_{b=1}^{B} \frac{\lvert B_b \rvert}{n} \left\lvert \text{acc}(B_b) - \text{conf}(B_b) \right\rvert
 $$
 
-其中 $B_b$ 是第 $b$ 个置信度区间，$\text{acc}(B_b)$ 是该区间内评判者与人类一致的样本比例，$\text{conf}(B_b)$ 是该区间内评判者的平均置信度。
+其中 $$B_b$$ 是第 $b$ 个置信度区间，$$\text{acc}(B_b)$$ 是该区间内评判者与人类一致的样本比例，$$\text{conf}(B_b)$$ 是该区间内评判者的平均置信度。
 
-一个良好校准的评判者满足：对所有 $p \in [0,1]$，$\mathbb{E}[\hat{h}_i \mid \hat{h}_i = p] = p$。校准可通过温度缩放改善：把评判者的原始 logit $z$ 替换为 $z/T$，其中 $T$ 在留出的校准集上通过最小化负对数似然来调优。
+一个良好校准的评判者满足：对所有 $p \in [0,1]$，$$\mathbb{E}[\hat{h}_i \mid \hat{h}_i = p] = p$$。校准可通过温度缩放改善：把评判者的原始 logit $z$ 替换为 $z/T$，其中 $T$ 在留出的校准集上通过最小化负对数似然来调优。
 
 ### Self-Instruct
 
@@ -242,7 +242,7 @@ $$
 P(A \succ B) = \sigma\!\left(\frac{R_A - R_B}{s}\right) = \frac{1}{1 + e^{-(R_A - R_B)/s}}
 $$
 
-其中 $s = 400/\ln(10) \approx 173.7$ 是一个尺度参数，其选择使得 400 分的差距对应于 $10:1$ 的胜率比。每场比赛后，给定结果 $S_A \in \{0, 0.5, 1\}$（负、平、胜），评分更新如下：
+其中 $s = 400/\ln(10) \approx 173.7$ 是一个尺度参数，其选择使得 400 分的差距对应于 $10:1$ 的胜率比。每场比赛后，给定结果 $$S_A \in \{0, 0.5, 1\}$$（负、平、胜），评分更新如下：
 
 $$
 R_A \leftarrow R_A + K(S_A - E_A), \qquad R_B \leftarrow R_B + K(S_B - E_B)
@@ -260,19 +260,19 @@ $$
 
 ### Bradley--Terry 模型
 
-Bradley--Terry（BT）模型[[186]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-bradley1952rank)] 是 ELO 的一种最大似然替代方案。给定 $n$ 个模型，其实力参数为 $\beta_1, \ldots, \beta_n > 0$，模型 $i$ 击败模型 $j$ 的概率为：
+Bradley--Terry（BT）模型[[186]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-bradley1952rank)] 是 ELO 的一种最大似然替代方案。给定 $n$ 个模型，其实力参数为 $$\beta_1, \ldots, \beta_n > 0$$，模型 $i$ 击败模型 $j$ 的概率为：
 
 $$
 P(i \succ j) = \frac{\beta_i}{\beta_i + \beta_j}
 $$
 
-给定一组成对结果 $\{(i_k, j_k, y_k)\}_{k=1}^{M}$，其中若 $i_k$ 击败 $j_k$ 则 $y_k = 1$，否则 $y_k = 0$，对数似然为：
+给定一组成对结果 $$\{(i_k, j_k, y_k)\}_{k=1}^{M}$$，其中若 $$i_k$$ 击败 $$j_k$$ 则 $$y_k = 1$$，否则 $$y_k = 0$$，对数似然为：
 
 $$
 \ell(\boldsymbol{\beta}) = \sum_{k=1}^{M} \left[ y_k \log \frac{\beta_{i_k}}{\beta_{i_k} + \beta_{j_k}} + (1-y_k) \log \frac{\beta_{j_k}}{\beta_{i_k} + \beta_{j_k}} \right]
 $$
 
-极大似然估计 $\hat{\boldsymbol{\beta}}$ 可通过迭代缩放或梯度上升求得。BT 模型仅在相差一个乘法常数的意义下可辨识；常用的归一化是 $\sum_i \log \beta_i = 0$。在对数空间中令 $\theta_i = \log \beta_i$ 得：
+极大似然估计 $\hat{\boldsymbol{\beta}}$ 可通过迭代缩放或梯度上升求得。BT 模型仅在相差一个乘法常数的意义下可辨识；常用的归一化是 $$\sum_i \log \beta_i = 0$$。在对数空间中令 $$\theta_i = \log \beta_i$$ 得：
 
 $$
 P(i \succ j) = \sigma(\theta_i - \theta_j)
@@ -282,7 +282,7 @@ $$
 
 ### TrueSkill
 
-TrueSkill[[247]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-herbrich2006trueskill)] 是一种贝叶斯式的实力评分系统，将每位选手的实力建模为高斯随机变量 $s_i \sim \mathcal{N}(\mu_i, \sigma_i^2)$。选手 $i$ 在某一局中的表现为 $p_i = s_i + \epsilon_i$，其中 $\epsilon_i \sim \mathcal{N}(0, \beta^2)$ 为比赛特定的噪声。当 $p_i > p_j$ 时，选手 $i$ 击败选手 $j$。
+TrueSkill[[247]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-herbrich2006trueskill)] 是一种贝叶斯式的实力评分系统，将每位选手的实力建模为高斯随机变量 $$s_i \sim \mathcal{N}(\mu_i, \sigma_i^2)$$。选手 $i$ 在某一局中的表现为 $$p_i = s_i + \epsilon_i$$，其中 $$\epsilon_i \sim \mathcal{N}(0, \beta^2)$$ 为比赛特定的噪声。当 $$p_i > p_j$$ 时，选手 $i$ 击败选手 $j$。
 
 观察到 $i \succ j$ 后的后验更新通过期望传播（Expectation Propagation, EP）计算。胜方的关键更新方程为：
 
@@ -294,7 +294,7 @@ $$
 \sigma_i^2 \leftarrow \sigma_i^2 \left[1 - \frac{\sigma_i^2}{c^2} \cdot w\!\left(\frac{\mu_i - \mu_j}{c}\right)\right]
 $$
 
-其中 $c = \sqrt{2\beta^2 + \sigma_i^2 + \sigma_j^2}$，$v(t) = \phi(t)/\Phi(t)$，$w(t) = v(t)(v(t) + t)$ 为截断高斯修正因子（$\phi$ 与 $\Phi$ 分别是标准正态的 PDF 与 CDF）。TrueSkill 的不确定性估计 $\sigma_i$ 在识别需要更多评估数据的模型时尤其有用。
+其中 $$c = \sqrt{2\beta^2 + \sigma_i^2 + \sigma_j^2}$$，$v(t) = \phi(t)/\Phi(t)$，$w(t) = v(t)(v(t) + t)$ 为截断高斯修正因子（$\phi$ 与 $\Phi$ 分别是标准正态的 PDF 与 CDF）。TrueSkill 的不确定性估计 $$\sigma_i$$ 在识别需要更多评估数据的模型时尤其有用。
 
 ### 带置信区间的胜率
 
@@ -330,7 +330,7 @@ $$
 \text{BLEU} = \text{BP} \cdot \exp\!\left(\sum_{n=1}^{N} w_n \log p_n\right)
 $$
 
-其中 $p_n$ 是修正后的 $n$-gram 精度，$w_n = 1/N$ 为均匀权重，BP 为简短惩罚（brevity penalty）：
+其中 $$p_n$$ 是修正后的 $n$-gram 精度，$$w_n = 1/N$$ 为均匀权重，BP 为简短惩罚（brevity penalty）：
 
 $$
 \text{BP} = \begin{cases} 1 & \text{if } \lvert h \rvert > \lvert r \rvert \\ e^{1 - \lvert r \rvert/\lvert h \rvert} & \text{if } \lvert h \rvert \leq \lvert r \rvert \end{cases}
@@ -368,7 +368,7 @@ $$
 
 ### BERTScore
 
-BERTScore[[251]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhang2020bertscore)] 使用预训练 BERT 模型的上下文 Embedding 来计算 Token 级相似度。给定假设 Token $\hat{\mathbf{x}} = \langle \hat{x}_1, \ldots, \hat{x}_m \rangle$ 与参考 Token $\mathbf{x} = \langle x_1, \ldots, x_n \rangle$，及其 Embedding $\hat{\mathbf{e}}_i$ 与 $\mathbf{e}_j$：
+BERTScore[[251]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhang2020bertscore)] 使用预训练 BERT 模型的上下文 Embedding 来计算 Token 级相似度。给定假设 Token $$\hat{\mathbf{x}} = \langle \hat{x}_1, \ldots, \hat{x}_m \rangle$$ 与参考 Token $$\mathbf{x} = \langle x_1, \ldots, x_n \rangle$$，及其 Embedding $$\hat{\mathbf{e}}_i$$ 与 $$\mathbf{e}_j$$：
 
 $$
 R_{\text{BERT}} = \frac{1}{\lvert x \rvert} \sum_{x_j \in \mathbf{x}} \max_{\hat{x}_i \in \hat{\mathbf{x}}} \frac{\hat{\mathbf{e}}_i^\top \mathbf{e}_j}{\|\hat{\mathbf{e}}_i\| \|\mathbf{e}_j\|}
@@ -396,11 +396,11 @@ $$
 \text{METEOR} = F_{\text{mean}} \cdot (1 - \text{Pen})
 $$
 
-其中 $F_{\text{mean}} = \frac{10PR}{R + 9P}$（召回加权的调和平均），碎片化惩罚 $\text{Pen} = 0.5 \cdot (c/u_m)^3$ 对非连续匹配进行惩罚（$c$ 为块数，$u_m$ 为匹配的 unigram 数）。
+其中 $$F_{\text{mean}} = \frac{10PR}{R + 9P}$$（召回加权的调和平均），碎片化惩罚 $$\text{Pen} = 0.5 \cdot (c/u_m)^3$$ 对非连续匹配进行惩罚（$c$ 为块数，$$u_m$$ 为匹配的 unigram 数）。
 
 ### 困惑度（Perplexity）
 
-困惑度（Perplexity）衡量语言模型对留出文本序列 $w_1, w_2, \ldots, w_T$ 的预测能力：
+困惑度（Perplexity）衡量语言模型对留出文本序列 $$w_1, w_2, \ldots, w_T$$ 的预测能力：
 
 $$
 \text{PPL}(w_{1:T}) = \exp\!\left(-\frac{1}{T}\sum_{t=1}^{T} \log P_\theta(w_t \mid w_{1:t-1})\right)
@@ -495,7 +495,7 @@ $$
 \eta = \frac{L^*}{L_{\text{agent}}}
 $$
 
-其中 $L^*$ 是最短成功轨迹的长度（由 Oracle 或人类专家计算得出），$L_{\text{agent}}$ 是 Agent 所执行的动作数。$\eta \in (0, 1]$，$\eta = 1$ 表示最优效率。对于失败的轨迹，$\eta = 0$。
+其中 $$L^*$$ 是最短成功轨迹的长度（由 Oracle 或人类专家计算得出），$$L_{\text{agent}}$$ 是 Agent 所执行的动作数。$\eta \in (0, 1]$，$\eta = 1$ 表示最优效率。对于失败的轨迹，$\eta = 0$。
 
 一个互补指标是*冗余率*（redundancy rate）：Agent 动作中不出现在任何最优轨迹里的比例。
 
@@ -517,7 +517,7 @@ $$
 \text{SRA} = \frac{1}{\lvert \mathcal{T} \rvert} \sum_{\tau \in \mathcal{T}} \frac{1}{\lvert S_\tau \rvert} \sum_{s \in S_\tau} \mathbf{1}[s \text{ is correct}]
 $$
 
-其中 $S_\tau$ 是轨迹 $\tau$ 中的推理步骤集合。步骤的正确性可由过程奖励模型（Process Reward Model, PRM）或人工标注来验证。
+其中 $$S_\tau$$ 是轨迹 $\tau$ 中的推理步骤集合。步骤的正确性可由过程奖励模型（Process Reward Model, PRM）或人工标注来验证。
 
 ### SWE-bench 方法论
 
@@ -632,7 +632,7 @@ LLM 评判者会表现出*位置偏置*（position bias）：系统性地偏好�
 
 ### 多评判者面板
 
-单一评判者可能带有系统性偏置。来自不同模型家族的评判者面板能提供更稳健的评估。给定 $J$ 位评判者，其裁决为 $v_1, \ldots, v_J \in \{A, B, \text{tie}\}$，面板裁决由多数投票决定。面板一致率为：
+单一评判者可能带有系统性偏置。来自不同模型家族的评判者面板能提供更稳健的评估。给定 $J$ 位评判者，其裁决为 $$v_1, \ldots, v_J \in \{A, B, \text{tie}\}$$，面板裁决由多数投票决定。面板一致率为：
 
 $$
 \text{Agreement} = \frac{1}{\binom{J}{2}} \sum_{i < j} \mathbf{1}[v_i = v_j]
@@ -656,7 +656,7 @@ $$
 G-Eval[[258]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-liu2023geval)] 是一个面向 LLM 评估的结构化框架，使用思维链（Chain-of-Thought，CoT）提示与 Token 概率加权来产出更可靠的分数。框架如下：
 
 1. **生成评估步骤：**提示 LLM 为评估任务生成详尽的评分细则（例如"列出你评估一篇摘要连贯性时所采取的步骤"）。
-2. **以概率加权方式打分：**对每个分值 $s \in \{1, 2, 3, 4, 5\}$，从评判模型获取对数概率 $\log P_\theta(s \mid \text{prompt, steps, response})$。最终分数为以概率加权的平均：
+2. **以概率加权方式打分：**对每个分值 $s \in \{1, 2, 3, 4, 5\}$，从评判模型获取对数概率 $$\log P_\theta(s \mid \text{prompt, steps, response})$$。最终分数为以概率加权的平均：
 
 $$
 \text{G-Eval score} = \sum_{s=1}^{5} s \cdot \frac{e^{\log P_\theta(s)}}{\sum_{s'=1}^{5} e^{\log P_\theta(s')}}

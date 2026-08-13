@@ -12,13 +12,13 @@ PPO 需要在显存中维持 4 个模型（policy、reference、reward 模型、
 
 ## 数学推导
 
-**第 1 步**：RLHF 目标：$\max_\pi \mathbb{E}_{x,y\sim\pi}[r(x,y)] - \beta D_\text{KL}[\pi\|\pi_\text{ref}]$
+**第 1 步**：RLHF 目标：$$\max_\pi \mathbb{E}_{x,y\sim\pi}[r(x,y)] - \beta D_\text{KL}[\pi\|\pi_\text{ref}]$$
 
-**第 2 步**：最优解为：$\pi^*(y\mid x) = \frac{1}{Z(x)} \pi_\text{ref}(y\mid x) \exp\left(\frac{r(x,y)}{\beta}\right)$
+**第 2 步**：最优解为：$$\pi^*(y\mid x) = \frac{1}{Z(x)} \pi_\text{ref}(y\mid x) \exp\left(\frac{r(x,y)}{\beta}\right)$$
 
-**第 3 步**：重排式子，用 policy 表达 reward：$r(x,y) = \beta \log \frac{\pi^*(y\mid x)}{\pi_\text{ref}(y\mid x)} + \beta \log Z(x)$
+**第 3 步**：重排式子，用 policy 表达 reward：$$r(x,y) = \beta \log \frac{\pi^*(y\mid x)}{\pi_\text{ref}(y\mid x)} + \beta \log Z(x)$$
 
-**第 4 步**：代入 Bradley-Terry 偏好模型 $P(y_w \succ y_l) = \sigma(r(y_w) - r(y_l))$。$Z(x)$ 项相互抵消！
+**第 4 步**：代入 Bradley-Terry 偏好模型 $$P(y_w \succ y_l) = \sigma(r(y_w) - r(y_l))$$。$Z(x)$ 项相互抵消！
 
 $$
 \boxed{\mathcal{L}_\text{DPO}(\theta) = -\mathbb{E}_{(x, y_w, y_l)}\left[\log\sigma\left(\beta\log\frac{\pi_\theta(y_w\mid x)}{\pi_\text{ref}(y_w\mid x)} - \beta\log\frac{\pi_\theta(y_l\mid x)}{\pi_\text{ref}(y_l\mid x)}\right)\right]}
@@ -26,7 +26,7 @@ $$
 
 > **DPO 实际在做什么**
 >
-> 将**隐式 reward** 定义为 $\hat{r}(x,y) = \beta\log\frac{\pi_\theta(y\mid x)}{\pi_\text{ref}(y\mid x)}$。
+> 将**隐式 reward** 定义为 $$\hat{r}(x,y) = \beta\log\frac{\pi_\theta(y\mid x)}{\pi_\text{ref}(y\mid x)}$$。
 >
 > DPO 在最小化一个交叉熵 loss，其中“标签”是：被选回答的隐式 reward 应高于被拒回答。Margin 由 $\beta$ 控制：
 >
@@ -47,15 +47,15 @@ $$
 >
 > **Prompt**：“向一个 10 岁的小孩解释量子纠缠。”
 >
-> **被选**（$y_w$）：“想象你有两枚魔法硬币。你抛其中一枚，如果它是正面，另一枚不管离多远都会立刻变成反面！”\
+> **被选**（$$y_w$$）：“想象你有两枚魔法硬币。你抛其中一枚，如果它是正面，另一枚不管离多远都会立刻变成反面！”\
 >
-> $\log\pi_\theta(y_w\mid x) = -15.3$，$\log\pi_\text{ref}(y_w\mid x) = -16.1$
+> $$\log\pi_\theta(y_w\mid x) = -15.3$$，$$\log\pi_\text{ref}(y_w\mid x) = -16.1$$
 >
-> **被拒**（$y_l$）：“量子纠缠是一种现象，其中两个粒子相互关联，以致于一个粒子的量子态无法被独立描述。”\
+> **被拒**（$$y_l$$）：“量子纠缠是一种现象，其中两个粒子相互关联，以致于一个粒子的量子态无法被独立描述。”\
 >
-> $\log\pi_\theta(y_l\mid x) = -12.8$，$\log\pi_\text{ref}(y_l\mid x) = -12.5$
+> $$\log\pi_\theta(y_l\mid x) = -12.8$$，$$\log\pi_\text{ref}(y_l\mid x) = -12.5$$
 >
-> **隐式 reward**：$\hat{r}_w = 0.1 \times ((-15.3) - (-16.1)) = 0.08$，$\hat{r}_l = 0.1 \times ((-12.8) - (-12.5)) = -0.03$
+> **隐式 reward**：$$\hat{r}_w = 0.1 \times ((-15.3) - (-16.1)) = 0.08$$，$$\hat{r}_l = 0.1 \times ((-12.8) - (-12.5)) = -0.03$$
 >
 > **Loss 输入**：$\sigma(0.08 - (-0.03)) = \sigma(0.11) = 0.527$
 >
@@ -122,15 +122,15 @@ trainer.train()
 
 ### 序列级对数概率
 
-DPO 中的关键量是：在给定 prompt $x$ 下，**整段序列** $y = (y_1, y_2, \ldots, y_T)$ 的对数概率。它是**逐 token 对数概率之和**：
+DPO 中的关键量是：在给定 prompt $x$ 下，**整段序列** $$y = (y_1, y_2, \ldots, y_T)$$ 的对数概率。它是**逐 token 对数概率之和**：
 
 $$
 \boxed{\log \pi_\theta(y\mid x) = \sum_{t=1}^{T} \log \pi_\theta(y_t \mid x, y_{<t})}
 $$
 
-其中每一项 $\log \pi_\theta(y_t \mid x, y_{<t})$ 都是位置 $t$ 处的 log-softmax 输出，对应序列中*实际*出现的 token $y_t$。这与标准语言建模中的交叉熵 loss 完全一致——只是这里我们**求和**而非求均值。
+其中每一项 $$\log \pi_\theta(y_t \mid x, y_{<t})$$ 都是位置 $t$ 处的 log-softmax 输出，对应序列中*实际*出现的 token $$y_t$$。这与标准语言建模中的交叉熵 loss 完全一致——只是这里我们**求和**而非求均值。
 
-**关键细节**：Gradient 会流过 $y_w$ 和 $y_l$ 中的**每一个 token 位置**。中间 token 不做掩码——每个 token 都对序列级对数概率有贡献。
+**关键细节**：Gradient 会流过 $$y_w$$ 和 $$y_l$$ 中的**每一个 token 位置**。中间 token 不做掩码——每个 token 都对序列级对数概率有贡献。
 
 ### DPO Loss 的分解
 
@@ -138,7 +138,7 @@ $$
 $$
 \mathcal{L}_{\text{DPO}}(\theta) = -\mathbb{E}_{(x, y_w, y_l) \sim \mathcal{D}}\!\left[\log \sigma\!\left(\beta \cdot h_\theta(x, y_w, y_l)\right)\right]
 $$
-其中“隐式 reward margin” $h_\theta$ 为：
+其中“隐式 reward margin” $$h_\theta$$ 为：
 $$
 h_\theta(x, y_w, y_l) = \underbrace{\log \frac{\pi_\theta(y_w\mid x)}{\pi_{\text{ref}}(y_w\mid x)}}_{\text{chosen reward proxy}} - \underbrace{\log \frac{\pi_\theta(y_l\mid x)}{\pi_{\text{ref}}(y_l\mid x)}}_{\text{rejected reward proxy}}
 $$
@@ -150,11 +150,11 @@ $$
 
 ### Forward Pass：逐步详解
 
-对一个训练样本 $(x, y_w, y_l)$：
+对一个训练样本 $$(x, y_w, y_l)$$：
 
-1. **拼接**：组成两条序列：$[x; y_w]$ 与 $[x; y_l]$。在 batch 内 pad 到相同长度。
-2. **Forward pass（policy $\pi_\theta$）**：把两条序列都喂进模型；在每个回答位置收集 logits。
-3. **提取对数概率**：在回答中每个位置 $t$ 处，取 $\log\text{softmax}(\text{logits}_t)[y_t]$——即实际 token 的对数概率。
+1. **拼接**：组成两条序列：$$[x; y_w]$$ 与 $$[x; y_l]$$。在 batch 内 pad 到相同长度。
+2. **Forward pass（policy $$\pi_\theta$$）**：把两条序列都喂进模型；在每个回答位置收集 logits。
+3. **提取对数概率**：在回答中每个位置 $t$ 处，取 $$\log\text{softmax}(\text{logits}_t)[y_t]$$——即实际 token 的对数概率。
 4. **对 token 求和**：
 $$
 \text{logp\_chosen} &= \sum_{t \in \text{response positions}} \log\pi_\theta(y_w^t \mid x, y_w^{<t}) \\
@@ -165,7 +165,7 @@ $$
 \text{ratio\_w} &= \text{logp\_chosen} - \text{ref\_logp\_chosen} \\
 \text{ratio\_l} &= \text{logp\_rejected} - \text{ref\_logp\_rejected}
 $$
-6. **计算 loss**：$\mathcal{L} = -\log\sigma(\beta \cdot (\text{ratio\_w} - \text{ratio\_l}))$
+6. **计算 loss**：$$\mathcal{L} = -\log\sigma(\beta \cdot (\text{ratio\_w} - \text{ratio\_l}))$$
 7. **Backward pass**：Gradient 沿步骤 5 $\rightarrow$ 4 $\rightarrow$ 3 $\rightarrow$ 2 回传，更新 $\theta$。
 
 ### Token 级 Gradient 分析
@@ -176,24 +176,24 @@ $$
 \frac{\partial \mathcal{L}}{\partial \text{logits}_t^{(w)}} = -\underbrace{\sigma(-\beta \cdot h_\theta)}_{\text{scaling factor}} \cdot \beta \cdot \frac{\partial \log\pi_\theta(y_w^t \mid \cdot)}{\partial \text{logits}_t^{(w)}}
 $$
 
-**关键洞察**：缩放因子 $\sigma(-\beta \cdot h_\theta)$ 在两条序列的**所有 token 间共享**，相当于一个自适应学习率：
+**关键洞察**：缩放因子 $$\sigma(-\beta \cdot h_\theta)$$ 在两条序列的**所有 token 间共享**，相当于一个自适应学习率：
 
-- 当 $h_\theta$ 较小（模型分不清被选与被拒）：缩放 $\approx 0.5$——gradient 强，激进地学。
-- 当 $h_\theta$ 较大（模型已经偏好被选）：缩放 $\approx 0$——gradient 可忽略，避免过拟合。
+- 当 $$h_\theta$$ 较小（模型分不清被选与被拒）：缩放 $\approx 0.5$——gradient 强，激进地学。
+- 当 $$h_\theta$$ 较大（模型已经偏好被选）：缩放 $\approx 0$——gradient 可忽略，避免过拟合。
 
 **对被选 token 的影响**：概率被*提升*（对数概率被推高）。\
 
 **对被拒 token 的影响**：概率被*降低*（对数概率被压低）。\
 
-**相对 reference**：只有相对 $\pi_{\text{ref}}$ 的*差值*才重要。如果模型本就给被选回答高概率（与 reference 一致），那么 gradient 就几乎为零。
+**相对 reference**：只有相对 $$\pi_{\text{ref}}$$ 的*差值*才重要。如果模型本就给被选回答高概率（与 reference 一致），那么 gradient 就几乎为零。
 
 ### 逐 Token vs. 序列级：长度归一化
 
-一个微妙问题：越长的序列对数概率天然越低（求和的项更多，且每项 $\leq 0$）。若 $\lvert y_w \rvert \gg \lvert y_l \rvert$，loss 会偏向于偏好更短的回答。
+一个微妙问题：越长的序列对数概率天然越低（求和的项更多，且每项 $\leq 0$）。若 $$\lvert y_w \rvert \gg \lvert y_l \rvert$$，loss 会偏向于偏好更短的回答。
 
 **解决方案**：
 
-- **长度归一化的 DPO**：用 $\frac{1}{\lvert y \rvert}\sum_t \log\pi_\theta(y_t\mid\cdot)$ 替换 $\log\pi_\theta(y\mid x)$。一些实现采用此做法（SimPO 即如此）。
+- **长度归一化的 DPO**：用 $$\frac{1}{\lvert y \rvert}\sum_t \log\pi_\theta(y_t\mid\cdot)$$ 替换 $$\log\pi_\theta(y\mid x)$$。一些实现采用此做法（SimPO 即如此）。
 - **标准 DPO**：使用原始求和（不归一化）。这会*隐式*惩罚冗长——模型必须对被选回答中的每个 token 都赋予高概率。
 - **实际影响**：在 benchmark 上，长度归一化的 DPO 能减少长度博弈，但可能损害指令遵循质量。生产中更常用未归一化的标准版本。
 
@@ -202,8 +202,8 @@ $$
 > **DPO 中哪些 token 收到 Gradient**
 >
 > - **Prompt token**（$x$）：**无 gradient**。Loss 仅在回答位置上计算。Prompt token 提供上下文，但其 logits 不参与 $\log\pi(y\mid x)$。
-> - **被选回答 token**（$y_w$）：**所有 token 都收到 gradient**。每个 $y_w^t$ 都贡献到求和；gradient 推高它们的概率。
-> - **被拒回答 token**（$y_l$）：**所有 token 都收到 gradient**。每个 $y_l^t$ 都贡献到求和；gradient 压低它们的概率。
+> - **被选回答 token**（$$y_w$$）：**所有 token 都收到 gradient**。每个 $$y_w^t$$ 都贡献到求和；gradient 推高它们的概率。
+> - **被拒回答 token**（$$y_l$$）：**所有 token 都收到 gradient**。每个 $$y_l^t$$ 都贡献到求和；gradient 压低它们的概率。
 > - **Padding token**：**无 gradient**。通过 attention mask 屏蔽掉。
 
 ### 伪代码：DPO 训练步
@@ -253,8 +253,8 @@ $$
 > **DPO 实现中的陷阱**
 >
 > - **忘记屏蔽 prompt**：如果 prompt token 被纳入对数概率求和，模型就会优化 prompt 的似然（无意义），且有效 $\beta$ 也会出错。
-> - **用均值替代求和**：$\frac{1}{T}\sum_t \log\pi$ 与 $\sum_t \log\pi$ 会带来不同的隐式长度惩罚。$\pi_\theta$ 与 $\pi_{\text{ref}}$ 之间必须保持一致。
-> - **过期的参考模型**：若 $\pi_{\text{ref}}$ 与 $\pi_\theta$ 相距过远（如 base 模型 vs. 微调后的模型），KL 项会占主导，gradient 消失。解决办法：使用 SFT checkpoint（而非 base）作为 reference。
+> - **用均值替代求和**：$$\frac{1}{T}\sum_t \log\pi$$ 与 $$\sum_t \log\pi$$ 会带来不同的隐式长度惩罚。$$\pi_\theta$$ 与 $$\pi_{\text{ref}}$$ 之间必须保持一致。
+> - **过期的参考模型**：若 $$\pi_{\text{ref}}$$ 与 $$\pi_\theta$$ 相距过远（如 base 模型 vs. 微调后的模型），KL 项会占主导，gradient 消失。解决办法：使用 SFT checkpoint（而非 base）作为 reference。
 > - **$\beta$ 过大**：放大对数概率差值 $\rightarrow$ sigmoid 饱和 $\rightarrow$ gradient 归零。从 $\beta = 0.1$ 起步，在 $[0.05, 0.5]$ 区间内调参。
 > - **$\beta$ 过小**：理论上允许 policy 更大程度地偏离 reference（KL 约束更弱），但 gradient $\propto \beta \cdot \sigma(-\beta h)$ 会变得极小 $\rightarrow$ loss 地形平坦 $\rightarrow$ 收敛极慢。模型“被允许”走得很远，却几乎收不到任何告诉它*往哪走*的信号。
 
@@ -293,37 +293,37 @@ $$
 \boxed{B_{\text{global}} \in [32, 128]}
 $$
 
-- $B_{\text{global}} < 32$：隐式 reward 估计中的 gradient 噪声严重 $\rightarrow$ policy 在多个对齐目标之间（如有用 vs 安全）破坏性振荡。
-- $B_{\text{global}} > 128$：收敛速度边际收益递减；分布式算力间通信开销巨大。
+- $$B_{\text{global}} < 32$$：隐式 reward 估计中的 gradient 噪声严重 $\rightarrow$ policy 在多个对齐目标之间（如有用 vs 安全）破坏性振荡。
+- $$B_{\text{global}} > 128$$：收敛速度边际收益递减；分布式算力间通信开销巨大。
 
 ### 数学分解
 
-由于 DPO 同时加载**两份**模型副本（活动 policy $\pi_\theta$ + 冻结 reference $\pi_{\text{ref}}$），每条序列的显存翻倍。全局 batch size 可分解为：
+由于 DPO 同时加载**两份**模型副本（活动 policy $$\pi_\theta$$ + 冻结 reference $$\pi_{\text{ref}}$$），每条序列的显存翻倍。全局 batch size 可分解为：
 $$
 \boxed{B_{\text{global}} = B_{\text{micro}} \times N_{\text{GPUs}} \times K_{\text{accum}}}
 $$
 
-- $B_{\text{micro}}$：每设备 micro-batch 大小（每次 forward pass 的偏好对数）。
-- $N_{\text{GPUs}}$：并行处理数据的设备数量。
-- $K_{\text{accum}}$：在权重更新前累计 gradient 的步数。
+- $$B_{\text{micro}}$$：每设备 micro-batch 大小（每次 forward pass 的偏好对数）。
+- $$N_{\text{GPUs}}$$：并行处理数据的设备数量。
+- $$K_{\text{accum}}$$：在权重更新前累计 gradient 的步数。
 
-**成对倍数因子**：单个 DPO 数据样本包含 prompt（$x$）、被选（$y_w$）和被拒（$y_l$）。每个 micro-batch 的实际 tensor 负载为：
+**成对倍数因子**：单个 DPO 数据样本包含 prompt（$x$）、被选（$$y_w$$）和被拒（$$y_l$$）。每个 micro-batch 的实际 tensor 负载为：
 $$
 T_{\text{sequences}} = 2 \times B_{\text{micro}}
 $$
 
-对于在 80GB GPU 上、上下文长度 4096--8192 token 的 $>$7B 参数模型，物理上限被刚性约束在 $B_{\text{micro}} \in [1, 2]$。
+对于在 80GB GPU 上、上下文长度 4096--8192 token 的 $>$7B 参数模型，物理上限被刚性约束在 $$B_{\text{micro}} \in [1, 2]$$。
 
 ### 分布式扩展配置
 
 
-**DPO 训练的分布式扩展配置（目标 $B_{\text{global}} = 64$）。**
+**DPO 训练的分布式扩展配置（目标 $$B_{\text{global}} = 64$$）。**
 | **配置** | **单 GPU** | **8 卡节点** |
 | --- | --- | --- |
-| $B_{\text{global}}$ | 64 | 64 |
-| $B_{\text{micro}}$ | 2（4 条序列） | 2（4 条序列） |
-| $N_{\text{GPUs}}$ | 1 | 8 |
-| $K_{\text{accum}}$ | 32 步 | 4 步 |
+| $$B_{\text{global}}$$ | 64 | 64 |
+| $$B_{\text{micro}}$$ | 2（4 条序列） | 2（4 条序列） |
+| $$N_{\text{GPUs}}$$ | 1 | 8 |
+| $$K_{\text{accum}}$$ | 32 步 | 4 步 |
 | 吞吐 | 串行/慢 | 高并行吞吐 |
 
 ### 显存优化：预计算 Reference 对数概率
@@ -333,15 +333,15 @@ $$
 \mathcal{L}_{\text{DPO}}(\theta) = -\mathbb{E}_{(x, y_w, y_l)}\!\left[\log \sigma\!\left(\beta \log \frac{\pi_\theta(y_w\mid x)}{\pi_{\text{ref}}(y_w\mid x)} - \beta \log \frac{\pi_\theta(y_l\mid x)}{\pi_{\text{ref}}(y_l\mid x)}\right)\right]
 $$
 
-由于 $\pi_{\text{ref}}$ 在整个训练过程中**完全静态**，其输出可被预先计算：
+由于 $$\pi_{\text{ref}}$$ 在整个训练过程中**完全静态**，其输出可被预先计算：
 
 > **Reference 模型驱逐策略**
 >
-> 1. 训练开始前，仅用 $\pi_{\text{ref}}$ 对数据集 $\mathcal{D}$ 执行一次 forward pass。
-> 2. 将标量 $\log \pi_{\text{ref}}(y_w\mid x)$ 和 $\log \pi_{\text{ref}}(y_l\mid x)$ 缓存到磁盘。
-> 3. **把 $\pi_{\text{ref}}$ 完全从 GPU 显存中驱逐。**
+> 1. 训练开始前，仅用 $$\pi_{\text{ref}}$$ 对数据集 $\mathcal{D}$ 执行一次 forward pass。
+> 2. 将标量 $$\log \pi_{\text{ref}}(y_w\mid x)$$ 和 $$\log \pi_{\text{ref}}(y_l\mid x)$$ 缓存到磁盘。
+> 3. **把 $$\pi_{\text{ref}}$$ 完全从 GPU 显存中驱逐。**
 >
-> **效果**：可用 GPU 显存翻倍 $\rightarrow$ $B_{\text{micro}}$ 可从 1--2 提升到 4--8，从而最大化硬件利用率与训练吞吐。
+> **效果**：可用 GPU 显存翻倍 $\rightarrow$ $$B_{\text{micro}}$$ 可从 1--2 提升到 4--8，从而最大化硬件利用率与训练吞吐。
 >
 > *实现*：在 TRL 中，于 `DPOConfig` 设置 `precompute_ref_log_probs=True`。对 70B 模型，这能在整个集群上节省约 140GB 的 GPU 显存。
 
@@ -358,7 +358,7 @@ $$
 \right],
 $$
 
-其中 $y_w$ 为被偏好（获胜）的回答，$y_l$ 为被拒（失败）的回答，$\beta$ 控制 KL 惩罚强度。下面的小节涵盖最重要的扩展与变体。
+其中 $$y_w$$ 为被偏好（获胜）的回答，$$y_l$$ 为被拒（失败）的回答，$\beta$ 控制 KL 惩罚强度。下面的小节涵盖最重要的扩展与变体。
 
 ### f-DPO——广义 f-Divergence DPO
 
@@ -432,7 +432,7 @@ $$
 - \epsilon\,\mathcal{L}_{DPO}(y_l, y_w)}{1 - 2\epsilon},
 $$
 
-其中 $\mathcal{L}_{\text{DPO}}(y_w, y_l)$ 是把 $y_w$ 视为被偏好的标准 DPO loss，而 $\mathcal{L}_{\text{DPO}}(y_l, y_w)$ 是把标签翻转后的 loss。该修正去除了标签噪声引入的偏置。
+其中 $$\mathcal{L}_{\text{DPO}}(y_w, y_l)$$ 是把 $$y_w$$ 视为被偏好的标准 DPO loss，而 $$\mathcal{L}_{\text{DPO}}(y_l, y_w)$$ 是把标签翻转后的 loss。该修正去除了标签噪声引入的偏置。
 
 > **Robust DPO 的直觉**
 >
@@ -461,7 +461,7 @@ $$
 
 > **过期 Reference 模型问题**
 >
-> 标准 DPO 在整个训练过程中使用固定的 reference 模型 $\pi_{\text{ref}}$。随着 policy $\pi_\theta$ 改进，KL 惩罚 $\beta \log(\pi_\theta/\pi_{\text{ref}})$ 不断增长，最终会主导 loss 并阻止进一步改进。TR-DPO [[163]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-gorbatenko2024trdpo)] 周期性地更新 reference 模型，使其跟随当前 policy。
+> 标准 DPO 在整个训练过程中使用固定的 reference 模型 $$\pi_{\text{ref}}$$。随着 policy $$\pi_\theta$$ 改进，KL 惩罚 $$\beta \log(\pi_\theta/\pi_{\text{ref}})$$ 不断增长，最终会主导 loss 并阻止进一步改进。TR-DPO [[163]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-gorbatenko2024trdpo)] 周期性地更新 reference 模型，使其跟随当前 policy。
 
 TR-DPO 使用指数滑动平均（EMA）更新 reference 模型：
 
@@ -470,7 +470,7 @@ $$
 \alpha \cdot \pi_\theta^{(t)} + (1-\alpha) \cdot \pi_{ref}^{(t)},
 $$
 
-其中 $\alpha \in (0,1)$ 是混合系数。每 $T_{\text{sync}}$ 个 gradient 步执行一次。
+其中 $\alpha \in (0,1)$ 是混合系数。每 $$T_{\text{sync}}$$ 个 gradient 步执行一次。
 
 > **TRL 中的 TR-DPO**
 >
@@ -514,7 +514,7 @@ $$
 \right],
 $$
 
-其中 $p^*(y\mid q) \propto \pi_{\text{ref}}(y\mid q) \exp(r(y,q)/\beta)$ 即最优 policy。实践中，EXO 利用可用的偏好对来近似该量：
+其中 $$p^*(y\mid q) \propto \pi_{\text{ref}}(y\mid q) \exp(r(y,q)/\beta)$$ 即最优 policy。实践中，EXO 利用可用的偏好对来近似该量：
 
 $$
 \mathcal{L}_{EXO} \approx -\mathbb{E}\!\left[
@@ -525,7 +525,7 @@ $$
 \right].
 $$
 
-注意：相对于 DPO，$\pi_\theta$ 与 $\pi_{\text{ref}}$ 的角色被*对调*了。
+注意：相对于 DPO，$$\pi_\theta$$ 与 $$\pi_{\text{ref}}$$ 的角色被*对调*了。
 
 > **TRL 中的 EXO**
 >
@@ -561,7 +561,7 @@ $$
 - \tfrac{1}{2}\log \sigma(-r_l),
 $$
 
-其中 $r_y = \beta \log(\pi_\theta(y\mid q)/\pi_{\text{ref}}(y\mid q))$ 是隐式 reward。第一项鼓励 $y_w$ 获得高 reward；第二、三项则同时惩罚 $y_w$ 与 $y_l$ 上的高 reward（防止崩塌）。
+其中 $$r_y = \beta \log(\pi_\theta(y\mid q)/\pi_{\text{ref}}(y\mid q))$$ 是隐式 reward。第一项鼓励 $$y_w$$ 获得高 reward；第二、三项则同时惩罚 $$y_w$$ 与 $$y_l$$ 上的高 reward（防止崩塌）。
 
 > **TRL 中的 NCA**
 >
@@ -636,7 +636,7 @@ $$
 + \lambda_2 \mathcal{L}_{NLL}(y_w),
 $$
 
-其中 $\mathcal{L}_{\text{NLL}}(y_w) = -\log \pi_\theta(y_w\mid q)$ 是作用于被选回答的标准语言建模 loss。
+其中 $$\mathcal{L}_{\text{NLL}}(y_w) = -\log \pi_\theta(y_w\mid q)$$ 是作用于被选回答的标准语言建模 loss。
 
 > **TRL 中的 Iterative RPO**
 >

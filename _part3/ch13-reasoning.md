@@ -36,7 +36,7 @@ permalink: /part3/ch13-reasoning.html
 
 ### 测试时计算的扩展律
 
-推动推理模型研究的一个核心经验发现是：**测试时算力与性能之间存在可预测的扩展关系**。记 $C_{\text{train}}$ 为训练算力（FLOPs），$C_{\text{test}}$ 为推理算力（生成的 Token 数）。关键观察是：
+推动推理模型研究的一个核心经验发现是：**测试时算力与性能之间存在可预测的扩展关系**。记 $$C_{\text{train}}$$ 为训练算力（FLOPs），$$C_{\text{test}}$$ 为推理算力（生成的 Token 数）。关键观察是：
 
 $$
 \text{Accuracy}(C_{\text{train}}, C_{\text{test}}) \approx f\!\left(\alpha \log C_{\text{train}} + \beta \log C_{\text{test}}\right)
@@ -70,7 +70,7 @@ $$
 \text{Prompt} = [(x_1, z_1, y_1), (x_2, z_2, y_2), \ldots, (x_k, z_k, y_k), (x_{\text{test}}, \texttt{?})]
 $$
 
-其中 $z_i$ 是为示例 $(x_i, y_i)$ 手工编写的推理轨迹。
+其中 $$z_i$$ 是为示例 $$(x_i, y_i)$$ 手工编写的推理轨迹。
 
 **形式化刻画。**
 
@@ -80,7 +80,7 @@ $$
 p(y\mid x) = \sum_{z} p(y\mid x, z) \cdot p(z\mid x) \approx p(y\mid x, z^*) \cdot p(z^*\mid x)
 $$
 
-其中 $z^* = (z_1, z_2, \ldots, z_T)$ 是贪心推理链。对所有可能链条求和是不可计算的；标准 CoT 仅采用单一样本（贪心或温度采样）。
+其中 $$z^* = (z_1, z_2, \ldots, z_T)$$ 是贪心推理链。对所有可能链条求和是不可计算的；标准 CoT 仅采用单一样本（贪心或温度采样）。
 
 **局限性。**
 
@@ -115,8 +115,8 @@ $$
 推理问题被分解为对一棵树的搜索，其中：
 
 - **根节点**：初始问题陈述 $x$
-- **节点**：部分推理状态 $s = (x, z_1, \ldots, z_k)$
-- **边**：单个推理步骤（「想法」）$z_{k+1}$
+- **节点**：部分推理状态 $$s = (x, z_1, \ldots, z_k)$$
+- **边**：单个推理步骤（「想法」）$$z_{k+1}$$
 - **叶子**：包含最终答案的完整解答
 - **价值函数**：$V(s)$ 估计某个部分解的前景如何
 
@@ -128,9 +128,9 @@ $$
 
 其中：
 
-- $\mathcal{G}$：**想法生成器**——产生 $b$ 个候选的下一想法：$\{z^{(1)}, \ldots, z^{(b)}\} \sim \pi_\theta(\cdot \mid s)$
+- $\mathcal{G}$：**想法生成器**——产生 $b$ 个候选的下一想法：$$\{z^{(1)}, \ldots, z^{(b)}\} \sim \pi_\theta(\cdot \mid s)$$
 - $\mathcal{E}$：**状态评估器**——为部分解打分：$V(s) \in \{\text{sure}, \text{maybe}, \text{impossible}\}$ 或 $V(s) \in [0, 1]$
-- $\pi_\theta$：生成想法的语言模型
+- $$\pi_\theta$$：生成想法的语言模型
 - $\text{Search}$：搜索算法（BFS 或 DFS）
 
 ![思维树在「24 点」任务上的运行：对 {4, 9, 10, 13} 进行四则运算得到 24。在每一层，模型生成 $b=3$ 个候选想法，分别评估（sure/maybe/impossible），剪掉前景不佳的分支，并扩展最有希望的分支。绿色路径通向解答；红色路径在早期被剪枝。]({{ site.baseurl }}/figures/fig_046_tot_example.png)
@@ -212,7 +212,7 @@ GoT 在 ToT 之上引入了三种操作：
 
 **图操作（形式化）。**
 
-设 $\mathcal{V} = \{v_1, \ldots, v_n\}$ 为想法节点，$\mathcal{E} \subseteq \mathcal{V} \times \mathcal{V}$ 为有向边。GoT 支持：
+设 $$\mathcal{V} = \{v_1, \ldots, v_n\}$$ 为想法节点，$\mathcal{E} \subseteq \mathcal{V} \times \mathcal{V}$ 为有向边。GoT 支持：
 
 $$
 \textbf{Generate}(v) : v \to \{v_{c_1}, \ldots, v_{c_b}\} \quad \text{(创建子节点)}
@@ -252,7 +252,7 @@ $$
 
 - **结合 ORM 的 BoN**：对完整解答打分，选择得分最高者。当 ORM $\approx$ 正确性检查时等价于 Self-Consistency。
 - **结合 PRM 的 BoN**：对每一推理步打分，选择最小步得分最高的解答（即在任何步骤上出错的可能性最小）。
-- **加权 BoN**：按奖励对候选加权：$y^* \sim \text{softmax}(R(y_1)/\tau, \ldots, R(y_N)/\tau)$。
+- **加权 BoN**：按奖励对候选加权：$$y^* \sim \text{softmax}(R(y_1)/\tau, \ldots, R(y_N)/\tau)$$。
 
 > **BoN 扩展律**
 >
@@ -287,7 +287,7 @@ $$
 a^* = \arg\max_a \left[ Q(s, a) + c_{\text{puct}} \cdot P(s, a) \cdot \frac{\sqrt{\sum_b N(s,b)}}{1 + N(s, a)} \right]
 $$
 
-其中 $P(s,a) = \pi_\theta(a\mid s)$ 是 LLM 从状态 $s$ 生成步骤 $a$ 的先验概率。这使探索偏向 LLM 本就认为可能的步骤，而 UCB 项鼓励尝试探索不足的备选方案。
+其中 $$P(s,a) = \pi_\theta(a\mid s)$$ 是 LLM 从状态 $s$ 生成步骤 $a$ 的先验概率。这使探索偏向 LLM 本就认为可能的步骤，而 UCB 项鼓励尝试探索不足的备选方案。
 
 > **面向数学推理的 MCTS：运行示例**
 >
@@ -299,19 +299,19 @@ $$
 >   1. "Assume for contradiction that $\sqrt{2} = p/q$ in lowest terms."（$P = 0.7$）
 >   2. "Consider the decimal expansion of $\sqrt{2}$ = 1.414..."（$P = 0.15$）
 >   3. "Use the fundamental theorem of arithmetic."（$P = 0.10$）
-> - 从 $z_1$ 做 Rollout：4 步内得到正确证明 $\to$ $r = 1.0$
-> - 从 $z_2$ 做 Rollout：失败（小数展开不能证明无理性）$\to$ $r = 0.0$
-> - 反向传播：$Q(s_0, z_1) = 1.0$，$N(s_0, z_1) = 1$
+> - 从 $$z_1$$ 做 Rollout：4 步内得到正确证明 $\to$ $r = 1.0$
+> - 从 $$z_2$$ 做 Rollout：失败（小数展开不能证明无理性）$\to$ $r = 0.0$
+> - 反向传播：$$Q(s_0, z_1) = 1.0$$，$$N(s_0, z_1) = 1$$
 >
-> **第 2 次迭代**（Selection：按 UCB 选中 $z_1$）：
+> **第 2 次迭代**（Selection：按 UCB 选中 $$z_1$$）：
 >
 > - 从状态"Assume $\sqrt{2} = p/q$..."进行扩展：
 >   1. "Then $2 = p^2/q^2$, so $p^2 = 2q^2$."（$P = 0.8$）
 >   2. "Then $p$ and $q$ share no common factors."（$P = 0.15$）
-> - 从 $z_4$ 做 Rollout：正确续推 $\to r = 1.0$
-> - 反向传播：$Q(s_0, z_1) = 1.0$，$Q(s_1, z_4) = 1.0$
+> - 从 $$z_4$$ 做 Rollout：正确续推 $\to r = 1.0$
+> - 反向传播：$$Q(s_0, z_1) = 1.0$$，$$Q(s_1, z_4) = 1.0$$
 >
-> **20 次迭代之后**：树已探索 8 条不同的推理路径。访问次数最多的路径被选为最终证明：$z_1 \to z_4 \to z_6 \to z_8$（基于奇偶性论证的经典反证法）。
+> **20 次迭代之后**：树已探索 8 条不同的推理路径。访问次数最多的路径被选为最终证明：$$z_1 \to z_4 \to z_6 \to z_8$$（基于奇偶性论证的经典反证法）。
 
 **对比：ToT vs MCTS。**
 
@@ -359,7 +359,7 @@ $$
 | Best-of-N + PRM | 并行链 | $N$ + $N{\cdot}K$ | ✓ 完全 | 是（PRM） | 复杂多步推理 |
 | ToT[[222]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-yao2024tree)] | 树（BFS/DFS） | $O(kbd)$ | 部分 | LLM 作判官 | 结构化搜索问题 |
 | GoT[[223]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-besta2024graph)] | DAG | $O(kbd)$ | 部分 | LLM 作判官 | 可分解的问题 |
-| MCTS[[225]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kocsis2006bandit)] | 树 + 价值 | $O(N_{\text{sim}} \cdot d)$ | 部分 | 是（价值网络） | 困难证明、编程 |
+| MCTS[[225]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-kocsis2006bandit)] | 树 + 价值 | $$O(N_{\text{sim}} \cdot d)$$ | 部分 | 是（价值网络） | 困难证明、编程 |
 | Self-Refine[[228]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-madaan2023selfrefine)] | 线性（迭代） | $2T$ | 否 | 自我评判 | 开放式生成 |
 | LATS[[213]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhou2024lats)] | 树 + 反思 | $O(N \cdot d)$ | 部分 | LLM 作判官 | Agent 任务 |
 
@@ -416,7 +416,7 @@ $$
 r_{\text{acc}}(y, y^*) = \begin{cases} 1 & \text{if } \texttt{verify}(y, y^*) = \texttt{True} \\ 0 & \text{otherwise} \end{cases}
 $$
 
-其中 $y$ 是模型的最终答案（从 `<answer>` 标签中提取），$y^*$ 是真实答案。`verify` 函数使用符号数学比较（如 SymPy）来处理等价形式。
+其中 $y$ 是模型的最终答案（从 `<answer>` 标签中提取），$$y^*$$ 是真实答案。`verify` 函数使用符号数学比较（如 SymPy）来处理等价形式。
 
 对于代码问题，准确率奖励由通过测试用例决定：
 
@@ -438,7 +438,7 @@ $$
 r(y, y^*) = r_{\text{acc}}(y, y^*) + \lambda_{\text{fmt}} \cdot r_{\text{fmt}}(y)
 $$
 
-在原始实现中 $\lambda_{\text{fmt}} = 0.1$（足够小以不至于主导优化，足够大以防止格式崩塌）。
+在原始实现中 $$\lambda_{\text{fmt}} = 0.1$$（足够小以不至于主导优化，足够大以防止格式崩塌）。
 
 > **没有过程奖励模型**
 >
@@ -446,7 +446,7 @@ $$
 
 ### R1 中的 GRPO 公式
 
-GRPO[[168]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shao2024deepseekmath)] 是一种策略梯度方法，它通过对一*组*采样回答估计优势，从而避免训练独立的价值网络。对于一个问题 $q$，GRPO 从当前 Policy $\pi_\theta$ 采样 $G$ 个回答 $\{y_1, y_2, \ldots, y_G\}$，并相对组均值计算优势。
+GRPO[[168]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-shao2024deepseekmath)] 是一种策略梯度方法，它通过对一*组*采样回答估计优势，从而避免训练独立的价值网络。对于一个问题 $q$，GRPO 从当前 Policy $$\pi_\theta$$ 采样 $G$ 个回答 $$\{y_1, y_2, \ldots, y_G\}$$，并相对组均值计算优势。
 
 **分组采样与优势归一化**
 
@@ -456,17 +456,17 @@ $$
 \{y_i\}_{i=1}^G \sim \pi_\theta(\cdot \mid q)
 $$
 
-使用组合奖励公式的奖励函数计算 Reward $\{r_i\}_{i=1}^G$。第 $i$ 个回答的归一化优势为：
+使用组合奖励公式的奖励函数计算 Reward $$\{r_i\}_{i=1}^G$$。第 $i$ 个回答的归一化优势为：
 
 $$
 \hat{A}_i = \frac{r_i - \mu_r}{\sigma_r + \epsilon}
 $$
 
-其中 $\mu_r = \frac{1}{G}\sum_{i=1}^G r_i$，$\sigma_r = \sqrt{\frac{1}{G}\sum_{i=1}^G (r_i - \mu_r)^2}$，$\epsilon = 10^{-8}$ 用于数值稳定。
+其中 $$\mu_r = \frac{1}{G}\sum_{i=1}^G r_i$$，$$\sigma_r = \sqrt{\frac{1}{G}\sum_{i=1}^G (r_i - \mu_r)^2}$$，$\epsilon = 10^{-8}$ 用于数值稳定。
 
 **GRPO 目标**
 
-GRPO 目标对概率比做截断（与近端策略优化（Proximal Policy Optimization, PPO）相同），并对参考 Policy $\pi_{\text{ref}}$ 加上 KL 惩罚：
+GRPO 目标对概率比做截断（与近端策略优化（Proximal Policy Optimization, PPO）相同），并对参考 Policy $$\pi_{\text{ref}}$$ 加上 KL 惩罚：
 
 $$
 \mathcal{L}_{\text{GRPO}}(\theta) = -\mathbb{E}_{q \sim \mathcal{D},\, \{y_i\} \sim \pi_\theta(\cdot\mid q)} \left[ \frac{1}{G} \sum_{i=1}^{G} \frac{1}{\lvert y_i \rvert} \sum_{t=1}^{\lvert y_i \rvert} \min\!\left( \rho_{i,t}\, \hat{A}_i,\; \text{clip}(\rho_{i,t}, 1{-}\varepsilon, 1{+}\varepsilon)\, \hat{A}_i \right) - \beta\, \mathbb{D}_{\mathrm{KL}}\!\left[\pi_\theta \,\|\, \pi_{\text{ref}}\right] \right]
@@ -474,10 +474,10 @@ $$
 
 其中：
 
-- $\rho_{i,t} = \dfrac{\pi_\theta(y_{i,t} \mid q, y_{i,<t})}{\pi_{\theta_{\text{old}}}(y_{i,t} \mid q, y_{i,<t})}$ 是逐 Token 的概率比
+- $$\rho_{i,t} = \dfrac{\pi_\theta(y_{i,t} \mid q, y_{i,<t})}{\pi_{\theta_{\text{old}}}(y_{i,t} \mid q, y_{i,<t})}$$ 是逐 Token 的概率比
 - $\varepsilon \in \{0.1, 0.2\}$ 是 PPO 的截断参数
 - $\beta > 0$ 控制 KL 惩罚的强度
-- $\lvert y_i \rvert$ 是第 $i$ 个回答的长度（长度归一化可防止偏向较短回答）
+- $$\lvert y_i \rvert$$ 是第 $i$ 个回答的长度（长度归一化可防止偏向较短回答）
 
 **KL 惩罚的具体形式**
 
@@ -487,13 +487,13 @@ $$
 \mathbb{D}_{\mathrm{KL}}\!\left[\pi_\theta \,\|\, \pi_{\text{ref}}\right] = \mathbb{E}_{y \sim \pi_\theta(\cdot\mid q)} \left[ \sum_{t=1}^{\lvert y \rvert} \log \frac{\pi_\theta(y_t \mid q, y_{<t})}{\pi_{\text{ref}}(y_t \mid q, y_{<t})} \right]
 $$
 
-在实践中，R1 使用一种 KL 的无偏估计器，通过下列近似避免在每一步都计算 $\pi_{\text{ref}}$：
+在实践中，R1 使用一种 KL 的无偏估计器，通过下列近似避免在每一步都计算 $$\pi_{\text{ref}}$$：
 
 $$
 \mathbb{D}_{\mathrm{KL}}\!\left[\pi_\theta \,\|\, \pi_{\text{ref}}\right] \approx \frac{\pi_{\text{ref}}(y_t \mid q, y_{<t})}{\pi_\theta(y_t \mid q, y_{<t})} - \log \frac{\pi_{\text{ref}}(y_t \mid q, y_{<t})}{\pi_\theta(y_t \mid q, y_{<t})} - 1
 $$
 
-该估计器恒为非负，且当 $\pi_\theta = \pi_{\text{ref}}$ 时为零。
+该估计器恒为非负，且当 $$\pi_\theta = \pi_{\text{ref}}$$ 时为零。
 
 > **GRPO 实战：组大小与稳定性**
 >
@@ -503,7 +503,7 @@ $$
 > - 过大（$G=32$）：计算成本线性增长，收益递减。
 > - $G=8$：经验上在方差缩减与计算成本之间取得平衡。
 >
-> 分组采样还提供了天然的**课程学习信号**：随着训练推进，模型的平均奖励 $\mu_r$ 上升，方差 $\sigma_r$ 下降。所有 $G$ 个回答全对（或全错）的问题贡献零梯度，从而自然地将学习聚焦于模型能力前沿的问题上。
+> 分组采样还提供了天然的**课程学习信号**：随着训练推进，模型的平均奖励 $$\mu_r$$ 上升，方差 $$\sigma_r$$ 下降。所有 $G$ 个回答全对（或全错）的问题贡献零梯度，从而自然地将学习聚焦于模型能力前沿的问题上。
 
 ### 蒸馏：R1-Distill 系列
 
@@ -553,13 +553,13 @@ $$
 
 **过程奖励模型（PRM）**
 
-PRM 为推理链 $y = (s_1, s_2, \ldots, s_K)$ 中的每一个推理步骤 $s_k$ 分配奖励：
+PRM 为推理链 $$y = (s_1, s_2, \ldots, s_K)$$ 中的每一个推理步骤 $$s_k$$ 分配奖励：
 
 $$
 R_{\text{PRM}}(q, y) = \sum_{k=1}^{K} \gamma^{K-k} \cdot r_k(q, s_1, \ldots, s_k)
 $$
 
-其中 $r_k \in [0,1]$ 是步骤级奖励，$\gamma \in (0,1]$ 是折扣因子。步骤级奖励 $r_k$ 估计部分解 $(s_1, \ldots, s_k)$ 能够导向正确最终答案的概率：
+其中 $$r_k \in [0,1]$$ 是步骤级奖励，$\gamma \in (0,1]$ 是折扣因子。步骤级奖励 $$r_k$$ 估计部分解 $$(s_1, \ldots, s_k)$$ 能够导向正确最终答案的概率：
 
 $$
 r_k(q, s_1, \ldots, s_k) = P(\text{correct final answer} \mid q, s_1, \ldots, s_k)
@@ -591,7 +591,7 @@ $$
 
 ### 训练计算量与测试时计算量
 
-o1/o3 系列带来的一个根本性洞见是**计算等价原理（compute equivalence principle）**：训练计算量 $C_{\text{train}}$ 与测试时计算量 $C_{\text{test}}$ 之间存在一条权衡曲线，曲线上的各点能够达到相近的性能：
+o1/o3 系列带来的一个根本性洞见是**计算等价原理（compute equivalence principle）**：训练计算量 $$C_{\text{train}}$$ 与测试时计算量 $$C_{\text{test}}$$ 之间存在一条权衡曲线，曲线上的各点能够达到相近的性能：
 
 $$
 \text{Performance}(C_{\text{train}}, C_{\text{test}}) = g\!\left(\alpha C_{\text{train}}^{p} + \beta C_{\text{test}}^{q}\right)
@@ -625,11 +625,11 @@ Qwen 的推理流水线采用了更精细的多阶段方法：
 
 Qwen 方法的一项关键创新是**拒绝采样与 RL 的迭代结合**：
 
-1. **初始化**：以 SFT 模型作为 Policy $\pi_0$。
-2. **拒绝采样（Rejection Sampling）**：采样 $N$ 个解 $\{y_i\}_{i=1}^N \sim \pi_{k-1}(\cdot \mid q)$，保留正确的解 $\mathcal{Y}^+(q) = \{y_i : r(y_i, y^*) = 1\}$。
-3. **SFT 更新**：$\pi_k^{\text{SFT}} \leftarrow \text{SFT}(\pi_{k-1}, \bigcup_q \mathcal{Y}^+(q))$
-4. **RL 更新**：$\pi_k \leftarrow \text{GRPO}(\pi_k^{\text{SFT}}, \mathcal{D})$
-5. **重复**步骤 2--4 共 $K$ 次迭代，得到最终 Policy $\pi_K$。
+1. **初始化**：以 SFT 模型作为 Policy $$\pi_0$$。
+2. **拒绝采样（Rejection Sampling）**：采样 $N$ 个解 $$\{y_i\}_{i=1}^N \sim \pi_{k-1}(\cdot \mid q)$$，保留正确的解 $$\mathcal{Y}^+(q) = \{y_i : r(y_i, y^*) = 1\}$$。
+3. **SFT 更新**：$$\pi_k^{\text{SFT}} \leftarrow \text{SFT}(\pi_{k-1}, \bigcup_q \mathcal{Y}^+(q))$$
+4. **RL 更新**：$$\pi_k \leftarrow \text{GRPO}(\pi_k^{\text{SFT}}, \mathcal{D})$$
+5. **重复**步骤 2--4 共 $K$ 次迭代，得到最终 Policy $$\pi_K$$。
 
 拒绝采样步骤提供高质量的正样本来锚定 Policy，而 RL 则在当前分布之外进行探索。这种组合比纯 RL 更稳定，又比纯 SFT 更有能力。
 
@@ -668,20 +668,20 @@ RL 训练奖励基于最终答案计算，但模型会学会策略性地使用�
 
 **状态与动作空间**
 
-- **状态** $s_k$：部分推理链 $(q, r_1, r_2, \ldots, r_k)$，其中 $r_i$ 为推理步骤
+- **状态** $$s_k$$：部分推理链 $$(q, r_1, r_2, \ldots, r_k)$$，其中 $$r_i$$ 为推理步骤
 - **动作** $a$：下一个推理步骤（一句话或一段话）
 - **终止状态**：包含最终答案的状态
-- **奖励**：$R(s_{\text{terminal}}) = r_{\text{acc}}$（见准确率奖励公式）
+- **奖励**：$$R(s_{\text{terminal}}) = r_{\text{acc}}$$（见准确率奖励公式）
 
 **部分解的价值函数**
 
-价值函数 $V(s_k)$ 估计从部分状态 $s_k$ 出发达到正确答案的概率：
+价值函数 $$V(s_k)$$ 估计从部分状态 $$s_k$$ 出发达到正确答案的概率：
 
 $$
 V(s_k) = P(\text{correct answer} \mid s_k) \approx \frac{1}{M} \sum_{m=1}^{M} R(\text{rollout}_m(s_k))
 $$
 
-其中 $\text{rollout}_m(s_k)$ 是从 $s_k$ 出发、使用当前 Policy 走到终止状态的一次蒙特卡洛 rollout。
+其中 $$\text{rollout}_m(s_k)$$ 是从 $$s_k$$ 出发、使用当前 Policy 走到终止状态的一次蒙特卡洛 rollout。
 
 **UCB 探索**
 
@@ -693,11 +693,11 @@ $$
 
 其中：
 
-- $Q(s_k, a) = \frac{1}{N(s_k,a)} \sum_{\text{visits}} V(s_{k+1})$ 为子状态的平均价值
-- $\pi_\theta(a \mid s_k)$ 为 Policy 先验（语言模型对步骤 $a$ 的概率）
-- $N(s_k)$ 为状态 $s_k$ 的访问次数
-- $N(s_k, a)$ 为边 $(s_k, a)$ 的访问次数
-- $c_{\text{puct}}$ 为探索常数
+- $$Q(s_k, a) = \frac{1}{N(s_k,a)} \sum_{\text{visits}} V(s_{k+1})$$ 为子状态的平均价值
+- $$\pi_\theta(a \mid s_k)$$ 为 Policy 先验（语言模型对步骤 $a$ 的概率）
+- $$N(s_k)$$ 为状态 $$s_k$$ 的访问次数
+- $$N(s_k, a)$$ 为边 $$(s_k, a)$$ 的访问次数
+- $$c_{\text{puct}}$$ 为探索常数
 
 **MCTS 引导的训练**
 
@@ -707,21 +707,21 @@ $$
 \mathcal{L}_{\text{MCTS}}(\theta) = -\sum_{k} \sum_{a} \pi_{\text{MCTS}}(a \mid s_k) \log \pi_\theta(a \mid s_k)
 $$
 
-其中 $\pi_{\text{MCTS}}(a \mid s_k) \propto N(s_k, a)^{1/\tau}$ 是 MCTS Policy（带温度 $\tau$ 的访问计数分布）。
+其中 $$\pi_{\text{MCTS}}(a \mid s_k) \propto N(s_k, a)^{1/\tau}$$ 是 MCTS Policy（带温度 $\tau$ 的访问计数分布）。
 
 ### 过程奖励模型
 
 **Math-Shepherd：自动化 PRM 训练**
 
-Math-Shepherd[[234]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2024mathshepherd)] 提出了一种无需人工步骤级标注、自动训练 PRM 的方法。其核心洞见是使用**基于结果的估计（outcome-based estimation）**：如果存在从 $s_k$ 出发的某一补全能够到达正确答案，则将步骤 $s_k$ 标注为正确。
+Math-Shepherd[[234]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wang2024mathshepherd)] 提出了一种无需人工步骤级标注、自动训练 PRM 的方法。其核心洞见是使用**基于结果的估计（outcome-based estimation）**：如果存在从 $$s_k$$ 出发的某一补全能够到达正确答案，则将步骤 $$s_k$$ 标注为正确。
 
-形式化地，对于部分解 $(s_1, \ldots, s_k)$：
+形式化地，对于部分解 $$(s_1, \ldots, s_k)$$：
 
 $$
 \hat{r}_k = \mathbf{1}\!\left[\exists\, (s_{k+1}, \ldots, s_K) : \text{verify}(s_K, y^*) = 1\right]
 $$
 
-在实践中，这通过从 $s_k$ 采样 $M$ 个补全并检查是否有任何一个正确来估计：
+在实践中，这通过从 $$s_k$$ 采样 $M$ 个补全并检查是否有任何一个正确来估计：
 
 $$
 \hat{r}_k \approx \mathbf{1}\!\left[\sum_{m=1}^{M} \text{verify}(\text{complete}_m(s_k), y^*) > 0\right]
@@ -790,7 +790,7 @@ $$
 \mathcal{L}_{\text{self-play}}(\theta) = \mathbb{E}_{q \sim \pi_\theta^{\text{gen}}} \mathbb{E}_{y \sim \pi_\theta^{\text{solve}}(\cdot\mid q)} \left[ r(y, y^*) \right]
 $$
 
-其中 $\pi_\theta^{\text{gen}}$ 生成问题，$\pi_\theta^{\text{solve}}$ 解答它们。生成器因产生具有挑战性但可解的问题而获得奖励。
+其中 $$\pi_\theta^{\text{gen}}$$ 生成问题，$$\pi_\theta^{\text{solve}}$$ 解答它们。生成器因产生具有挑战性但可解的问题而获得奖励。
 
 ### 可验证奖励的强化学习（RLVR）
 
@@ -835,17 +835,17 @@ RLVR 相对于基于人类反馈的强化学习（Reinforcement Learning from Hu
 
 **Journey Learning 目标**
 
-给定一条可能包含回溯的轨迹 $\tau = (s_0, a_0, s_1, a_1, \ldots, s_T)$：
+给定一条可能包含回溯的轨迹 $$\tau = (s_0, a_0, s_1, a_1, \ldots, s_T)$$：
 
 $$
 \mathcal{L}_{\text{journey}}(\theta) = -\sum_{t=0}^{T} w_t \log \pi_\theta(a_t \mid s_t)
 $$
 
-其中权重 $w_t$ 被设计为强调：
+其中权重 $$w_t$$ 被设计为强调：
 
-- 最终导向成功的步骤（$w_t > 1$）
-- 错误之后的纠正步骤（$w_t > 1$）
-- 失败分支中的步骤（$w_t < 1$，但 $> 0$）
+- 最终导向成功的步骤（$$w_t > 1$$）
+- 错误之后的纠正步骤（$$w_t > 1$$）
+- 失败分支中的步骤（$$w_t < 1$$，但 $> 0$）
 
 ### Quiet-STaR：在每个 Token 上推理
 
@@ -853,7 +853,7 @@ Quiet-STaR[[218]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zelikman2024q
 
 **形式化**
 
-对于每个 Token 位置 $t$，模型在预测下一个 Token $x_{t+1}$ 之前先生成一段隐藏思考 $z_t$：
+对于每个 Token 位置 $t$，模型在预测下一个 Token $$x_{t+1}$$ 之前先生成一段隐藏思考 $$z_t$$：
 
 $$
 P(x_{t+1} \mid x_{\leq t}) = \mathbb{E}_{z_t \sim \pi_\theta(\cdot \mid x_{\leq t})} \left[ \pi_\theta(x_{t+1} \mid x_{\leq t}, z_t) \right]
@@ -867,17 +867,17 @@ $$
 
 **使用 REINFORCE 训练**
 
-由于思考 $z_t$ 是离散潜变量，梯度使用 REINFORCE 估计：
+由于思考 $$z_t$$ 是离散潜变量，梯度使用 REINFORCE 估计：
 
 $$
 \nabla_\theta \mathcal{L}_{\text{QS}} = \mathbb{E}_{z_t} \left[ \nabla_\theta \log \pi_\theta(z_t \mid x_{\leq t}) \cdot \left( \log P(x_{t+1} \mid x_{\leq t}, z_t) - b_t \right) \right]
 $$
 
-其中 $b_t$ 为基线（例如无思考预测 $\log \pi_\theta(x_{t+1} \mid x_{\leq t})$）。
+其中 $$b_t$$ 为基线（例如无思考预测 $$\log \pi_\theta(x_{t+1} \mid x_{\leq t})$$）。
 
 > **Quiet-STaR 的计算代价**
 >
-> Quiet-STaR 将推理成本提升为 $L_z + 1$ 倍（$L_z$ 为思考长度），且作用于*每一个* Token 位置。对于长度为 $T$ 的序列，若思考长度 $L_z = 8$，计算量增加 $9\times$。这使得 Quiet-STaR 在长序列上若无重大工程优化（如对思考的投机解码、缓存等）便不可行。
+> Quiet-STaR 将推理成本提升为 $$L_z + 1$$ 倍（$$L_z$$ 为思考长度），且作用于*每一个* Token 位置。对于长度为 $T$ 的序列，若思考长度 $$L_z = 8$$，计算量增加 $9\times$。这使得 Quiet-STaR 在长序列上若无重大工程优化（如对思考的投机解码、缓存等）便不可行。
 
 ## 推理的扩展律
 
@@ -885,15 +885,15 @@ $$
 
 ### 训练计算量与测试时计算量的权衡
 
-推理模型的根本性扩展问题是：**给定固定的总计算预算 $C_{\text{total}} = C_{\text{train}} + N \cdot C_{\text{test}}$（其中 $N$ 为查询数量），应如何分配计算？**
+推理模型的根本性扩展问题是：**给定固定的总计算预算 $$C_{\text{total}} = C_{\text{train}} + N \cdot C_{\text{test}}$$（其中 $N$ 为查询数量），应如何分配计算？**
 
-设 $\mathcal{A}(C_{\text{train}}, C_{\text{test}})$ 表示用 $C_{\text{train}}$ FLOPs 训练、每个查询给定 $C_{\text{test}}$ 推理 FLOPs 的模型准确率。经验上：
+设 $$\mathcal{A}(C_{\text{train}}, C_{\text{test}})$$ 表示用 $$C_{\text{train}}$$ FLOPs 训练、每个查询给定 $$C_{\text{test}}$$ 推理 FLOPs 的模型准确率。经验上：
 
 $$
 \mathcal{A}(C_{\text{train}}, C_{\text{test}}) \approx 1 - \exp\!\left(-a \cdot C_{\text{train}}^{\alpha} \cdot C_{\text{test}}^{\beta}\right)
 $$
 
-其中 $a, \alpha, \beta > 0$ 为常数。对于固定总预算 $C_{\text{total}}$，最优分配满足训练与推理之间每 FLOP 的边际回报相等的条件：
+其中 $a, \alpha, \beta > 0$ 为常数。对于固定总预算 $$C_{\text{total}}$$，最优分配满足训练与推理之间每 FLOP 的边际回报相等的条件：
 
 $$
 \frac{\partial \mathcal{A}}{\partial C_{\text{train}}} = \frac{1}{N} \cdot \frac{\partial \mathcal{A}}{\partial C_{\text{test}}}
@@ -905,13 +905,13 @@ $$
 \frac{C_{\text{train}}^*}{C_{\text{total}}} = \frac{\alpha}{\alpha + \beta}
 $$
 
-对于特定预算结构 $C_{\text{total}} = C_{\text{train}} + N \cdot C_{\text{test}}$，在乘性准确率模型下该占比与 $N$ 无关。然而在实际中 $\alpha$ 和 $\beta$ 是问题相关的：对于高流量部署（大 $N$），即便基础模型的微小提升也会占主导，倾向于训练投入；对于低流量、高价值的查询（小 $N$），测试时计算则更具成本效益。
+对于特定预算结构 $$C_{\text{total}} = C_{\text{train}} + N \cdot C_{\text{test}}$$，在乘性准确率模型下该占比与 $N$ 无关。然而在实际中 $\alpha$ 和 $\beta$ 是问题相关的：对于高流量部署（大 $N$），即便基础模型的微小提升也会占主导，倾向于训练投入；对于低流量、高价值的查询（小 $N$），测试时计算则更具成本效益。
 
 ### 何时投资于更长推理链 vs 更好的基础模型
 
 > **推理链长度与模型容量**
 >
-> 对于容量为 $C$ 的模型在难度为 $D$ 的问题上，最优推理链长度 $L^*$ 满足：
+> 对于容量为 $C$ 的模型在难度为 $D$ 的问题上，最优推理链长度 $$L^*$$ 满足：
 >
 > $$
 > L^* \propto \frac{D}{C^{\gamma}}
@@ -921,7 +921,7 @@ $$
 >
 > - **困难问题**无论模型规模如何都需要更长的推理链
 > - 在相同问题难度下，**更大的模型**需要更短的推理链
-> - **收益递减**：超过 $L^*$ 后，额外的 Token 不再带来收益，反而可能有害（过度思考）
+> - **收益递减**：超过 $$L^*$$ 后，额外的 Token 不再带来收益，反而可能有害（过度思考）
 
 「过度思考（overthinking）」现象——拥有极长推理链的模型反而比拥有适中推理链的模型表现*更差*——已被经验观察到，归因于：
 
@@ -931,7 +931,7 @@ $$
 
 ### 最优 Token 预算分配
 
-对于给定 Token 预算 $B$ 的模型，「思考」Token $T_{\text{think}}$ 与「作答」Token $T_{\text{answer}}$ 之间的分配应满足：
+对于给定 Token 预算 $B$ 的模型，「思考」Token $$T_{\text{think}}$$ 与「作答」Token $$T_{\text{answer}}$$ 之间的分配应满足：
 
 $$
 T_{\text{think}}^* = \arg\max_{T} \mathcal{A}(T, B - T)
@@ -939,9 +939,9 @@ $$
 
 经验上，最优划分是问题相关的：
 
-- **简单问题**：$T_{\text{think}}^* / B \approx 0.3$（30\% 思考）
-- **困难问题**：$T_{\text{think}}^* / B \approx 0.8$（80\% 思考）
-- **极困难问题**：$T_{\text{think}}^* / B \approx 0.95$（95\% 思考，极简作答）
+- **简单问题**：$$T_{\text{think}}^* / B \approx 0.3$$（30\% 思考）
+- **困难问题**：$$T_{\text{think}}^* / B \approx 0.8$$（80\% 思考）
+- **极困难问题**：$$T_{\text{think}}^* / B \approx 0.95$$（95\% 思考，极简作答）
 
 这促成了**自适应思考预算（adaptive thinking budgets）**：为更难的问题分配更多 Token，难度可由模型在初次解题尝试中的不确定度来估计。
 

@@ -6,7 +6,7 @@ permalink: /part5/ch17-memory-systems.html
 
 ## 动机：为什么 Agent 需要记忆
 
-大语言模型本质上是无状态的函数近似器：给定 Prompt $x$，它们产生续写分布 $p_\theta(y \mid x)$。每一次推理调用都从零开始。*上下文窗口*（context window）——模型可以关注的有限 Token 序列——是生成时唯一可用的信息。对短小、自包含的任务而言这已足够；但对长周期的智能体任务而言，这是一个根本性瓶颈。
+大语言模型本质上是无状态的函数近似器：给定 Prompt $x$，它们产生续写分布 $$p_\theta(y \mid x)$$。每一次推理调用都从零开始。*上下文窗口*（context window）——模型可以关注的有限 Token 序列——是生成时唯一可用的信息。对短小、自包含的任务而言这已足够；但对长周期的智能体任务而言，这是一个根本性瓶颈。
 
 > **上下文窗口瓶颈**
 >
@@ -22,13 +22,13 @@ permalink: /part5/ch17-memory-systems.html
 >
 > 认知科学在生物智能体中区分出多种记忆系统 [[293]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-tulving1985memory), [294]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-squire1992declarative)]：*工作记忆*（对信息的主动操控）、*情景记忆*（自传式事件）、*语义记忆*（世界知识）以及*程序记忆*（技能与习惯）。有效的智能体 AI 系统从类似的划分中获益——并非因为我们要模拟神经科学，而是因为这些类别真实地反映了截然不同的*访问模式*、*更新频率*和*检索机制*。
 
-形式化地，我们把 Agent 建模为一个元组 $\mathcal{A} = (\pi_\theta, \mathcal{M}, \mathcal{R}, \mathcal{W})$，其中 $\pi_\theta$ 是 Policy（LLM），$\mathcal{M}$ 是记忆存储，$\mathcal{R}: \mathcal{Q} \times \mathcal{M} \to \mathcal{D}$ 是把查询映射到检索结果的检索函数，$\mathcal{W}: \mathcal{M} \times \mathcal{E} \to \mathcal{M}$ 是用新经验 $\mathcal{E}$ 更新记忆的写入函数。在每一步 $t$，Agent 观察到 $o_t$，检索相关上下文 $c_t = \mathcal{R}(o_t, \mathcal{M})$，并采取行动：
+形式化地，我们把 Agent 建模为一个元组 $$\mathcal{A} = (\pi_\theta, \mathcal{M}, \mathcal{R}, \mathcal{W})$$，其中 $$\pi_\theta$$ 是 Policy（LLM），$\mathcal{M}$ 是记忆存储，$\mathcal{R}: \mathcal{Q} \times \mathcal{M} \to \mathcal{D}$ 是把查询映射到检索结果的检索函数，$\mathcal{W}: \mathcal{M} \times \mathcal{E} \to \mathcal{M}$ 是用新经验 $\mathcal{E}$ 更新记忆的写入函数。在每一步 $t$，Agent 观察到 $$o_t$$，检索相关上下文 $$c_t = \mathcal{R}(o_t, \mathcal{M})$$，并采取行动：
 
 $$
 a_t \sim \pi_\theta\!\left(\cdot \;\middle\vert\; [s_t;\, c_t;\, h_t]\right),
 $$
 
-其中 $s_t$ 是当前的系统 Prompt，$c_t$ 是检索到的记忆，$h_t$ 是近期的上下文历史。行动之后，Agent 可写入新信息：$\mathcal{M} \leftarrow \mathcal{W}(\mathcal{M},\, (o_t, a_t, r_t))$。
+其中 $$s_t$$ 是当前的系统 Prompt，$$c_t$$ 是检索到的记忆，$$h_t$$ 是近期的上下文历史。行动之后，Agent 可写入新信息：$$\mathcal{M} \leftarrow \mathcal{W}(\mathcal{M},\, (o_t, a_t, r_t))$$。
 
 ## 记忆类型分类
 
@@ -39,8 +39,8 @@ $$
 工作记忆是 Agent 的*活动工作空间*：当前正在被操控的信息。在 LLM Agent 中它对应于：
 
 - **草稿板（Scratchpads）。** 在产出最终答案之前写入专用缓冲区的中间推理步骤（例如思维链 Chain-of-Thought [[103]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-wei2022chain)]、scratchpad [[295]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-nye2021show)]）。
-- **思维链缓冲区。** 在答案 Token $a$ 之前生成的推理 Token 序列 $z_1, z_2, \ldots, z_k$，建模为 $p(a \mid x) = \sum_z p(a \mid x, z)\,p(z \mid x)$。
-- **对话上下文。** 保留在上下文窗口中的近期轮次历史 $[(u_1, a_1), \ldots, (u_t, a_t)]$。
+- **思维链缓冲区。** 在答案 Token $a$ 之前生成的推理 Token 序列 $$z_1, z_2, \ldots, z_k$$，建模为 $$p(a \mid x) = \sum_z p(a \mid x, z)\,p(z \mid x)$$。
+- **对话上下文。** 保留在上下文窗口中的近期轮次历史 $$[(u_1, a_1), \ldots, (u_t, a_t)]$$。
 
 工作记忆是*快速的*（零检索延迟——它已经在上下文中）、*易失的*（上下文清空时即丢失），且*容量受限*（受 $L$ 约束）。
 
@@ -51,7 +51,7 @@ $$
 - **过往交互。** 先前对话、任务尝试及其结果的完整或摘要记录。
 - **成功轨迹。** 可作为少样本范例被检索、以服务于未来相似任务的高 Reward 动作序列。
 - **失败案例。** 带有根因标注的错误记录，使 Agent 能够避免重复犯错。
-- **检索增强的情景回忆。** 给定新任务 $q$，检索最相似的 $k$ 个过去 Episode $\{e_i\}_{i=1}^k$ 并加入上下文。
+- **检索增强的情景回忆。** 给定新任务 $q$，检索最相似的 $k$ 个过去 Episode $$\{e_i\}_{i=1}^k$$ 并加入上下文。
 
 情景记忆通常实现为基于 Episode 摘要 Embedding 的向量存储（见「基于 RAG 的记忆」一节）。
 
@@ -86,11 +86,11 @@ $$
 
 ### 基于 RAG 的记忆
 
-检索增强生成（Retrieval-Augmented Generation, RAG） [[109]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lewis2020retrieval)] 是 LLM Agent 外部记忆的主流范式。记忆存储 $\mathcal{M}$ 是文档集合 $\{d_i\}_{i=1}^N$；检索把查询 $q$ 映射到一个有序子集。
+检索增强生成（Retrieval-Augmented Generation, RAG） [[109]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lewis2020retrieval)] 是 LLM Agent 外部记忆的主流范式。记忆存储 $\mathcal{M}$ 是文档集合 $$\{d_i\}_{i=1}^N$$；检索把查询 $q$ 映射到一个有序子集。
 
 **Embedding 存储与向量数据库。**
 
-每个文档 $d_i$ 由 Embedding 模型 $\phi$ 编码：$\mathbf{v}_i = \phi(d_i) \in \mathbb{R}^{D}$。查询同样被编码：$\mathbf{q} = \phi(q)$。检索按相似度返回 top-$k$ 文档：
+每个文档 $$d_i$$ 由 Embedding 模型 $\phi$ 编码：$$\mathbf{v}_i = \phi(d_i) \in \mathbb{R}^{D}$$。查询同样被编码：$\mathbf{q} = \phi(q)$。检索按相似度返回 top-$k$ 文档：
 
 $$
 \text{Retrieve}(q, \mathcal{M}, k) = \underset{S \subseteq [N],\, \lvert S \rvert=k}{\arg\max} \sum_{i \in S} \text{sim}(\mathbf{q}, \mathbf{v}_i),
@@ -112,7 +112,7 @@ $$
 
 **重排序（Re-ranking）。**
 
-交叉编码器（cross-encoder）重排序器 $f_\psi(q, d) \in [0,1]$ 与查询联合打分每个被检索文档，以 $O(k)$ 次前向传播的代价换取更高准确率。整体流水线为：用 ANN 检索 $k' \gg k$ 个候选，再用交叉编码器重排序，返回 top $k$。
+交叉编码器（cross-encoder）重排序器 $$f_\psi(q, d) \in [0,1]$$ 与查询联合打分每个被检索文档，以 $O(k)$ 次前向传播的代价换取更高准确率。整体流水线为：用 ANN 检索 $k' \gg k$ 个候选，再用交叉编码器重排序，返回 top $k$。
 
 > **检索引发的幻觉风险**
 >
@@ -124,7 +124,7 @@ $$
 
 **渐进式摘要（Progressive Summarization）。**
 
-在每一步 $t$，Agent 维护一个运行中的摘要 $S_t$。当新信息 $e_t$ 到达时：
+在每一步 $t$，Agent 维护一个运行中的摘要 $$S_t$$。当新信息 $$e_t$$ 到达时：
 
 $$
 S_{t+1} = \text{LLM}\!\left(\texttt{``Summarize: [}S_t\texttt{] + [}e_t\texttt{]''}\right).
@@ -134,7 +134,7 @@ $$
 
 **分层压缩（Hierarchical Compression）。**
 
-将记忆组织为层级 $L_0 \supset L_1 \supset \cdots \supset L_K$，其中 $L_0$ 是原文，每个 $L_{i+1}$ 都是 $L_i$ 的摘要。检索首先访问 $L_K$（压缩程度最高、最快），按需逐层深入。这呼应了 Forte [[298]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-forte2022building)] 的*渐进式摘要*技术。
+将记忆组织为层级 $$L_0 \supset L_1 \supset \cdots \supset L_K$$，其中 $$L_0$$ 是原文，每个 $$L_{i+1}$$ 都是 $$L_i$$ 的摘要。检索首先访问 $$L_K$$（压缩程度最高、最快），按需逐层深入。这呼应了 Forte [[298]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-forte2022building)] 的*渐进式摘要*技术。
 
 **何时摘要、何时原样存储。**
 
@@ -150,7 +150,7 @@ $$
 
 **实体-关系抽取。**
 
-新观察由抽取模型 $\text{IE}: \text{text} \to \{(h_i, r_i, t_i)\}$ 解析并合并到 $\mathcal{G}$ 中。共指消解（coreference resolution）与实体链接（entity linking）保证一致性。
+新观察由抽取模型 $$\text{IE}: \text{text} \to \{(h_i, r_i, t_i)\}$$ 解析并合并到 $\mathcal{G}$ 中。共指消解（coreference resolution）与实体链接（entity linking）保证一致性。
 
 **GraphRAG。**
 
@@ -160,15 +160,15 @@ $$
 \text{GraphRetrieve}(q, \mathcal{G}, k) = \bigcup_{v \in \text{seeds}(q)} \mathcal{N}_k(v, \mathcal{G}),
 $$
 
-其中 $\mathcal{N}_k(v, \mathcal{G})$ 是 $v$ 的 $k$ 跳邻域。
+其中 $$\mathcal{N}_k(v, \mathcal{G})$$ 是 $v$ 的 $k$ 跳邻域。
 
 **时序知识图谱。**
 
-事实具有有效期：$(h, r, t, [t_\text{start}, t_\text{end}])$。时序知识图谱 [[301]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lacroix2020tensor)] 支持类似 “2023 年 OpenAI 的 CEO 是谁？” 的查询，而不会把过去与现在的状态混淆在一起。
+事实具有有效期：$$(h, r, t, [t_\text{start}, t_\text{end}])$$。时序知识图谱 [[301]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-lacroix2020tensor)] 支持类似 “2023 年 OpenAI 的 CEO 是谁？” 的查询，而不会把过去与现在的状态混淆在一起。
 
 ### 键值记忆网络（Key-Value Memory Networks）
 
-可微分记忆网络 [[302]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-weston2014memory), [303]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-sukhbaatar2015end)] 把记忆表示为一组键值对 $\{(\mathbf{k}_i, \mathbf{v}_i)\}_{i=1}^M$，并通过基于软 Attention 的检索访问：
+可微分记忆网络 [[302]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-weston2014memory), [303]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-sukhbaatar2015end)] 把记忆表示为一组键值对 $$\{(\mathbf{k}_i, \mathbf{v}_i)\}_{i=1}^M$$，并通过基于软 Attention 的检索访问：
 
 $$
 \alpha_i = \text{softmax}\!\left(\frac{\mathbf{q}^\top \mathbf{k}_i}{\sqrt{D}}\right), \qquad
@@ -205,13 +205,13 @@ $$
 
 其中 $\tau$ 为阈值，$\text{importance}(e)$ 可以是：
 
-- **惊讶度（Surprise）：** $-\log p_\theta(e \mid \text{context})$——出乎意料的事件信息量更大。
-- **Reward 信号：** 与高 $\lvert r_t \rvert$（正或负）相关联的事件值得记住。
+- **惊讶度（Surprise）：** $$-\log p_\theta(e \mid \text{context})$$——出乎意料的事件信息量更大。
+- **Reward 信号：** 与高 $$\lvert r_t \rvert$$（正或负）相关联的事件值得记住。
 - **LLM 自评：** 提示模型在 1--10 的尺度上为重要性打分。
 
 **冲突检测。**
 
-在写入新事实 $f_\text{new}$ 之前，应检查它与已有记忆是否冲突：
+在写入新事实 $$f_\text{new}$$ 之前，应检查它与已有记忆是否冲突：
 
 $$
 \text{Conflict}(f_\text{new}, \mathcal{M}) = \exists\, f \in \mathcal{M} : \text{Contradicts}(f_\text{new}, f).
@@ -256,7 +256,7 @@ $$
 \text{score}(d, q, t) = \lambda \cdot \text{sim}(\mathbf{q}, \mathbf{v}_d) + (1-\lambda) \cdot \exp\!\left(-\frac{t - t_d}{\tau_\text{decay}}\right),
 $$
 
-其中 $t_d$ 是记忆的创建时间，$\tau_\text{decay}$ 控制衰减速率。Generative Agents 论文 [[307]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-park2023generative)] 采用了类似的近期性加权检索。
+其中 $$t_d$$ 是记忆的创建时间，$$\tau_\text{decay}$$ 控制衰减速率。Generative Agents 论文 [[307]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-park2023generative)] 采用了类似的近期性加权检索。
 
 ### 更新：冲突解决与巩固
 
@@ -282,7 +282,7 @@ $$
 \text{Reflect}(\mathcal{M}) \to \{i_1, i_2, \ldots\} \subset \mathcal{M}_\text{semantic},
 $$
 
-其中每条洞见 $i_j$ 都是从多条情景记忆中归纳出的更高层抽象。
+其中每条洞见 $$i_j$$ 都是从多条情景记忆中归纳出的更高层抽象。
 
 > **反思的实践（Reflexion）**
 >
@@ -297,7 +297,7 @@ $$
 
 **反思结果存放在哪里？**
 
-反思从情景记忆*读取*，但向语义记忆*写入*。所产生的洞见是上下文无关的概括（“始终检查空输入”），并非具体 Episode 的记录——因此属于语义记忆 $\mathcal{M}_\text{semantic}$。然而在反思过程本身中，中间推理（检索到的 Episode + 综合 Prompt + 生成的洞见）占用的是*工作记忆*（上下文窗口）。一言以蔽之：
+反思从情景记忆*读取*，但向语义记忆*写入*。所产生的洞见是上下文无关的概括（“始终检查空输入”），并非具体 Episode 的记录——因此属于语义记忆 $$\mathcal{M}_\text{semantic}$$。然而在反思过程本身中，中间推理（检索到的 Episode + 综合 Prompt + 生成的洞见）占用的是*工作记忆*（上下文窗口）。一言以蔽之：
 
 - **输入**：情景记忆（具体的过往事件）
 - **计算**：工作记忆（上下文中的主动推理）
@@ -348,7 +348,7 @@ $$
 
 ### 共享记忆池
 
-在多智能体系统中，Agent 可以在共享记忆存储 $\mathcal{M}_\text{shared}$ 之外，再各自保留私有存储 $\mathcal{M}_i$：
+在多智能体系统中，Agent 可以在共享记忆存储 $$\mathcal{M}_\text{shared}$$ 之外，再各自保留私有存储 $$\mathcal{M}_i$$：
 
 $$
 \text{context}_i(t) = \mathcal{R}(\mathcal{M}_i, q_i) \cup \mathcal{R}(\mathcal{M}_\text{shared}, q_i).
@@ -369,7 +369,7 @@ $$
 - **Last-write-wins（后写者胜出）：** 简单但会丢失信息。
 - **版本化记忆：** 维护所有写入的历史；Agent 可以查询任一版本。
 - **投票 / 共识：** 在某个事实被提交之前，要求 $n$ 个 Agent 中有 $k$ 个达成一致。
-- **置信度加权合并：** $f_\text{merged} = \sum_i w_i f_i$，其中 $w_i$ 是 Agent $i$ 的置信度。
+- **置信度加权合并：** $$f_\text{merged} = \sum_i w_i f_i$$，其中 $$w_i$$ 是 Agent $i$ 的置信度。
 - **指定权威：** 把不同记忆区域的所有权分配给特定的 Agent。
 
 > **开放问题：分布式记忆一致性**
@@ -383,11 +383,11 @@ $$
 记忆操作（读、写、更新、反思）可以被视为 RL 框架中的动作。挑战在于设计能激励*有用*记忆行为的 Reward 信号：
 
 - **任务 Reward 回传。** 如果某次记忆检索导致了正确答案，则把功劳归于该检索动作。稀疏但毫不含糊。
-- **检索精度 Reward。** $r_\text{retrieve} = \text{Relevance}(d_\text{retrieved}, \text{task})$，由一个学习得到的相关性模型估计。
-- **记忆效率 Reward。** 对不必要的写入施加惩罚：$r_\text{write} = -\lambda \cdot \mathbf{1}[\text{write}]$，从而鼓励选择性存储。
+- **检索精度 Reward。** $$r_\text{retrieve} = \text{Relevance}(d_\text{retrieved}, \text{task})$$，由一个学习得到的相关性模型估计。
+- **记忆效率 Reward。** 对不必要的写入施加惩罚：$$r_\text{write} = -\lambda \cdot \mathbf{1}[\text{write}]$$，从而鼓励选择性存储。
 - **一致性 Reward。** 奖励内部一致（无矛盾）的记忆状态。
 
-在第 $t$ 步对一次记忆操作 $m_t$ 的组合 Reward：
+在第 $t$ 步对一次记忆操作 $$m_t$$ 的组合 Reward：
 
 $$
 r_t^{\text{mem}} = r_t^{\text{task}} + \alpha \cdot r_t^{\text{retrieve}} + \beta \cdot r_t^{\text{write}} + \gamma \cdot r_t^{\text{consistency}}.
@@ -395,7 +395,7 @@ $$
 
 ### 学习“记什么”
 
-“记什么”是一个元学习挑战：Agent 必须学到一个能最大化未来任务表现的写入 Policy $\pi_\text{write}(e)$。其难点在于：
+“记什么”是一个元学习挑战：Agent 必须学到一个能最大化未来任务表现的写入 Policy $$\pi_\text{write}(e)$$。其难点在于：
 
 1. 一条记忆的价值只有在未来才会显现（延迟 Reward）。
 2. 写入时未来可能查询的空间是未知的。
@@ -415,7 +415,7 @@ $$
 \mathcal{L}(\theta, \phi) = \mathbb{E}_{\tau \sim \pi_\theta}\!\left[\sum_{t=0}^T \gamma^t r_t\right] - \lambda \cdot \mathcal{L}_\text{mem}(\phi),
 $$
 
-其中 $\theta$ 是 LLM 参数，$\phi$ 是记忆系统参数（例如检索模型权重），$\mathcal{L}_\text{mem}$ 是对记忆复杂度的正则项。
+其中 $\theta$ 是 LLM 参数，$\phi$ 是记忆系统参数（例如检索模型权重），$$\mathcal{L}_\text{mem}$$ 是对记忆复杂度的正则项。
 
 > **关键洞见：把记忆作为可学习的归纳偏置**
 >

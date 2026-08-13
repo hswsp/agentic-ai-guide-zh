@@ -8,7 +8,7 @@ permalink: /part2/ch09-reward-model-training.html
 
 ## Bradley-Terry 模型 —— 完整推导
 
-Bradley-Terry 模型 [[186]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-bradley1952rank)] 是成对偏好学习(pairwise preference learning)的标准概率框架。给定对 prompt $q$ 的两个回答 $y_1$ 和 $y_2$,该模型假设:
+Bradley-Terry 模型 [[186]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-bradley1952rank)] 是成对偏好学习(pairwise preference learning)的标准概率框架。给定对 prompt $q$ 的两个回答 $$y_1$$ 和 $$y_2$$,该模型假设:
 
 $$
 P(y_1 \succ y_2 \mid q) = \sigma(r(y_1, q) - r(y_2, q))
@@ -19,18 +19,18 @@ $$
 
 #### 最大似然估计
 
-给定偏好对数据集 $\mathcal{D} = \{(q^{(k)}, y_w^{(k)}, y_l^{(k)})\}_{k=1}^N$,最大似然估计(MLE)目标为:
+给定偏好对数据集 $$\mathcal{D} = \{(q^{(k)}, y_w^{(k)}, y_l^{(k)})\}_{k=1}^N$$,最大似然估计(MLE)目标为:
 
 $$
 \mathcal{L}_{BT}(\phi) =
 -\frac{1}{N}\sum_{k=1}^N \log \sigma\!\bigl(r_\phi(y_w^{(k)}, q^{(k)}) - r_\phi(y_l^{(k)}, q^{(k)})\bigr),
 $$
 
-其中 $r_\phi$ 是由 $\phi$ 参数化的神经网络。这是一个二元交叉熵 Loss,其中“正”类别对应偏好的回答。
+其中 $$r_\phi$$ 是由 $\phi$ 参数化的神经网络。这是一个二元交叉熵 Loss,其中“正”类别对应偏好的回答。
 
 > **Bradley-Terry 假设**
 >
-> 1. 偏好具有*传递性*:若 $y_1 \succ y_2$ 且 $y_2 \succ y_3$,则 $y_1 \succ y_3$。
+> 1. 偏好具有*传递性*:若 $$y_1 \succ y_2$$ 且 $$y_2 \succ y_3$$,则 $$y_1 \succ y_3$$。
 > 2. 偏好由*标量*Reward 决定(不存在多维偏好)。
 > 3. 偏好概率仅依赖于 Reward 的*差值*。
 > 4. 各偏好对之间相互*独立*(不存在标注者效应)。
@@ -236,7 +236,7 @@ $$
 
 > **多 Reward 组合策略**
 >
-> 1. **加权求和(Weighted sum)**:$r = \sum_n w_n r_n$。简单但对尺度敏感。
+> 1. **加权求和(Weighted sum)**:$$r = \sum_n w_n r_n$$。简单但对尺度敏感。
 > 2. **先归一化再求和(GDPO)**:在组内将每个 Reward 归一化为零均值、单位方差,再加权求和。尺度无关。
 > 3. **字典序(Lexicographic)**:按优先级顺序优化 Reward;仅当高优先级 Reward 平局时才考虑低优先级的 Reward。
 > 4. **约束法(Constrained)**:在次要 Reward 的约束下最大化主 Reward。
@@ -268,7 +268,7 @@ $$
 
 ## 基于列表排序的 Reward
 
-虽然 Bradley-Terry 模型处理的是*成对*偏好($y_w \succ y_l$),但许多实际场景需要同时对多个回答进行排序。列表式(listwise)奖励模型从完整排序中学习,提供更丰富的训练信号,并实现更好的校准。
+虽然 Bradley-Terry 模型处理的是*成对*偏好($$y_w \succ y_l$$),但许多实际场景需要同时对多个回答进行排序。列表式(listwise)奖励模型从完整排序中学习,提供更丰富的训练信号,并实现更好的校准。
 
 #### 动机:超越成对比较
 
@@ -281,7 +281,7 @@ $$
 
 #### Plackett-Luce 模型
 
-Plackett-Luce(PL)模型 [[187]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-plackett1975analysis)] 是将 Bradley-Terry 推广至完整排序的标准扩展。给定 $K$ 个回答 $y_1, \ldots, y_K$ 及其排序 $\pi$(其中 $\pi(1)$ 为最佳):
+Plackett-Luce(PL)模型 [[187]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-plackett1975analysis)] 是将 Bradley-Terry 推广至完整排序的标准扩展。给定 $K$ 个回答 $$y_1, \ldots, y_K$$ 及其排序 $\pi$(其中 $\pi(1)$ 为最佳):
 
 > **Plackett-Luce 似然**
 >
@@ -297,7 +297,7 @@ Plackett-Luce(PL)模型 [[187]({{ site.baseurl }}/part6/ch29-conclusion.html#ref
 
 > **Plackett-Luce 退化为 Bradley-Terry**
 >
-> 当 $K=2$ 时,PL 模型给出:$P(y_1 \succ y_2) = \frac{e^{r(y_1)}}{e^{r(y_1)} + e^{r(y_2)}} = \sigma(r(y_1) - r(y_2))$ —— 这正是 Bradley-Terry 模型。PL 是其严格的推广。
+> 当 $K=2$ 时,PL 模型给出:$$P(y_1 \succ y_2) = \frac{e^{r(y_1)}}{e^{r(y_1)} + e^{r(y_2)}} = \sigma(r(y_1) - r(y_2))$$ —— 这正是 Bradley-Terry 模型。PL 是其严格的推广。
 
 #### ListMLE 与基于排序的 Loss
 
@@ -308,7 +308,7 @@ Plackett-Luce(PL)模型 [[187]({{ site.baseurl }}/part6/ch29-conclusion.html#ref
 > $$
 > \mathcal{L}_{ListNet} = -\sum_{i=1}^{K} P_{true}(y_i  is best) \cdot \log P_{model}(y_i  is best)
 > $$
-> 其中 $P_{\text{model}}(y_i \text{ is best}) = \frac{e^{r_\phi(y_i)}}{\sum_j e^{r_\phi(y_j)}}$。
+> 其中 $$P_{\text{model}}(y_i \text{ is best}) = \frac{e^{r_\phi(y_i)}}{\sum_j e^{r_\phi(y_j)}}$$。
 > - **LambdaRank** [[190]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-burges2006lambdarank)]:用排序指标(例如 NDCG)的变化对成对 Gradient 加权。当排名靠前的质量更重要时尤为有用。
 > - **RankNet** [[191]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-burges2005ranknet)]:对所有成对组合求和的成对交叉熵 —— 等价于在从排序中抽取的所有 $\binom{K}{2}$ 个对上应用 BT。
 
@@ -321,7 +321,7 @@ Plackett-Luce(PL)模型 [[187]({{ site.baseurl }}/part6/ch29-conclusion.html#ref
 > 1. **生成**:从 Policy 中对每个 prompt 采样 $N=8$ 个回答。
 > 2. **排序**:使用已有的奖励模型(或人工标注者)产生完整排序 $\pi$。
 > 3. **训练 listwise RM**:在 $(q, \pi)$ 元组上优化 PL Loss。
-> 4. **在 GRPO 中使用**:listwise RM 对每个回答分配标量 Reward $r(y_i, q)$;GRPO 将优势计算为 $\hat{A}_i = (r_i - \mu) / \sigma$。
+> 4. **在 GRPO 中使用**:listwise RM 对每个回答分配标量 Reward $$r(y_i, q)$$;GRPO 将优势计算为 $$\hat{A}_i = (r_i - \mu) / \sigma$$。
 >
 > **相对成对方法的优势**:listwise RM 同时看到全部 $N$ 个回答,可学到排名第 1 应当比排名第 $N$ 拥有高得多的 Reward(而非仅仅“比另一个回答略好”)。
 

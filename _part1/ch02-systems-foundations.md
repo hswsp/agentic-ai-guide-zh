@@ -142,7 +142,7 @@ NVMe SSD（例如 Samsung 990 Pro）顺序读取可达约 7 GB/s。ZeRO-Infinity
 >   \quad \text{(FLOPs / Byte)}
 > $$
 >
-> 当 $I < I_{\text{ridge}}$ 时内核是**内存密集（Memory-Bound）**的，当 $I > I_{\text{ridge}}$ 时则是**计算密集（Compute-Bound）**的，其中
+> 当 $$I < I_{\text{ridge}}$$ 时内核是**内存密集（Memory-Bound）**的，当 $$I > I_{\text{ridge}}$$ 时则是**计算密集（Compute-Bound）**的，其中
 >
 > $$
 > I_{\text{ridge}} = \frac{\text{峰值 FLOP/s}}{\text{峰值带宽}}
@@ -191,7 +191,7 @@ NVMe SSD（例如 Samsung 990 Pro）顺序读取可达约 7 GB/s。ZeRO-Infinity
 > 一个 transformer 块有两个主要组件，它们的算术强度截然不同：
 >
 > - **Attention：**作用于 $n \times d$ 张量。$QK^T$ 乘积是 $O(n^2 d)$ FLOPs，但注意力分数需要 $O(n^2)$ 内存。在长序列下，内存流量占主导地位——attention 是*内存密集（Memory-Bound）*的。
-> - **FFN（MLP）：**两个大型线性层，权重矩阵形状为 $[d_{\text{model}}, 4d_{\text{model}}]$。这些是高算术强度的大型 GEMM——FFN 是*计算密集（Compute-Bound）*的。
+> - **FFN（MLP）：**两个大型线性层，权重矩阵形状为 $$[d_{\text{model}}, 4d_{\text{model}}]$$。这些是高算术强度的大型 GEMM——FFN 是*计算密集（Compute-Bound）*的。
 >
 > 这就是为什么 FlashAttention（内存优化）对 attention 有效但对 FFN 无效，而量化（缩小权重体积）对 FFN 的帮助比对 attention 更大。
 
@@ -259,7 +259,7 @@ NVLink 是同一节点内 GPU 之间的点对点互联。每条链路都是双�
 
 > **环形拓扑 vs. 全二分**
 >
-> 在环形拓扑（8 GPU）中，AllReduce 需要数据绕环传输。每条链路必须承载总数据的 $\frac{2(N-1)}{N}$，因此算法带宽为 $B_{\text{link}} \times \frac{N}{2(N-1)}$（$N=8$ 时约为 $0.57 \times B_{\text{link}}$）。借助 NVSwitch 的全二分带宽，AllReduce 可以使用基于树的算法同时使用所有链路，达到接近峰值的带宽。在 DGX H100 实际测试中：ring 达到约 700 GB/s 总线带宽，NVSwitch 达到约 900 GB/s。
+> 在环形拓扑（8 GPU）中，AllReduce 需要数据绕环传输。每条链路必须承载总数据的 $\frac{2(N-1)}{N}$，因此算法带宽为 $$B_{\text{link}} \times \frac{N}{2(N-1)}$$（$N=8$ 时约为 $$0.57 \times B_{\text{link}}$$）。借助 NVSwitch 的全二分带宽，AllReduce 可以使用基于树的算法同时使用所有链路，达到接近峰值的带宽。在 DGX H100 实际测试中：ring 达到约 700 GB/s 总线带宽，NVSwitch 达到约 900 GB/s。
 
 **InfiniBand——节点间通信。**
 

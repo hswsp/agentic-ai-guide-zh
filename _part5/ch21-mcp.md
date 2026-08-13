@@ -792,7 +792,7 @@ LangChain 的 tool 可以通过 `langchain-mcp-adapters` 包封装到 MCP server
 
 $$\mathcal{A}_{\text{MCP}} = \bigcup_{s \in \mathcal{S}} \text{Tools}(s)$$
 
-其中 $\mathcal{S}$ 为已连接的 MCP server 集合，$\text{Tools}(s)$ 是 server $s$ 暴露的 tool 集合。Agent 学到的是一个以可用动作集合为条件的 policy $\pi(a \mid o, \mathcal{A}_{\text{MCP}})$，从而能够零样本泛化到新的 tool 集合。
+其中 $\mathcal{S}$ 为已连接的 MCP server 集合，$\text{Tools}(s)$ 是 server $s$ 暴露的 tool 集合。Agent 学到的是一个以可用动作集合为条件的 policy $$\pi(a \mid o, \mathcal{A}_{\text{MCP}})$$，从而能够零样本泛化到新的 tool 集合。
 
 工具参数的 JSON Schema 格式提供了一种 LLM 可以可靠解析与生成的**结构化动作表示**。这比自由格式的 API 文档更易处理，并使得在训练期间对动作空间进行系统性探索成为可能。
 

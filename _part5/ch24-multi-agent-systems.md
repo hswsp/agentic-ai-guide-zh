@@ -340,7 +340,7 @@ class TaskDAG:
 - **基于辩论的裁决**：Agent 为各自立场辩论；由一个裁判 Agent 做出决定
 - **Delphi 方法**：迭代轮次中，Agent 在看到他人的推理后修改自己的答案
 
-形式化地，给定 $n$ 个 Agent 产生输出 $\{o_1, \ldots, o_n\}$ 及其权重 $\{w_1, \ldots, w_n\}$，加权共识为：
+形式化地，给定 $n$ 个 Agent 产生输出 $$\{o_1, \ldots, o_n\}$$ 及其权重 $$\{w_1, \ldots, w_n\}$$，加权共识为：
 
 $$o^* = \arg\max_{o} \sum_{i=1}^{n} w_i \cdot \mathbf{1}[o_i = o]$$
 
@@ -637,7 +637,7 @@ CTDE 在训练时解决了非平稳性问题（集中式 critic 看到完整的�
 
 ### 通信学习（Communication Learning）
 
-与使用固定通信协议不同，Agent 可以**学习要通信什么**。在可微通信框架 [[378]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-sukhbaatar2016learning), [379]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-das2019tarmac)] 中，Agent 产生连续的通信向量 $m^i_t$ 并传递给其他 Agent：
+与使用固定通信协议不同，Agent 可以**学习要通信什么**。在可微通信框架 [[378]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-sukhbaatar2016learning), [379]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-das2019tarmac)] 中，Agent 产生连续的通信向量 $$m^i_t$$ 并传递给其他 Agent：
 
 $$a^i_t, m^i_t = \pi^i_{\theta^i}(o^i_t, \{m^j_{t-1}\}_{j \neq i})$$
 
@@ -671,7 +671,7 @@ $$a^i_t, m^i_t = \pi^i_{\theta^i}(o^i_t, \{m^j_{t-1}\}_{j \neq i})$$
 
 在多 Agent 场景下，最优性的概念比单 Agent 场景更复杂。两个关键的解概念：
 
-**Nash 均衡（Nash Equilibrium）**：一个联合 Policy $(\pi^{1*}, \ldots, \pi^{n*})$，使得没有任何 Agent 可以通过单方面偏离来提高其期望回报：
+**Nash 均衡（Nash Equilibrium）**：一个联合 Policy $$(\pi^{1*}, \ldots, \pi^{n*})$$，使得没有任何 Agent 可以通过单方面偏离来提高其期望回报：
 
 $$J^i(\pi^{i*}, \pi^{-i*}) \geq J^i(\pi^i, \pi^{-i*}) \quad \forall i, \forall \pi^i$$
 
@@ -706,7 +706,7 @@ $$\max_{\pi^1,\ldots,\pi^n} \sum_{i=1}^{n} J^i(\pi^1, \ldots, \pi^n)$$
 >
 > **准则**：仅当信息的期望价值超过消息成本时才进行通信。
 
-量化通信成本：若一条消息消耗 $c$ 个 Token，接收方 Agent 的任务价值为 $v$，则仅当任务价值的期望提升 $\Delta v > c \cdot \text{cost\_per\_token}$ 时才进行通信。
+量化通信成本：若一条消息消耗 $c$ 个 Token，接收方 Agent 的任务价值为 $v$，则仅当任务价值的期望提升 $$\Delta v > c \cdot \text{cost\_per\_token}$$ 时才进行通信。
 
 ### 冗余 vs. 效率
 

@@ -30,10 +30,10 @@ $$
 >
 > 在每个时间步 $t$：
 >
-> 1. 智能体观察状态 $s_t$
-> 2. 智能体根据策略 $\pi(a\mid s)$ 选择动作 $a_t$
-> 3. 环境转移到 $s_{t+1} \sim P(\cdot\mid s_t, a_t)$
-> 4. 智能体接收奖励 $r_t = R(s_t, a_t, s_{t+1})$
+> 1. 智能体观察状态 $$s_t$$
+> 2. 智能体根据策略 $\pi(a\mid s)$ 选择动作 $$a_t$$
+> 3. 环境转移到 $$s_{t+1} \sim P(\cdot\mid s_t, a_t)$$
+> 4. 智能体接收奖励 $$r_t = R(s_t, a_t, s_{t+1})$$
 > 5. 重复直到终止状态或时间步上限 $T$
 
 ## 核心概念与定义
@@ -76,7 +76,7 @@ $$
 
 > **关键：最优策略与贝尔曼最优性**
 >
-> 最优策略 $\pi^*$ 满足：
+> 最优策略 $$\pi^*$$ 满足：
 >
 > $$
 > V^*(s) = \max_a \sum_{s'} P(s'\mid s,a)\left[R(s,a,s') + \gamma V^*(s')\right]
@@ -86,7 +86,7 @@ $$
 > Q^*(s,a) = \sum_{s'} P(s'\mid s,a)\left[R(s,a,s') + \gamma \max_{a'} Q^*(s', a')\right]
 > $$
 >
-> 一旦得到 $Q^*$，最优策略就直接是：$\pi^*(s) = \arg\max_a Q^*(s,a)$。
+> 一旦得到 $$Q^*$$，最优策略就直接是：$$\pi^*(s) = \arg\max_a Q^*(s,a)$$。
 
 ## 强化学习方法的分类
 
@@ -103,8 +103,8 @@ $$
 >
 > **基于价值（Value-Based） vs 基于策略（Policy-Based）**：
 >
-> - **Value-Based**：学习 $Q(s,a)$ 或 $V(s)$，并通过 $\arg\max_a Q(s,a)$ 得到策略。适合离散、小规模动作空间（如 Atari），在连续或大规模动作空间上表现不佳。
-> - **Policy-Based**：直接参数化并优化 $\pi_\theta(a\mid s)$。天然适合连续或高维动作空间，对 LLM 至关重要（词表 = 32K--128K 个动作）。
+> - **Value-Based**：学习 $Q(s,a)$ 或 $V(s)$，并通过 $$\arg\max_a Q(s,a)$$ 得到策略。适合离散、小规模动作空间（如 Atari），在连续或大规模动作空间上表现不佳。
+> - **Policy-Based**：直接参数化并优化 $$\pi_\theta(a\mid s)$$。天然适合连续或高维动作空间，对 LLM 至关重要（词表 = 32K--128K 个动作）。
 > - **Actor-Critic**：两者结合——策略（actor）提议动作，价值函数（critic）评估动作。用于 LLM 的 PPO 即属于 actor-critic 方法。
 >
 > **同策略（On-Policy） vs 异策略（Off-Policy）**：
@@ -138,11 +138,11 @@ $$
 \delta_t = R_{t+1} + \gamma V(S_{t+1}) - V(S_t)
 $$
 
-- $R_{t+1}$：采取动作后获得的**即时奖励**。
-- $\gamma V(S_{t+1})$：下一个状态的估计**折扣价值**（智能体从下一个状态起预期获得的回报，按折扣因子 $\gamma$ 缩放）。
-- $V(S_t)$：当前状态价值的**原始估计**。
+- $$R_{t+1}$$：采取动作后获得的**即时奖励**。
+- $$\gamma V(S_{t+1})$$：下一个状态的估计**折扣价值**（智能体从下一个状态起预期获得的回报，按折扣因子 $\gamma$ 缩放）。
+- $$V(S_t)$$：当前状态价值的**原始估计**。
 
-组合项 $(R_{t+1} + \gamma V(S_{t+1}))$ 被称为 **TD 目标（TD Target）**。因此：
+组合项 $$(R_{t+1} + \gamma V(S_{t+1}))$$ 被称为 **TD 目标（TD Target）**。因此：
 
 $$
 \text{TD Error} = \text{TD Target} - \text{Old Estimate}
@@ -156,19 +156,19 @@ $$
 V(S_t) \leftarrow V(S_t) + \alpha \cdot \delta_t
 $$
 
-- 若 $\delta_t > 0$：结果好于预测 $\rightarrow$ 增加 $V(S_t)$，使智能体倾向追求该状态。
-- 若 $\delta_t < 0$：结果差于预测 $\rightarrow$ 降低 $V(S_t)$，使智能体避开该状态。
-- 若 $\delta_t = 0$：预测完美 $\rightarrow$ 无需更新（已收敛）。
+- 若 $$\delta_t > 0$$：结果好于预测 $\rightarrow$ 增加 $$V(S_t)$$，使智能体倾向追求该状态。
+- 若 $$\delta_t < 0$$：结果差于预测 $\rightarrow$ 降低 $$V(S_t)$$，使智能体避开该状态。
+- 若 $$\delta_t = 0$$：预测完美 $\rightarrow$ 无需更新（已收敛）。
 
 > **直觉：TD 与 Monte Carlo 的比较**
 >
-> **Monte Carlo**：等到 episode 结束，使用实际回报 $G_t$。无偏但方差高（单条完整轨迹可能不具代表性）。
+> **Monte Carlo**：等到 episode 结束，使用实际回报 $$G_t$$。无偏但方差高（单条完整轨迹可能不具代表性）。
 >
-> **TD**：每一步使用估计的未来价值 $\gamma V(s_{t+1})$ 进行更新。有偏（依赖 $V$ 的准确性），但方差低得多（单步更新，不会复合噪声）。
+> **TD**：每一步使用估计的未来价值 $$\gamma V(s_{t+1})$$ 进行更新。有偏（依赖 $V$ 的准确性），但方差低得多（单步更新，不会复合噪声）。
 >
 > **TD($\lambda$)**：在 TD(0) 与 Monte Carlo 之间插值。$\lambda=0$：纯 TD；$\lambda=1$：纯 MC。这正是 GAE 在 PPO 中所做的事情（取 $\lambda=0.95$）。
 
-**TD 目标**：$y_t = r_t + \gamma V(s_{t+1})$——我们要靠近的「更好的估计」。
+**TD 目标**：$$y_t = r_t + \gamma V(s_{t+1})$$——我们要靠近的「更好的估计」。
 
 **多步 TD**（n 步回报）：
 
@@ -178,7 +178,7 @@ $$
 
 ## Q-Learning
 
-Q-Learning[[141]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-watkins1989learning)]是基础性的**异策略、基于价值**的算法。它直接学习最优 $Q^*$，与所遵循的策略无关。
+Q-Learning[[141]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-watkins1989learning)]是基础性的**异策略、基于价值**的算法。它直接学习最优 $$Q^*$$，与所遵循的策略无关。
 
 **更新规则**：
 
@@ -188,7 +188,7 @@ $$
 
 > **直觉：为什么 Q-Learning 是异策略的**
 >
-> 更新使用 $\max_{a'} Q(s_{t+1}, a')$——下一状态下*最优*动作的价值，与智能体实际采取的动作无关。这意味着目标始终在最优策略下计算，即便行为策略以随机方式探索（$\epsilon$-贪心）。
+> 更新使用 $$\max_{a'} Q(s_{t+1}, a')$$——下一状态下*最优*动作的价值，与智能体实际采取的动作无关。这意味着目标始终在最优策略下计算，即便行为策略以随机方式探索（$\epsilon$-贪心）。
 >
 > 这就是 Q-Learning 可以从重放缓冲区（Replay Buffer）、演示数据或任何经验来源中学习的原因。数据无需来自当前策略。
 
@@ -198,7 +198,7 @@ $$
 Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha\left[r_t + \gamma Q(s_{t+1}, a_{t+1}) - Q(s_t, a_t)\right]
 $$
 
-**深度 Q 网络（Deep Q-Networks，DQN）**[[143]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-mnih2015human)]：用神经网络 $Q_\theta(s,a)$ 取代表格化的 $Q(s,a)$。关键创新包括：经验重放缓冲区（异策略数据复用）、目标网络（稳定性）、$\epsilon$-贪心探索。
+**深度 Q 网络（Deep Q-Networks，DQN）**[[143]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-mnih2015human)]：用神经网络 $$Q_\theta(s,a)$$ 取代表格化的 $Q(s,a)$。关键创新包括：经验重放缓冲区（异策略数据复用）、目标网络（稳定性）、$\epsilon$-贪心探索。
 
 **DQN 损失函数**：网络通过最小化从重放缓冲区采样的 mini-batch 上的均方 TD 误差来训练：
 
@@ -206,7 +206,7 @@ $$
 \mathcal{L}(\theta) = \mathbb{E}_{(s,a,r,s') \sim \mathcal{B}}\!\left[\left(r + \gamma \max_{a'} Q_{\bar{\theta}}(s', a') - Q_\theta(s, a)\right)^2\right]
 $$
 
-其中 $Q_{\bar{\theta}}$ 是**目标网络（target network）**——$Q_\theta$ 的冻结副本，每 $C$ 步才更新一次（如 $C = 10{,}000$）。这避免了「移动目标」问题：没有它的话，预测与目标会同时变化，导致发散。
+其中 $$Q_{\bar{\theta}}$$ 是**目标网络（target network）**——$$Q_\theta$$ 的冻结副本，每 $C$ 步才更新一次（如 $C = 10{,}000$）。这避免了「移动目标」问题：没有它的话，预测与目标会同时变化，导致发散。
 
 **梯度更新**：对损失关于 $\theta$ 求梯度（注意：目标 $y$ 被视为常量——梯度不流经 $\bar{\theta}$）：
 
@@ -220,11 +220,11 @@ $$
 
 **学习流程**（每个训练步）：
 
-1. **行动**：通过 $\epsilon$-贪心选择动作：以概率 $\epsilon$ 选择随机动作，否则 $a = \arg\max_a Q_\theta(s, a)$。在前 100 万步内将 $\epsilon$ 从 1.0 衰减到 0.01。
+1. **行动**：通过 $\epsilon$-贪心选择动作：以概率 $\epsilon$ 选择随机动作，否则 $$a = \arg\max_a Q_\theta(s, a)$$。在前 100 万步内将 $\epsilon$ 从 1.0 衰减到 0.01。
 2. **存储**：将转移 $(s, a, r, s', d)$ 存入重放缓冲区 $\mathcal{B}$（容量约 100 万）。
 3. **采样**：从 $\mathcal{B}$ 中均匀采样 32 条转移作为 mini-batch。
-4. **计算目标**：$y = r + \gamma(1 - d)\max_{a'} Q_{\bar{\theta}}(s', a')$（若为终止状态则未来价值为零）。
-5. **更新**：对 $(y - Q_\theta(s,a))^2$ 进行梯度下降。将梯度裁剪到 $[-1, 1]$（Huber 损失变体）。
+4. **计算目标**：$$y = r + \gamma(1 - d)\max_{a'} Q_{\bar{\theta}}(s', a')$$（若为终止状态则未来价值为零）。
+5. **更新**：对 $$(y - Q_\theta(s,a))^2$$ 进行梯度下降。将梯度裁剪到 $[-1, 1]$（Huber 损失变体）。
 6. **同步目标网络**：每 $C$ 步执行 $\bar{\theta} \leftarrow \theta$。
 
 ### 理解重放缓冲区
@@ -237,7 +237,7 @@ $$
 e_t = (s_t, a_t, r_t, s_{t+1}, d_t)
 $$
 
-其中 $d_t$ 是布尔标志，表示 episode 是否结束。
+其中 $$d_t$$ 是布尔标志，表示 episode 是否结束。
 
 > **关键：为何重放缓冲区不可或缺**
 >
@@ -266,17 +266,17 @@ class ReplayBuffer:
 
 > **直觉：优先级经验回放（Prioritized Experience Replay，PER）**
 >
-> 在标准缓冲区中，所有经验的采样概率相等。但有些经验信息量大得多。**PER**[[145]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-schaul2016prioritized)]按 **TD 误差幅度**对采样概率进行加权——如果某条转移引发了巨大「惊讶」（$\lvert \delta_t \rvert$ 高），智能体就更频繁地采样它，从而更快修正模型。在 Atari 基准上可将学习速度加快 2--3 倍。
+> 在标准缓冲区中，所有经验的采样概率相等。但有些经验信息量大得多。**PER**[[145]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-schaul2016prioritized)]按 **TD 误差幅度**对采样概率进行加权——如果某条转移引发了巨大「惊讶」（$$\lvert \delta_t \rvert$$ 高），智能体就更频繁地采样它，从而更快修正模型。在 Atari 基准上可将学习速度加快 2--3 倍。
 
 > **警告：为什么 Q-Learning 对 LLM 不适用**
 >
-> 语言生成中的动作空间是整个词表（$\lvert A \rvert = 32\text{K}$--$128\text{K}$），状态空间是所有可能的 token 序列（无限）。在每个 token 位置对 128K 个动作计算 $\max_a Q(s,a)$ 是不可行的。这就是 LLM RL 使用**基于策略**方法（PPO、GRPO）的原因。
+> 语言生成中的动作空间是整个词表（$\lvert A \rvert = 32\text{K}$--$128\text{K}$），状态空间是所有可能的 token 序列（无限）。在每个 token 位置对 128K 个动作计算 $$\max_a Q(s,a)$$ 是不可行的。这就是 LLM RL 使用**基于策略**方法（PPO、GRPO）的原因。
 
 ## 策略梯度方法——REINFORCE
 
 与其学习价值函数再推导策略，不如直接优化策略参数 $\theta$ 以最大化期望回报[[146]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-williams1992simple)]。
 
-**目标**：$J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}[R(\tau)] = \mathbb{E}_{\pi_\theta}\left[\sum_{t=0}^T r_t\right]$
+**目标**：$$J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}[R(\tau)] = \mathbb{E}_{\pi_\theta}\left[\sum_{t=0}^T r_t\right]$$
 
 **策略梯度定理（Policy Gradient Theorem）**：
 
@@ -292,27 +292,27 @@ $$
 > J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}\!\left[\sum_{t=0}^T r_t\right] = \sum_\tau P(\tau\mid\theta) R(\tau)
 > $$
 >
-> 其中 $P(\tau\mid\theta) = p(s_0)\prod_{t=0}^T \pi_\theta(a_t\mid s_t)\, p(s_{t+1}\mid s_t, a_t)$ 是轨迹概率。
+> 其中 $$P(\tau\mid\theta) = p(s_0)\prod_{t=0}^T \pi_\theta(a_t\mid s_t)\, p(s_{t+1}\mid s_t, a_t)$$ 是轨迹概率。
 >
-> **第 2 步**：求梯度。只有 $\pi_\theta$ 项依赖于 $\theta$（状态转移 $p$ 与 $\theta$ 无关）：
+> **第 2 步**：求梯度。只有 $$\pi_\theta$$ 项依赖于 $\theta$（状态转移 $p$ 与 $\theta$ 无关）：
 >
 > $$
 > \nabla_\theta J = \sum_\tau \nabla_\theta P(\tau\mid\theta)\, R(\tau)
 > $$
 >
-> **第 3 步**：应用**对数求导技巧（log-derivative trick）**：$\nabla_\theta P(\tau\mid\theta) = P(\tau\mid\theta)\, \nabla_\theta \log P(\tau\mid\theta)$：
+> **第 3 步**：应用**对数求导技巧（log-derivative trick）**：$$\nabla_\theta P(\tau\mid\theta) = P(\tau\mid\theta)\, \nabla_\theta \log P(\tau\mid\theta)$$：
 >
 > $$
 > \nabla_\theta J = \mathbb{E}_{\tau \sim \pi_\theta}\!\left[\nabla_\theta \log P(\tau\mid\theta)\, R(\tau)\right]
 > $$
 >
-> **第 4 步**：展开 $\log P(\tau\mid\theta)$。$\log p(s_0)$ 与 $\log p(s_{t+1}\mid s_t,a_t)$ 在 $\nabla_\theta$ 下消失：
+> **第 4 步**：展开 $\log P(\tau\mid\theta)$。$$\log p(s_0)$$ 与 $$\log p(s_{t+1}\mid s_t,a_t)$$ 在 $$\nabla_\theta$$ 下消失：
 >
 > $$
 > \nabla_\theta \log P(\tau\mid\theta) = \sum_{t=0}^T \nabla_\theta \log \pi_\theta(a_t\mid s_t)
 > $$
 >
-> **第 5 步**：合并。未来奖励不依赖于过去动作（因果性），因此每个 $\nabla\log\pi$ 仅与未来回报 $G_t = \sum_{t'=t}^T r_{t'}$ 配对：
+> **第 5 步**：合并。未来奖励不依赖于过去动作（因果性），因此每个 $\nabla\log\pi$ 仅与未来回报 $$G_t = \sum_{t'=t}^T r_{t'}$$ 配对：
 >
 > $$
 > \nabla_\theta J = \mathbb{E}_{\pi_\theta}\!\left[\sum_{t=0}^T \nabla_\theta \log \pi_\theta(a_t\mid s_t) \cdot G_t\right]
@@ -320,20 +320,20 @@ $$
 
 > **直觉：这一结果为何优美**
 >
-> 该梯度**不需要对环境的状态转移** $p(s'\mid s,a)$ **求导**。对数求导技巧将其转化为一个期望，只需*运行策略并观察奖励*就能估计。把 $G_t$ 替换为优势 $\hat{A}_t = G_t - V(s_t)$ 可以在不引入偏差的前提下降低方差（因为对任何仅依赖状态的基线 $b(s)$，都有 $\mathbb{E}[\nabla\log\pi \cdot b(s)] = 0$）。
+> 该梯度**不需要对环境的状态转移** $p(s'\mid s,a)$ **求导**。对数求导技巧将其转化为一个期望，只需*运行策略并观察奖励*就能估计。把 $$G_t$$ 替换为优势 $$\hat{A}_t = G_t - V(s_t)$$ 可以在不引入偏差的前提下降低方差（因为对任何仅依赖状态的基线 $b(s)$，都有 $\mathbb{E}[\nabla\log\pi \cdot b(s)] = 0$）。
 
 **REINFORCE 算法（REINFORCE）**[[146]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-williams1992simple)]（Williams, 1992）：
 
-1. 在 $\pi_\theta$ 下采样完整轨迹 $\tau = (s_0, a_0, r_0, s_1, a_1, r_1, \ldots)$
-2. 为每个时间步计算回报 $G_t = \sum_{k=0}^{T-t} \gamma^k r_{t+k}$
-3. 更新：$\theta \leftarrow \theta + \alpha \sum_t \nabla_\theta \log \pi_\theta(a_t\mid s_t) \cdot G_t$
+1. 在 $$\pi_\theta$$ 下采样完整轨迹 $$\tau = (s_0, a_0, r_0, s_1, a_1, r_1, \ldots)$$
+2. 为每个时间步计算回报 $$G_t = \sum_{k=0}^{T-t} \gamma^k r_{t+k}$$
+3. 更新：$$\theta \leftarrow \theta + \alpha \sum_t \nabla_\theta \log \pi_\theta(a_t\mid s_t) \cdot G_t$$
 
 > **直觉：REINFORCE 直觉——「奖励加权的最大似然」**
 >
-> $\nabla_\theta \log \pi_\theta(a_t\mid s_t)$ 是提升动作 $a_t$ 概率的方向。乘以 $G_t$ 意味着：
+> $$\nabla_\theta \log \pi_\theta(a_t\mid s_t)$$ 是提升动作 $$a_t$$ 概率的方向。乘以 $$G_t$$ 意味着：
 >
-> - 高奖励轨迹：提升所有所采取动作的概率（$G_t$ 为正）
-> - 低奖励轨迹：降低所采取动作的概率（扣除基线后 $G_t$ 为负）
+> - 高奖励轨迹：提升所有所采取动作的概率（$$G_t$$ 为正）
+> - 低奖励轨迹：降低所采取动作的概率（扣除基线后 $$G_t$$ 为负）
 >
 > 这是一种监督学习，「标签」是你采取的动作，并按结果好坏加权。
 
@@ -343,7 +343,7 @@ $$
 \nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta}\left[\sum_{t=0}^T \nabla_\theta \log \pi_\theta(a_t\mid s_t) \cdot (G_t - b(s_t))\right]
 $$
 
-任何与 $a_t$ 无关的基线 $b(s_t)$ 都能在保持梯度无偏的同时降低方差。最佳选择：$b(s_t) = V^\pi(s_t)$。此时 $G_t - V(s_t) \approx A^\pi(s_t, a_t)$ = 优势。
+任何与 $$a_t$$ 无关的基线 $$b(s_t)$$ 都能在保持梯度无偏的同时降低方差。最佳选择：$$b(s_t) = V^\pi(s_t)$$。此时 $$G_t - V(s_t) \approx A^\pi(s_t, a_t)$$ = 优势。
 
 > **警告：REINFORCE 的局限**
 >
@@ -360,8 +360,8 @@ $$
 
 **结构**：
 
-- **Actor** $\pi_\theta(a\mid s)$：策略，提议动作。
-- **Critic** $V_\phi(s)$ 或 $Q_\phi(s,a)$：评估状态/动作的好坏，提供低方差基线。
+- **Actor** $$\pi_\theta(a\mid s)$$：策略，提议动作。
+- **Critic** $$V_\phi(s)$$ 或 $$Q_\phi(s,a)$$：评估状态/动作的好坏，提供低方差基线。
 
 **Actor 更新**（使用 critic 提供的优势）：
 
@@ -387,23 +387,23 @@ $$
 
 **动机**：Actor-Critic 框架需要对优势 $A(s,a) = Q(s,a) - V(s)$ 进行良好估计——这个动作比平均水平好多少？但这里存在根本性的张力：
 
-- **1 步 TD 优势**（$r_t + \gamma V(s_{t+1}) - V(s_t)$）：方差低（仅含一步随机性），但**有偏**——若价值函数 $V$ 不准确，优势估计就会系统性偏离。
-- **Monte Carlo 优势**（$G_t - V(s_t)$）：无偏（使用实际回报），但**方差高**——许多随机奖励之和在不同 episode 间波动剧烈。
+- **1 步 TD 优势**（$$r_t + \gamma V(s_{t+1}) - V(s_t)$$）：方差低（仅含一步随机性），但**有偏**——若价值函数 $V$ 不准确，优势估计就会系统性偏离。
+- **Monte Carlo 优势**（$$G_t - V(s_t)$$）：无偏（使用实际回报），但**方差高**——许多随机奖励之和在不同 episode 间波动剧烈。
 
 GAE[[150]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-schulman2016high)]（Schulman 等，2016）通过单一参数 $\lambda \in [0, 1]$ 在两种极端之间提供**平滑插值**。它对所有 $n$ 的 $n$ 步优势估计进行指数加权平均，给出一种在偏差与方差之间权衡的原则化方式。
 
-**核心思想**：在每个时间步计算 1 步 TD 误差 $\delta_t$，然后用指数衰减权重 $(\gamma\lambda)^l$ 进行混合——近期 TD 误差权重完整，远期的被降权：
+**核心思想**：在每个时间步计算 1 步 TD 误差 $$\delta_t$$，然后用指数衰减权重 $(\gamma\lambda)^l$ 进行混合——近期 TD 误差权重完整，远期的被降权：
 
 $$
 \hat{A}_t^{\text{GAE}} = \sum_{l=0}^{T-t} (\gamma\lambda)^l \delta_{t+l}, \quad \delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)
 $$
 
-![GAE 数据流：每个 TD 残差 $\delta_{t+l}^V$ 在求和前被乘以权重 $(\gamma\lambda)^l$。$\lambda$ 越大，纳入的未来残差越多（偏差更低，方差更高）。]({{ site.baseurl }}/figures/fig_022_fig22.png)
+![GAE 数据流：每个 TD 残差 $$\delta_{t+l}^V$$ 在求和前被乘以权重 $(\gamma\lambda)^l$。$\lambda$ 越大，纳入的未来残差越多（偏差更低，方差更高）。]({{ site.baseurl }}/figures/fig_022_fig22.png)
 
 > **直觉：$\lambda$ 控制什么——偏差-方差权衡**
 >
-> - $\lambda = 0$：$\hat{A}_t = \delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$。完全信任价值函数。方差低，但若 $V$ 不准确则有偏。
-> - $\lambda = 1$：$\hat{A}_t = \sum_l \gamma^l r_{t+l} - V(s_t)$。完整 Monte Carlo 回报减去基线。无偏但方差极高。
+> - $\lambda = 0$：$$\hat{A}_t = \delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$$。完全信任价值函数。方差低，但若 $V$ 不准确则有偏。
+> - $\lambda = 1$：$$\hat{A}_t = \sum_l \gamma^l r_{t+l} - V(s_t)$$。完整 Monte Carlo 回报减去基线。无偏但方差极高。
 > - $\lambda = 0.95$（标准取值）：黄金平衡点。主要信任 $V$，但在远期效应上用实际回报修正。之所以可行，是因为价值头在初始训练后会变得准确。
 >
 > 针对 LLM 的常用取值：$\gamma = 1.0$（无时间折扣——单轮对话中所有 token 权重相等），$\lambda = 0.95$。
@@ -412,7 +412,7 @@ $$
 
 在监督学习中，偏差与方差源于模型的结构性假设。而在通过 GAE 进行的强化学习中，它们源于**你信任有缺陷的模型有多深 vs 你信任混乱的环境有多深**：
 
-- **偏差（系统性偏离）**：当估计器依赖于价值网络 $V_\theta$ 的结构性假设与不完美预测时产生。如果 $\theta$ 训练不足或容量不够，基线猜测就会系统性出错。
+- **偏差（系统性偏离）**：当估计器依赖于价值网络 $$V_\theta$$ 的结构性假设与不完美预测时产生。如果 $\theta$ 训练不足或容量不够，基线猜测就会系统性出错。
 - **方差（样本抖动）**：当估计器依赖于长且无约束的环境轨迹时产生。随机转移、随机种子与策略执行噪声在长时间步上累积，导致不同 rollout 之间的实际样本奖励剧烈波动。
 
 ### 架构光谱：边界情形分析
@@ -428,7 +428,7 @@ $$
 > $$
 >
 > - **行为**：优势在很大程度上由参数 $\theta$ 的当前状态决定。
-> - **直觉**：高度**有偏**，因为网络在 1 步窗口内为自己打分；若 $V_\theta$ 不准确，梯度步就会被破坏。**方差低**，因为它忽略 $t+1$ 步之后的未来随机事件，从而产生平滑、稳定的参数更新。
+> - **直觉**：高度**有偏**，因为网络在 1 步窗口内为自己打分；若 $$V_\theta$$ 不准确，梯度步就会被破坏。**方差低**，因为它忽略 $t+1$ 步之后的未来随机事件，从而产生平滑、稳定的参数更新。
 > - **风险**：策略陷入次优局部极小——永远发现不了复杂的延迟奖励序列。
 
 > **关键：低偏差/高方差的限制（$\lambda = 1$）**
@@ -466,7 +466,7 @@ $$
 
 |  | On-Policy | Off-Policy |
 | --- | --- | --- |
-| **数据来源** | 仅当前策略 $\pi_\theta$ | 任意策略（重放缓冲区） |
+| **数据来源** | 仅当前策略 $$\pi_\theta$$ | 任意策略（重放缓冲区） |
 | **更新之后** | 旧数据失效，必须重新生成 | 旧数据仍可使用 |
 | **样本效率** | 低（数据仅用一次） | 高（数据可多次复用） |
 | **稳定性** | 更稳定（分布一致） | 可能发散（分布不匹配） |
@@ -481,7 +481,7 @@ $$
 >
 > **在线 DPO 是混合体**：生成新鲜数据（同策略生成），但使用 DPO 的监督损失（异策略式优化）。兼具两者优势。
 >
-> **PPO 的巧妙之处**：使用裁剪比率 $r = \pi_\text{new}/\pi_\text{old}$，从同一批同策略数据中榨取多步梯度更新（通常 4 个 epoch），以可控方式使其变得「略带异策略」。
+> **PPO 的巧妙之处**：使用裁剪比率 $$r = \pi_\text{new}/\pi_\text{old}$$，从同一批同策略数据中榨取多步梯度更新（通常 4 个 epoch），以可控方式使其变得「略带异策略」。
 
 ## 基于模型 vs 无模型
 
@@ -506,7 +506,7 @@ $$
 
 ### 数学框架
 
-设时间步 $t$ 的原始奖励为 $R_t(s, a, s')$。重塑后的奖励添加了一个辅助塑形函数 $F$：
+设时间步 $t$ 的原始奖励为 $$R_t(s, a, s')$$。重塑后的奖励添加了一个辅助塑形函数 $F$：
 
 $$
 R'_t(s, a, s') = R_t(s, a, s') + F(s, a, s')
@@ -540,6 +540,6 @@ $$
 
 > **关键：PBRS 策略不变性定理**
 >
-> - **策略不变性**：在重塑奖励 $R'$ 下的最优策略 $\pi^*$ 与原始奖励 $R$ 下的最优策略**完全相同**。塑形不会引入次优行为。
+> - **策略不变性**：在重塑奖励 $R'$ 下的最优策略 $$\pi^*$$ 与原始奖励 $R$ 下的最优策略**完全相同**。塑形不会引入次优行为。
 > - **回路免疫**：任何从某状态出发又回到同一状态的循环轨迹，其净势能变化恰好为零（$\Phi(s) - \Phi(s) = 0$）。智能体无法利用回路来作弊式刷奖励。
 > - **收敛加速**：尽管最优策略不变，塑形后的奖励提供了更稠密的梯度信号，使智能体在稀疏奖励环境下收敛速度提升 5--50 倍。

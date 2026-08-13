@@ -20,7 +20,7 @@ title: 大语言模型的强化学习基础
 > **共同的底层基础**
 >
 > 尽管两类范式的目标不同，但它们共享同一套核心机制：
-> - 一个自回归生成文本的 **policy** $\pi_\theta$（即大语言模型）
+> - 一个自回归生成文本的 **policy** $$\pi_\theta$$（即大语言模型）
 > - 一个 **reward 信号** $r(x, y)$（来自偏好学习或来自验证计算）
 > - 相对于参考 policy 的 **KL 约束**，用于防止退化解
 > - 用于将模型朝更高 reward 方向更新的 **policy gradient 优化**（PPO 或 GRPO）
@@ -36,22 +36,22 @@ title: 大语言模型的强化学习基础
 
 形式化地，文本生成的 MDP 定义如下：
 
-- **State** $s_t = (x, y_1, \ldots, y_{t-1})$：Prompt 与到目前为止已生成的所有 token 的拼接。
-- **Action** $a_t \in \{1, \ldots, \lvert \mathcal{V} \rvert\}$：从词表（32K--128K 选项）中选出下一个 token。
-- **Transition** $P(s_{t+1}\mid s_t, a_t)$：确定性的——只需追加所选 token。环境无随机性。
+- **State** $$s_t = (x, y_1, \ldots, y_{t-1})$$：Prompt 与到目前为止已生成的所有 token 的拼接。
+- **Action** $$a_t \in \{1, \ldots, \lvert \mathcal{V} \rvert\}$$：从词表（32K--128K 选项）中选出下一个 token。
+- **Transition** $$P(s_{t+1}\mid s_t, a_t)$$：确定性的——只需追加所选 token。环境无随机性。
 - **Reward** $r$：通常仅在生成结束时给出（稀疏）。对 RLHF 而言是 reward 模型评分；对 RLVR 而言是最终答案的正确性。
-- **Policy** $\pi_\theta(a_t\mid s_t)$：大语言模型的下一 token 概率分布——正是 Softmax 输出已经计算出的东西。
+- **Policy** $$\pi_\theta(a_t\mid s_t)$$：大语言模型的下一 token 概率分布——正是 Softmax 输出已经计算出的东西。
 - **折扣因子** $\gamma = 1.0$：Episode 是有限的（即一条回答），因此无需折扣。
 
-这种映射之所以强大，是因为大语言模型*本身就已经是*一个 policy——其 Softmax 输出为每一个 state 定义了 $\pi_\theta(a_t\mid s_t)$。我们无需另行构建一个 policy 网络；只需调整权重 $\theta$，让模型为能获得更高 reward 的 token 序列赋予更高概率。
+这种映射之所以强大，是因为大语言模型*本身就已经是*一个 policy——其 Softmax 输出为每一个 state 定义了 $$\pi_\theta(a_t\mid s_t)$$。我们无需另行构建一个 policy 网络；只需调整权重 $\theta$，让模型为能获得更高 reward 的 token 序列赋予更高概率。
 
 ## RLHF 流水线
 
 经典的 RLHF 流水线 [[99]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-ouyang2022training)] 包含四个阶段：
 
-1. **监督微调（SFT）**：在高质量示例上训练 base 模型，得到一个能够遵循指令的 policy $\pi_{\text{SFT}}$。
-2. **Reward 模型训练**：收集人类偏好比较（对同一 prompt 满足 $y_w \succ y_l$），并使用 Bradley-Terry 模型（Bradley-Terry Model）目标训练 reward 模型 $R_\phi(x, y)$。
-3. **RL 优化**：以 reward 模型作为信号，通过 PPO 或 GRPO 优化 policy，并对 $\pi_{\text{SFT}}$ 施加 KL 约束。
+1. **监督微调（SFT）**：在高质量示例上训练 base 模型，得到一个能够遵循指令的 policy $$\pi_{\text{SFT}}$$。
+2. **Reward 模型训练**：收集人类偏好比较（对同一 prompt 满足 $$y_w \succ y_l$$），并使用 Bradley-Terry 模型（Bradley-Terry Model）目标训练 reward 模型 $$R_\phi(x, y)$$。
+3. **RL 优化**：以 reward 模型作为信号，通过 PPO 或 GRPO 优化 policy，并对 $$\pi_{\text{SFT}}$$ 施加 KL 约束。
 4. **评估与迭代**：评估对齐后的模型，收集新的失败案例，并进行迭代。
 
 对于 RLVR（推理/agentic 训练），阶段 1--2 被替换：SFT 模型在推理轨迹上训练，reward 模型被替换为验证器（例如检查数学正确性）。阶段 3 不变——使用 PPO 或 GRPO 针对 reward 信号进行优化。

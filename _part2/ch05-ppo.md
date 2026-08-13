@@ -20,7 +20,7 @@ PPO 的核心创新是一个 clipped surrogate 目标：它能阻止破坏性的
 $$
 \boxed{L^{\text{CLIP}}(\theta) = \mathbb{E}_t\left[\min\left(r_t(\theta)\hat{A}_t,\; \text{clip}(r_t(\theta), 1{-}\epsilon, 1{+}\epsilon)\hat{A}_t\right)\right]}
 $$
-其中 $r_t(\theta) = \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_\text{old}}(a_t\mid s_t)}$ 是概率比。
+其中 $$r_t(\theta) = \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_\text{old}}(a_t\mid s_t)}$$ 是概率比。
 
 > **Clipping 直觉——关键洞察**
 >
@@ -37,8 +37,8 @@ $$
 L = L^{\text{CLIP}} - c_1 \underbrace{(V_\theta(s_t) - V^{\text{target}}_t)^2}_{\text{value loss}} + c_2 \underbrace{H[\pi_\theta(\cdot\mid s_t)]}_{\text{entropy bonus}}
 $$
 
-- **Value loss**（$c_1 = 0.1$）：训练 critic 去预测 return；同样被 clip 以保持稳定。
-- **熵奖励**（$c_2 = 0.01$）：防止过早收敛到确定性 policy，对探索至关重要。
+- **Value loss**（$$c_1 = 0.1$$）：训练 critic 去预测 return；同样被 clip 以保持稳定。
+- **熵奖励**（$$c_2 = 0.01$$）：防止过早收敛到确定性 policy，对探索至关重要。
 
 ## PPO Gradient 与更新规则的推导
 
@@ -58,16 +58,16 @@ $$
 \boxed{\nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta}\left[\sum_{t=0}^T \nabla_\theta \log \pi_\theta(a_t\mid s_t) \cdot \hat{A}_t\right]}
 $$
 
-其中 $\hat{A}_t$ 是优势函数（即在 state $s_t$ 下 action $a_t$ 相对平均 action 的好坏程度）。用 advantage 替代完整 return 是为了降低方差。
+其中 $$\hat{A}_t$$ 是优势函数（即在 state $$s_t$$ 下 action $$a_t$$ 相对平均 action 的好坏程度）。用 advantage 替代完整 return 是为了降低方差。
 
 ### 第 3 步：离策略数据的重要性采样
 
-PPO 使用 $\pi_{\theta_{\text{old}}}$ 收集数据，却更新 $\pi_\theta$。为修正这种分布失配，需应用重要性采样：
+PPO 使用 $$\pi_{\theta_{\text{old}}}$$ 收集数据，却更新 $$\pi_\theta$$。为修正这种分布失配，需应用重要性采样：
 $$
 \nabla_\theta J(\theta) = \mathbb{E}_{\pi_{\theta_{\text{old}}}}\left[\frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\text{old}}}(a_t\mid s_t)} \nabla_\theta \log \pi_\theta(a_t\mid s_t) \cdot \hat{A}_t\right]
 $$
 
-定义概率比 $r_t(\theta) = \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\text{old}}}(a_t\mid s_t)}$。利用恒等式 $\nabla_\theta \log f = \frac{\nabla_\theta f}{f}$，可得：
+定义概率比 $$r_t(\theta) = \frac{\pi_\theta(a_t\mid s_t)}{\pi_{\theta_{\text{old}}}(a_t\mid s_t)}$$。利用恒等式 $$\nabla_\theta \log f = \frac{\nabla_\theta f}{f}$$，可得：
 $$
 \nabla_\theta J(\theta) = \mathbb{E}_{\pi_{\theta_{\text{old}}}}\left[\nabla_\theta\, r_t(\theta) \cdot \hat{A}_t\right]
 $$
@@ -79,13 +79,13 @@ $$
 
 ### 第 4 步：无约束 Surrogate 的问题
 
-$L^{\text{CPI}}$ 是一个合法的目标，但若无约束，单次 gradient 步就可能让 $r_t(\theta)$ 远离 1.0，导致：
+$L^{\text{CPI}}$ 是一个合法的目标，但若无约束，单次 gradient 步就可能让 $$r_t(\theta)$$ 远离 1.0，导致：
 
 - 重要性权重变得极端 $\rightarrow$ 方差升高
 - Policy 进入未经检验的区域 $\rightarrow$ reward 模型给出不可靠的分数
 - 灾难性崩溃：policy 生成垃圾，且无法恢复
 
-**TRPO 方案**：约束 $D_{\text{KL}}(\pi_{\theta_{\text{old}}} \| \pi_\theta) \leq \delta$。需要二阶方法（成本高）。
+**TRPO 方案**：约束 $$D_{\text{KL}}(\pi_{\theta_{\text{old}}} \| \pi_\theta) \leq \delta$$。需要二阶方法（成本高）。
 
 ### 第 5 步：PPO 的 Clipped Surrogate（一阶近似）
 
@@ -97,7 +97,7 @@ $$
 
 **Gradient 的推导**：
 
-令 $L_t = \min(r_t \hat{A}_t,\; \bar{r}_t \hat{A}_t)$，其中 $\bar{r}_t = \text{clip}(r_t, 1{-}\epsilon, 1{+}\epsilon)$。
+令 $$L_t = \min(r_t \hat{A}_t,\; \bar{r}_t \hat{A}_t)$$，其中 $$\bar{r}_t = \text{clip}(r_t, 1{-}\epsilon, 1{+}\epsilon)$$。
 
 $$
 \nabla_\theta L_t = \begin{cases}
@@ -108,10 +108,10 @@ $$
 
 展开各条件：
 
-- **当 $\hat{A}_t > 0$ 且 $r_t < 1+\epsilon$**：Gradient 正常传播——policy 被鼓励提升 $\pi_\theta(a_t\mid s_t)$。
-- **当 $\hat{A}_t > 0$ 且 $r_t \geq 1+\epsilon$**：Gradient 为**零**——policy 提升已足够，停止继续推。
-- **当 $\hat{A}_t < 0$ 且 $r_t > 1-\epsilon$**：Gradient 正常传播——policy 被鼓励降低 $\pi_\theta(a_t\mid s_t)$。
-- **当 $\hat{A}_t < 0$ 且 $r_t \leq 1-\epsilon$**：Gradient 为**零**——policy 降低已足够，停止继续推。
+- **当 $$\hat{A}_t > 0$$ 且 $$r_t < 1+\epsilon$$**：Gradient 正常传播——policy 被鼓励提升 $$\pi_\theta(a_t\mid s_t)$$。
+- **当 $$\hat{A}_t > 0$$ 且 $$r_t \geq 1+\epsilon$$**：Gradient 为**零**——policy 提升已足够，停止继续推。
+- **当 $$\hat{A}_t < 0$$ 且 $$r_t > 1-\epsilon$$**：Gradient 正常传播——policy 被鼓励降低 $$\pi_\theta(a_t\mid s_t)$$。
+- **当 $$\hat{A}_t < 0$$ 且 $$r_t \leq 1-\epsilon$$**：Gradient 为**零**——policy 降低已足够，停止继续推。
 
 ### 第 6 步：完整的 PPO 更新规则
 
@@ -129,7 +129,7 @@ $$
 > **小结：它为何有效**
 >
 > 1. **Policy gradient 定理**给出了改进 policy 的方向。
-> 2. **重要性采样**让我们能在多个 epoch 中复用来自 $\pi_{\theta_{\text{old}}}$ 的数据。
+> 2. **重要性采样**让我们能在多个 epoch 中复用来自 $$\pi_{\theta_{\text{old}}}$$ 的数据。
 > 3. **Clipping** 防止重要性权重变得极端，保持更新安全。
 > 4. **$\min$ 算子**保证我们始终在 (clipped, unclipped) 中取更保守的一项——对改进设置悲观下界。
 > 5. **结果**：以概率 1 实现单调改进，且只用一阶 gradient。无需 Hessian、共轭梯度或线搜索。
@@ -152,9 +152,9 @@ $$
 \boxed{\mathcal{B} = \left\{ \left(s_t,\; a_t,\; \log\pi_{\theta_{\text{old}}}(a_t\mid s_t),\; r_t,\; V(s_t)\right) \right\}_{t=1}^{T}}
 $$
 
-- $s_t, a_t, r_t$：步 $t$ 的 state、所采取的 action 与 reward。
-- $\log\pi_{\theta_{\text{old}}}(a_t\mid s_t)$：在生成该 action 的那一个 policy 下取该 action 的对数概率（计算 ratio 时需要）。
-- $V(s_t)$：Value function 给出的基线预测（计算 GAE advantage 时需要）。
+- $$s_t, a_t, r_t$$：步 $t$ 的 state、所采取的 action 与 reward。
+- $$\log\pi_{\theta_{\text{old}}}(a_t\mid s_t)$$：在生成该 action 的那一个 policy 下取该 action 的对数概率（计算 ratio 时需要）。
+- $$V(s_t)$$：Value function 给出的基线预测（计算 GAE advantage 时需要）。
 
 ### Rollout Buffer 的生命周期
 
@@ -162,7 +162,7 @@ $$
 
 1. **收集**：当前 policy 与环境交互，用新鲜轨迹填满 buffer（对一个 70B 模型，batch=128，max_tokens=512：单次 rollout 可达 65K 个 token 级 transition）。
 2. **训练**：对各轨迹计算 GAE advantage。使用 clipped 目标在 mini-batch 上跑 $K$ 个 epoch（通常 3--10）的 gradient 下降，更新 policy 权重。
-3. **清空**：整个 buffer 被**彻底清空**。由于 PPO 是 on-policy 的，旧 policy 产生的数据无法安全地复用于下一轮更新——比率 $r_t(\theta)$ 会变得过期，clipping 保证也会失效。
+3. **清空**：整个 buffer 被**彻底清空**。由于 PPO 是 on-policy 的，旧 policy 产生的数据无法安全地复用于下一轮更新——比率 $$r_t(\theta)$$ 会变得过期，clipping 保证也会失效。
 
 > **Rollout Buffer 与 Replay Buffer 的区别**
 >
@@ -194,11 +194,11 @@ $$
 >
 > **第 2 步——打分**：Reward 模型对每个 (prompt, response) 对打分。取值范围：0.2--0.95。
 >
-> **第 3 步——KL**：计算逐 token 的 KL：$\text{KL}_t = \log\pi_\theta(y_t\mid y_{<t}) - \log\pi_\text{ref}(y_t\mid y_{<t})$。跨 token 的均值 KL：通常 3--8。
+> **第 3 步——KL**：计算逐 token 的 KL：$$\text{KL}_t = \log\pi_\theta(y_t\mid y_{<t}) - \log\pi_\text{ref}(y_t\mid y_{<t})$$。跨 token 的均值 KL：通常 3--8。
 >
-> **第 4 步——最终 reward**：$R = r_\text{RM} - 0.05 \times \text{mean\_KL}$（只在最后一个 token 给）。
+> **第 4 步——最终 reward**：$$R = r_\text{RM} - 0.05 \times \text{mean\_KL}$$（只在最后一个 token 给）。
 >
-> **第 5 步——GAE**：使用 value head 的预测，为每个 token 位置计算 $\hat{A}_t$。对 advantage 做 whitening（零均值、单位方差）。
+> **第 5 步——GAE**：使用 value head 的预测，为每个 token 位置计算 $$\hat{A}_t$$。对 advantage 做 whitening（零均值、单位方差）。
 >
 > **第 6 步——更新**：在大小为 16 的 mini-batch 上跑 4 个 epoch 的 SGD。Clip 比率 $\epsilon = 0.2$，梯度范数 clip 至 1.0。
 >
@@ -223,29 +223,29 @@ PPO 在内存中维护两份不同的参数状态，它们共享同一神经网�
 
 > **核心架构：两个网络**
 >
-> 1. **Policy 网络（$\pi_\theta$）：**由权重 $\theta$ 参数化的、处于活动状态的实时网络。优化过程中通过反向传播持续更新。
-> 2. **旧 Policy 网络（$\pi_{\theta_{\text{old}}}$）：**由权重 $\theta_{\text{old}}$ 参数化的冻结快照。在单个优化周期内充当静态锚，防止 policy 漂移过快。
+> 1. **Policy 网络（$$\pi_\theta$$）：**由权重 $\theta$ 参数化的、处于活动状态的实时网络。优化过程中通过反向传播持续更新。
+> 2. **旧 Policy 网络（$$\pi_{\theta_{\text{old}}}$$）：**由权重 $$\theta_{\text{old}}$$ 参数化的冻结快照。在单个优化周期内充当静态锚，防止 policy 漂移过快。
 
 ### 阶段 1：Rollout（数据收集）
 
 在数据收集期间，Agent 与环境交互 $T$ 步。在每个时间步 $t$：
 
-1. 环境给出当前 state/观测 $s_t$（对大语言模型而言：prompt + 到目前为止已生成的 token）。
-2. $s_t$ 被送入当前网络快照（$\theta_{\text{old}}$）。
-3. 网络输出原始未归一化的值——**logits** $z_{\text{old}}$——一个长度为 $\lvert V \rvert$（词表大小 32K--128K）的向量。
+1. 环境给出当前 state/观测 $$s_t$$（对大语言模型而言：prompt + 到目前为止已生成的 token）。
+2. $$s_t$$ 被送入当前网络快照（$$\theta_{\text{old}}$$）。
+3. 网络输出原始未归一化的值——**logits** $$z_{\text{old}}$$——一个长度为 $\lvert V \rvert$（词表大小 32K--128K）的向量。
 4. 通过 Softmax 计算概率：
 $$
 \boxed{P(a \mid s_t) = \text{Softmax}(z_{\text{old}}) = \frac{\exp(z_{\text{old}, a})}{\sum_{j=1}^{\lvert V \rvert} \exp(z_{\text{old}, j})}}
 $$
-5. 从 $P(a \mid s_t)$ 中采样一个 action $a_t$（下一个 token），并将 transition 元组 $\langle s_t, a_t, r_t, s_{t+1} \rangle$ 连同 $\log \pi_{\theta_{\text{old}}}(a_t \mid s_t)$ 一起存入 rollout buffer。
+5. 从 $$P(a \mid s_t)$$ 中采样一个 action $$a_t$$（下一个 token），并将 transition 元组 $$\langle s_t, a_t, r_t, s_{t+1} \rangle$$ 连同 $$\log \pi_{\theta_{\text{old}}}(a_t \mid s_t)$$ 一起存入 rollout buffer。
 
 > **为何要存对数概率？**
 >
-> 在 rollout 阶段把 $\log \pi_{\theta_{\text{old}}}(a_t \mid s_t)$ 作为标量保存，可以避免在优化期间重新运行冻结的网络。每个 mini-batch 因此可省下一次完整 forward pass——对 70B 模型而言意义重大。
+> 在 rollout 阶段把 $$\log \pi_{\theta_{\text{old}}}(a_t \mid s_t)$$ 作为标量保存，可以避免在优化期间重新运行冻结的网络。每个 mini-batch 因此可省下一次完整 forward pass——对 70B 模型而言意义重大。
 
 ### 阶段 2：优化循环（Mini-Batch 更新）
 
-一旦 rollout buffer 填满，PPO 就在 mini-batch 上跑 $K$ 个 epoch（通常 3--10）。在每个 gradient 步中，使用所存 state $s_t$ 为两个 policy 同时生成 logits：
+一旦 rollout buffer 填满，PPO 就在 mini-batch 上跑 $K$ 个 epoch（通常 3--10）。在每个 gradient 步中，使用所存 state $$s_t$$ 为两个 policy 同时生成 logits：
 
 **旧 Policy 评估**（冻结）：
 $$
@@ -259,7 +259,7 @@ $$
 z_{\text{new}} = f(s_t; \theta) \quad \longrightarrow \quad \log \pi_\theta(a_t \mid s_t) = \text{LogSoftmax}(z_{\text{new}})[a_t]
 $$
 
-由于每次 mini-batch gradient 步后 $\theta$ 都会更新，$z_{\text{new}}$ 会在整个优化循环中持续变化，而 $z_{\text{old}}$ 则始终保持不变。
+由于每次 mini-batch gradient 步后 $\theta$ 都会更新，$$z_{\text{new}}$$ 会在整个优化循环中持续变化，而 $$z_{\text{old}}$$ 则始终保持不变。
 
 ### 从 Logits 到概率比
 
@@ -286,8 +286,8 @@ $$
 
 > **Clipping 的工作方式**
 >
-> - 若 $\hat{A}_t > 0$（好 action）：比率被 clip 至 $1+\epsilon$——不会对好 action 过度利用。
-> - 若 $\hat{A}_t < 0$（坏 action）：比率被 clip 至 $1-\epsilon$——不会对坏 action 过度惩罚。
+> - 若 $$\hat{A}_t > 0$$（好 action）：比率被 clip 至 $1+\epsilon$——不会对好 action 过度利用。
+> - 若 $$\hat{A}_t < 0$$（坏 action）：比率被 clip 至 $1-\epsilon$——不会对坏 action 过度惩罚。
 > - $\min(\cdot)$ 保证我们始终取更保守的估计。
 >
 > 结果：在一个信任域内实现单调改进——不会出现灾难性崩溃。
@@ -295,15 +295,15 @@ $$
 ### PPO 权重生命周期
 
 
-**$\theta$ 与 $\theta_{\text{old}}$ 在 PPO 训练各阶段的演化。**
-| **阶段** | **实时 $\theta$** | **旧 $\theta_{\text{old}}$** | **比率 $r_t(\theta)$** |
+**$\theta$ 与 $$\theta_{\text{old}}$$ 在 PPO 训练各阶段的演化。**
+| **阶段** | **实时 $\theta$** | **旧 $$\theta_{\text{old}}$$** | **比率 $$r_t(\theta)$$** |
 | --- | --- | --- | --- |
 | 1. Rollout 起始 | 活动副本 | 同一活动副本 | 恒为 $1.0$（按定义） |
 | 2. Batch 第 1 步 | 计算 gradient | 冻结 | $1.0$（初始步） |
-| 3. Batch 第 $N$ 步 | 正在修改（$\theta \neq \theta_{\text{old}}$） | 冻结 | 偏离 $1.0$（如 $1.06$、$0.94$） |
+| 3. Batch 第 $N$ 步 | 正在修改（$$\theta \neq \theta_{\text{old}}$$） | 冻结 | 偏离 $1.0$（如 $1.06$、$0.94$） |
 | 4. Clipping 生效 | 受 $\epsilon$ 限制 | 冻结 | 被锁在边界（$1 \pm \epsilon$） |
 | 5. 优化结束 | 高度优化后 | 被丢弃 | 不适用 |
-| 6. 下一周期 | $\theta \rightarrow \theta_{\text{old}}$ | 接收最新的 $\theta$ | 重置回 $1.0$ |
+| 6. 下一周期 | $$\theta \rightarrow \theta_{\text{old}}$$ | 接收最新的 $\theta$ | 重置回 $1.0$ |
 
 ### 连续 Action 空间扩展
 
@@ -317,7 +317,7 @@ $$
 \boxed{\log \pi(a_t \mid s_t) = -\frac{1}{2}\left(\frac{a_t - \mu}{\sigma}\right)^{\!2} - \log(\sigma) - \frac{1}{2}\log(2\pi)}
 $$
 
-比率 $r_t(\theta) = \exp(\log \pi_\theta - \log \pi_{\theta_{\text{old}}})$ 的计算方式完全相同，并被代入同一个 clipping 目标。
+比率 $$r_t(\theta) = \exp(\log \pi_\theta - \log \pi_{\theta_{\text{old}}})$$ 的计算方式完全相同，并被代入同一个 clipping 目标。
 
 ## TRL 实现
 

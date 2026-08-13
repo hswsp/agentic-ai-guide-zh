@@ -18,7 +18,7 @@ permalink: /part5/ch16-rag.html
 
 ### 参数化知识 vs. 非参数化知识
 
-我们可以将两种知识来源之间的区别形式化。令 $\mathcal{M}_\theta$ 表示参数为 $\theta$ 的语言模型，$\mathcal{D} = \{d_1, d_2, \ldots, d_N\}$ 为外部文档语料库。在每种范式下，给定查询 $q$ 生成回答 $a$ 的概率为：
+我们可以将两种知识来源之间的区别形式化。令 $$\mathcal{M}_\theta$$ 表示参数为 $\theta$ 的语言模型，$$\mathcal{D} = \{d_1, d_2, \ldots, d_N\}$$ 为外部文档语料库。在每种范式下，给定查询 $q$ 生成回答 $a$ 的概率为：
 
 $$
 \begin{aligned}
@@ -28,7 +28,7 @@ $$
 \end{aligned}
 $$
 
-其中 $P_{\text{ret}}(d \mid q, \mathcal{D})$ 是关于文档的检索分布。RAG 对检索到的证据进行边缘化，使生成过程接地于非参数化知识。
+其中 $$P_{\text{ret}}(d \mid q, \mathcal{D})$$ 是关于文档的检索分布。RAG 对检索到的证据进行边缘化，使生成过程接地于非参数化知识。
 
 > **图书馆类比**
 >
@@ -70,17 +70,17 @@ $$
 
 **Embedding。**
 
-每个块 $c_i$ 通过 Embedding 模型 $f_\phi$ 编码为稠密向量 $\mathbf{e}_i = f_\phi(c_i) \in \mathbb{R}^d$。这些向量与原始文本和元数据一同存储到向量数据库中。
+每个块 $$c_i$$ 通过 Embedding 模型 $$f_\phi$$ 编码为稠密向量 $$\mathbf{e}_i = f_\phi(c_i) \in \mathbb{R}^d$$。这些向量与原始文本和元数据一同存储到向量数据库中。
 
 ### 检索
 
-给定查询 $q$，检索步骤将其编码为 $\mathbf{q} = f_\phi(q)$，并通过余弦相似度找出最相似的 $k$ 个块：
+给定查询 $q$，检索步骤将其编码为 $$\mathbf{q} = f_\phi(q)$$，并通过余弦相似度找出最相似的 $k$ 个块：
 
 $$
   \text{sim}(\mathbf{q}, \mathbf{e}_i) = \frac{\mathbf{q} \cdot \mathbf{e}_i}{\|\mathbf{q}\|\,\|\mathbf{e}_i\|}
 $$
 
-返回 top-$k$ 块 $\mathcal{C}_k = \{c_{(1)}, \ldots, c_{(k)}\}$ 作为上下文。
+返回 top-$k$ 块 $$\mathcal{C}_k = \{c_{(1)}, \ldots, c_{(k)}\}$$ 作为上下文。
 
 ### 生成
 
@@ -110,14 +110,14 @@ Answer:"""
 
 ### 稀疏检索：BM25 与 TF-IDF
 
-稀疏检索方法将文档和查询表示为词汇表上的高维稀疏向量。给定查询 $q$（含词项 $t_1, \ldots, t_n$）时，针对文档 $d$ 的经典 BM25 评分函数 [[261]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-robertson2009probabilistic)] 为：
+稀疏检索方法将文档和查询表示为词汇表上的高维稀疏向量。给定查询 $q$（含词项 $$t_1, \ldots, t_n$$）时，针对文档 $d$ 的经典 BM25 评分函数 [[261]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-robertson2009probabilistic)] 为：
 
 $$
   \text{BM25}(d, q) = \sum_{i=1}^{n} \text{IDF}(t_i) \cdot
     \frac{f(t_i, d) \cdot (k_1 + 1)}{f(t_i, d) + k_1 \cdot \left(1 - b + b \cdot \frac{\lvert d \rvert}{\text{avgdl}}\right)}
 $$
 
-其中 $f(t_i, d)$ 为词频，$\lvert d \rvert$ 为文档长度，$\text{avgdl}$ 为平均文档长度，$k_1 \in [1.2, 2.0]$、$b = 0.75$ 为可调参数。
+其中 $$f(t_i, d)$$ 为词频，$\lvert d \rvert$ 为文档长度，$\text{avgdl}$ 为平均文档长度，$$k_1 \in [1.2, 2.0]$$、$b = 0.75$ 为可调参数。
 
 > **稀疏检索仍然占优的场景**
 >
@@ -129,7 +129,7 @@ $$
 
 ### 稠密检索：DPR
 
-稠密段落检索（Dense Passage Retrieval, DPR）[[262]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-karpukhin2020dense)] 使用两个独立的、基于 BERT 的编码器——一个*查询编码器* $E_Q$ 和一个*段落编码器* $E_P$——通过对比 Loss 进行训练，使相关的查询—段落对在 Embedding 空间中彼此靠近。
+稠密段落检索（Dense Passage Retrieval, DPR）[[262]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-karpukhin2020dense)] 使用两个独立的、基于 BERT 的编码器——一个*查询编码器* $$E_Q$$ 和一个*段落编码器* $$E_P$$——通过对比 Loss 进行训练，使相关的查询—段落对在 Embedding 空间中彼此靠近。
 
 **双编码器（Bi-Encoder）架构。**
 
@@ -139,7 +139,7 @@ $$
 
 **使用 Batch 内负样本进行训练。**
 
-给定包含 $B$ 个查询—段落对的 Batch $\{(q_i, p_i^+)\}_{i=1}^B$，对比 Loss 将 Batch 中所有其他段落视为负样本：
+给定包含 $B$ 个查询—段落对的 Batch $$\{(q_i, p_i^+)\}_{i=1}^B$$，对比 Loss 将 Batch 中所有其他段落视为负样本：
 
 $$
   \mathcal{L}_{\text{DPR}} = -\frac{1}{B} \sum_{i=1}^{B}
@@ -171,7 +171,7 @@ $$
   \text{RRF}(d) = \sum_{r \in \mathcal{R}} \frac{1}{k + \text{rank}_r(d)}
 $$
 
-其中 $\mathcal{R}$ 是排名列表集合（如 BM25 排名和稠密排名），$\text{rank}_r(d)$ 是文档 $d$ 在列表 $r$ 中的排名，$k = 60$ 是平滑常数，用于削弱排名极高的文档带来的影响。
+其中 $\mathcal{R}$ 是排名列表集合（如 BM25 排名和稠密排名），$$\text{rank}_r(d)$$ 是文档 $d$ 在列表 $r$ 中的排名，$k = 60$ 是平滑常数，用于削弱排名极高的文档带来的影响。
 
 > **RRF 计算示例**
 >
@@ -195,7 +195,7 @@ SPLADE（Sparse Lexical and Expansion Model）[[266]({{ site.baseurl }}/part6/ch
 
 **架构。**
 
-给定输入文本 $x = [x_1, \ldots, x_n]$：
+给定输入文本 $$x = [x_1, \ldots, x_n]$$：
 
 1. 通过 Transformer 编码器，并经由 MLM 头部得到上下文表示 $\mathbf{H} \in \mathbb{R}^{n \times \lvert \mathcal{V} \rvert}$
 2. 跨位置聚合，并应用一个饱和激活：
@@ -204,7 +204,7 @@ $$
   w_t(x) = \log\!\left(1 + \text{ReLU}\!\left(\max_{i \in [1,n]} \mathbf{H}_i[t]\right)\right)
 $$
 
-其中 $\mathbf{H}_i[t]$ 是输入位置 $i$ 处针对词汇 Token $t$ 的 MLM logit。
+其中 $$\mathbf{H}_i[t]$$ 是输入位置 $i$ 处针对词汇 Token $t$ 的 MLM logit。
 
 - $\log(1 + \cdot)$ 饱和防止任何单个词项占主导（类似 BM25 中的 TF 饱和）
 - ReLU 保证稀疏性——绝大多数词汇项的权重为零
@@ -229,7 +229,7 @@ $$
   \mathcal{L} = \mathcal{L}_{\text{contrastive}} + \lambda_q \|\mathbf{w}^q\|_1 + \lambda_d \|\mathbf{w}^d\|_1
 $$
 
-查询和文档表示上的 $L_1$ 惩罚鼓励稀疏性——若没有它们，模型将学到稠密表示，从而背离设计初衷。
+查询和文档表示上的 $$L_1$$ 惩罚鼓励稀疏性——若没有它们，模型将学到稠密表示，从而背离设计初衷。
 
 **SPLADEv2 —— 关键改进。**
 
@@ -247,13 +247,13 @@ $$
     \lambda_q > \lambda_d \quad \text{(e.g., } \lambda_q = 3 \times 10^{-4},\; \lambda_d = 1 \times 10^{-4}\text{)}
 $$
 
-3. **FLOPS 正则化**：SPLADEv2 不再使用简单的 $L_1$，而是引入了一个感知 FLOPS 的正则项，直接惩罚预期检索代价：
+3. **FLOPS 正则化**：SPLADEv2 不再使用简单的 $$L_1$$，而是引入了一个感知 FLOPS 的正则项，直接惩罚预期检索代价：
 
 $$
     \mathcal{L}_{\text{FLOPS}} = \sum_{t \in \mathcal{V}} \left(\overline{a}_t^q\right)^2 + \sum_{t \in \mathcal{V}} \left(\overline{a}_t^d\right)^2
 $$
 
-其中 $\overline{a}_t$ 是 Batch 中词项 $t$ 的平均激活。该项会惩罚在许多文档上都非零的词项（倒排列表长 = 检索慢）。
+其中 $$\overline{a}_t$$ 是 Batch 中词项 $t$ 的平均激活。该项会惩罚在许多文档上都非零的词项（倒排列表长 = 检索慢）。
 
 4. **高效骨干**：使用 DistilBERT（66M 参数）替代 BERT-base（110M），编码时间减半，质量损失极小。
 
@@ -262,7 +262,7 @@ $$
 > | 方面 | SPLADE（v1） | SPLADEv2 |
 > | --- | --- | --- |
 > | 训练信号 | 二元相关性 + 硬负样本 | 交叉编码器蒸馏 |
-> | 稀疏度控制 | $L_1$ 正则化 | 感知 FLOPS 的正则化 |
+> | 稀疏度控制 | $$L_1$$ 正则化 | 感知 FLOPS 的正则化 |
 > | 查询/文档对称性 | 同一编码器、同一 $\lambda$ | 非对称（查询更稀疏） |
 > | 骨干 | BERT-base（110M） | DistilBERT（66M） |
 > | MRR@10（MS MARCO [[269]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-bajaj2016msmarco)]） | 34.0 | 36.8 |
@@ -286,7 +286,7 @@ $$
 
 **架构。**
 
-查询编码器 $E_Q$ 和文档编码器 $E_D$ 都是基于 BERT 的模型，产生*逐 Token* 的 Embedding（而不是单个 [CLS] 向量）。每个 Token Embedding 通过一个线性层投影到更低维度（通常为 128）：
+查询编码器 $$E_Q$$ 和文档编码器 $$E_D$$ 都是基于 BERT 的模型，产生*逐 Token* 的 Embedding（而不是单个 [CLS] 向量）。每个 Token Embedding 通过一个线性层投影到更低维度（通常为 128）：
 
 $$
 \begin{aligned}
@@ -297,7 +297,7 @@ $$
 
 **训练。**
 
-ColBERT 在正、负段落上以成对的 Softmax 交叉熵 Loss 进行训练。给定查询 $q$、正段落 $d^+$ 和一组负段落 $\{d^-_1, \ldots, d^-_N\}$：
+ColBERT 在正、负段落上以成对的 Softmax 交叉熵 Loss 进行训练。给定查询 $q$、正段落 $d^+$ 和一组负段落 $$\{d^-_1, \ldots, d^-_N\}$$：
 
 $$
   \mathcal{L}_{\text{ColBERT}} = -\log \frac{\exp(s(q, d^+))}{\exp(s(q, d^+)) + \sum_{k=1}^{N} \exp(s(q, d^-_k))}
@@ -812,7 +812,7 @@ Search-R1 使用组相对策略优化（Group Relative Policy Optimization, GRPO
 1. **每个问题采样 $N$ 条轨迹**，每条可能包含 0--5 次搜索调用
 2. **实时执行搜索**——环境返回真实的搜索引擎结果
 3. **对终端答案的正确性打分**（与真实答案的精确匹配或 F1）
-4. **计算组相对优势**：$\hat{A}_i = (R_i - \mu_G) / \sigma_G$
+4. **计算组相对优势**：$$\hat{A}_i = (R_i - \mu_G) / \sigma_G$$
 5. 使用 GRPO 的裁剪目标**更新 Policy**——强化那些有效搜索的轨迹
 
 模型学会：
@@ -866,7 +866,7 @@ Search-R1 使用组相对策略优化（Group Relative Policy Optimization, GRPO
 
 ### 检索指标
 
-令 $\mathcal{R}_k$ 为前 $k$ 名的检索文档集合，$\mathcal{R}^*$ 为相关文档集合。
+令 $$\mathcal{R}_k$$ 为前 $k$ 名的检索文档集合，$$\mathcal{R}^*$$ 为相关文档集合。
 
 **Recall@K。**
 
@@ -886,7 +886,7 @@ $$
   \text{MRR} = \frac{1}{\lvert Q \rvert} \sum_{i=1}^{\lvert Q \rvert} \frac{1}{\text{rank}_i}
 $$
 
-其中 $\text{rank}_i$ 是查询 $i$ 第一个相关文档的排名。
+其中 $$\text{rank}_i$$ 是查询 $i$ 第一个相关文档的排名。
 
 **归一化折损累计增益（NDCG@K）。**
 
@@ -895,7 +895,7 @@ $$
   \text{DCG@}K = \sum_{i=1}^{K} \frac{\text{rel}_i}{\log_2(i+1)}
 $$
 
-其中 $\text{rel}_i \in \{0, 1, 2, \ldots\}$ 是第 $i$ 个结果的分级相关性，IDCG 是理想（完美）的 DCG。
+其中 $$\text{rel}_i \in \{0, 1, 2, \ldots\}$$ 是第 $i$ 个结果的分级相关性，IDCG 是理想（完美）的 DCG。
 
 ### 生成指标
 
@@ -915,7 +915,7 @@ $$
   \text{AnswerRelevance} = \frac{1}{N} \sum_{i=1}^{N} \cos\!\left(E(q), E(\hat{q}_i)\right)
 $$
 
-其中 $\hat{q}_i$ 是从答案中生成的问题。
+其中 $$\hat{q}_i$$ 是从答案中生成的问题。
 
 **上下文精度与召回率。**
 
@@ -1117,9 +1117,9 @@ class RAGIndexManager:
 
 RAFT [[291]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-zhang2024raft)] 在混合了相关文档与*干扰*文档的设置下训练模型回答问题，教会模型识别并只使用相关上下文：
 
-1. 对每个训练样本 $(q, a, d^*)$，采样 $k-1$ 个干扰文档 $\{d_i^-\}$
-2. 在 `[q, `$d^*$`, `$d_1^-$`, \ldots{}, `$d_{k-1}^-$`]` $\to$ `[chain-of-thought + a]` 上微调
-3. 思维链显式引用 $d^*$ 中的内容，教模型对答案进行接地
+1. 对每个训练样本 $$(q, a, d^*)$$，采样 $k-1$ 个干扰文档 $$\{d_i^-\}$$
+2. 在 `[q, `$$d^*$$`, `$$d_1^-$$`, \ldots{}, `$$d_{k-1}^-$$`]` $\to$ `[chain-of-thought + a]` 上微调
+3. 思维链显式引用 $$d^*$$ 中的内容，教模型对答案进行接地
 
 $$
   \mathcal{L}_{\text{RAFT}} = -\mathbb{E}_{(q,a,d^*,\{d_i^-\})} \left[
@@ -1137,7 +1137,7 @@ $$
   \right]
 $$
 
-检索器参数 $\phi$ 通过 REINFORCE 估计器更新，或将 $P_\phi(d \mid q)$ 视为关于文档的可微 Attention 进行更新。
+检索器参数 $\phi$ 通过 REINFORCE 估计器更新，或将 $$P_\phi(d \mid q)$$ 视为关于文档的可微 Attention 进行更新。
 
 > **联合训练的挑战**
 >

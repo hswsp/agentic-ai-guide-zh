@@ -87,14 +87,14 @@ model = DDP(model, device_ids=[local_rank],
 $$
 W = [W_0 \;\mid\; W_1 \;\mid\; \cdots \;\mid\; W_{T-1}], \quad W_i \in \mathbb{R}^{d \times h/T}
 $$
-每块 GPU $i$ 独立计算 $Y_i = XW_i$（无需通信）。输出沿 hidden 维度被切开。
+每块 GPU $i$ 独立计算 $$Y_i = XW_i$$（无需通信）。输出沿 hidden 维度被切开。
 
 **行并行（Row-Parallel）线性层。**
 
-权重矩阵按行切：$W = [W_0; W_1; \ldots; W_{T-1}]$，其中 $W_i \in \mathbb{R}^{d/T \times h}$。输入 $X$ 也必须切开。每块 GPU 计算一个部分和，再通过 **AllReduce** 得到最终输出。
+权重矩阵按行切：$$W = [W_0; W_1; \ldots; W_{T-1}]$$，其中 $$W_i \in \mathbb{R}^{d/T \times h}$$。输入 $X$ 也必须切开。每块 GPU 计算一个部分和，再通过 **AllReduce** 得到最终输出。
 
 
-![列并行线性层（TP=2）。权重按列切开；每块 GPU 独立计算 $XW_i$。MLP 将其与行并行层配对，从而避免多余的 AllReduce。]({{ site.baseurl }}/figures/fig_034_tp-column.png)
+![列并行线性层（TP=2）。权重按列切开；每块 GPU 独立计算 $$XW_i$$。MLP 将其与行并行层配对，从而避免多余的 AllReduce。]({{ site.baseurl }}/figures/fig_034_tp-column.png)
 
 **TP 下的 Transformer Block。**
 
@@ -646,7 +646,7 @@ $$
 
 - **过小**：GPU 利用率低（算术强度低），通信占主导。
 - **过大**：每 token 的学习收益递减（超过 critical batch size），算力被浪费。
-- **最佳点**：*临界 batch size*（critical batch size）$B_\text{crit}$，即梯度噪声等于梯度信号之处。对 LLM，$B_\text{crit} \sim 1$--$4$M token [[210]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-mccandlish2018empirical)]。
+- **最佳点**：*临界 batch size*（critical batch size）$$B_\text{crit}$$，即梯度噪声等于梯度信号之处。对 LLM，$$B_\text{crit} \sim 1$$--$4$M token [[210]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-mccandlish2018empirical)]。
 
 对 RLHF 而言，batch 包含的是*rollout*（不仅仅是 token）：
 $$
@@ -820,7 +820,7 @@ RL 训练（PPO、GRPO、DPO）相比预训练或 SFT 对优化器有独特要�
 ### 各 RL 方法的推荐超参
 
 
-**RL 训练各阶段的优化器设置。均使用 $\beta_1=0.9$、$\beta_2=0.95$、$\epsilon=10^{-8}$、`max_grad_norm`=1.0、BF16。**
+**RL 训练各阶段的优化器设置。均使用 $$\beta_1=0.9$$、$$\beta_2=0.95$$、$\epsilon=10^{-8}$、`max_grad_norm`=1.0、BF16。**
 | **方法** | **优化器** | **LR** | **WD** | **Warmup** | **调度** |
 | --- | --- | --- | --- | --- | --- |
 | DPO | AdamW | $5\text{e-}7$ | 0.0 | 50 步 | Constant 或 Linear |
@@ -834,11 +834,11 @@ RL 训练（PPO、GRPO、DPO）相比预训练或 SFT 对优化器有独特要�
 
 ### RL 用 Beta-2 = 0.95：更快的自适应
 
-Adam 默认的 $\beta_2 = 0.999$ 给二阶矩留下了非常长的记忆（有效窗口 $\sim$1000 步）。在 RL 训练中，loss 地形随 policy 演化迅速变化——1000 步前的梯度方差已无关紧要。使用 $\beta_2 = 0.95$ 把窗口缩短到 $\sim$20 步，让自适应学习率能够迅速响应变化中的梯度统计。
+Adam 默认的 $$\beta_2 = 0.999$$ 给二阶矩留下了非常长的记忆（有效窗口 $\sim$1000 步）。在 RL 训练中，loss 地形随 policy 演化迅速变化——1000 步前的梯度方差已无关紧要。使用 $$\beta_2 = 0.95$$ 把窗口缩短到 $\sim$20 步，让自适应学习率能够迅速响应变化中的梯度统计。
 
 > **beta2 = 0.95 反受其害的场景**
 >
-> 对于非常小的 batch（例如在线 RL 中 batch=1），$\beta_2 = 0.95$ 会让二阶矩估计噪声过大。这种情况下，使用 $\beta_2 = 0.99$ 作为折中，或通过梯度累积加大有效 batch。
+> 对于非常小的 batch（例如在线 RL 中 batch=1），$$\beta_2 = 0.95$$ 会让二阶矩估计噪声过大。这种情况下，使用 $$\beta_2 = 0.99$$ 作为折中，或通过梯度累积加大有效 batch。
 
 ### RL 的混合精度：FP32 Master 权重至关重要
 
@@ -864,7 +864,7 @@ RL 训练对数值精度尤其敏感：
 >
 > | **症状** | **可能原因与修复** |
 > | --- | --- |
-> | Reward 先升后崩 | LR 过高或 KL 系数过低。将 LR 降 2--5$\times$，或加大 $\beta_\text{KL}$。 |
+> | Reward 先升后崩 | LR 过高或 KL 系数过低。将 LR 降 2--5$\times$，或加大 $$\beta_\text{KL}$$。 |
 > | 梯度 norm 一直顶在裁剪阈值 | 更新过于激进。降低 LR（持续裁剪意味着每一步都丢失梯度方向信息）。 |
 > | KL 散度爆炸（$>$15 nat） | LR 过高。降低 10$\times$ 或加上自适应 KL 惩罚。 |
 > | Reward 卡在基线 | LR 过低，或 reward 模型信号过弱。试着把 LR 提 2--5$\times$。检查 reward 模型校准。 |

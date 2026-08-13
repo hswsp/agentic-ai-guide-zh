@@ -16,8 +16,8 @@ permalink: /part2/ch08-preference-optimization-variants.html
 
 ### 算法
 
-1. 从当前 $\pi_\theta$ 为每个 prompt 生成 $K$ 条响应
-2. 用 reward model $r_\phi$ 给所有响应打分
+1. 从当前 $$\pi_\theta$$ 为每个 prompt 生成 $K$ 条响应
+2. 用 reward model $$r_\phi$$ 给所有响应打分
 3. 构造 pair：最高分 = chosen，最低分 = rejected
 4. 在这些新鲜 pair 上应用 DPO loss
 5. 重复（每步重新生成）
@@ -73,8 +73,8 @@ trainer.train()
 |  | **数据** | **模型** | **Loss** | **最适合** |
 | --- | --- | --- | --- | --- |
 | Offline DPO | 静态 pair | 2 (policy + reference) | DPO | 快速对齐、算力有限 |
-| Online DPO | 从 $\pi_\theta$ 新鲜采样 | 3 (policy + reference + reward model) | DPO | 当 DPO 停滞、需要探索时 |
-| PPO | 从 $\pi_\theta$ 新鲜采样 | 4 (policy + reference + reward model + value head) | PPO clip | 极致质量、复杂推理 |
+| Online DPO | 从 $$\pi_\theta$$ 新鲜采样 | 3 (policy + reference + reward model) | DPO | 当 DPO 停滞、需要探索时 |
+| PPO | 从 $$\pi_\theta$$ 新鲜采样 | 4 (policy + reference + reward model + value head) | PPO clip | 极致质量、复杂推理 |
 
 ## KTO —— Kahneman-Tversky Optimization
 
@@ -89,13 +89,13 @@ DPO 需要 *成对* 偏好：对同一 prompt，你既需要好的也需要坏�
 $$
 \boxed{\mathcal{L}_\text{KTO} = \mathbb{E}_{y_w}\left[\lambda_w (1 - v(x, y_w))\right] + \mathbb{E}_{y_l}\left[\lambda_l \cdot v(x, y_l)\right]}
 $$
-其中 $v(x,y) = \sigma\left(\beta \log\frac{\pi_\theta(y\mid x)}{\pi_\text{ref}(y\mid x)} - z_\text{ref}\right)$，$z_\text{ref}$ 是期望 KL 散度（一个滑动 baseline）。
+其中 $$v(x,y) = \sigma\left(\beta \log\frac{\pi_\theta(y\mid x)}{\pi_\text{ref}(y\mid x)} - z_\text{ref}\right)$$，$$z_\text{ref}$$ 是期望 KL 散度（一个滑动 baseline）。
 
 > **基于前景理论的 KTO 直觉**
 >
-> **好响应**（$y_w$）：模型通过提高它们的概率获得“效用”。但收益递减——一旦它已相当可能，就不再用力推。
+> **好响应**（$$y_w$$）：模型通过提高它们的概率获得“效用”。但收益递减——一旦它已相当可能，就不再用力推。
 >
-> **坏响应**（$y_l$）：损失厌恶意味着生成坏文本的惩罚被加权得比生成好文本的奖励更强。默认 $\lambda_l = 1.0$，$\lambda_w = 1.0$，但你可以设 $\lambda_l > \lambda_w$。
+> **坏响应**（$$y_l$$）：损失厌恶意味着生成坏文本的惩罚被加权得比生成好文本的奖励更强。默认 $$\lambda_l = 1.0$$，$$\lambda_w = 1.0$$，但你可以设 $$\lambda_l > \lambda_w$$。
 >
 > **关键优势**：每个训练样本都是独立的！无需匹配 pair。可直接使用点赞/点踩数据。
 
@@ -225,7 +225,7 @@ trainer.train()
 $$
 \boxed{\mathcal{L}_\text{ORPO} = \underbrace{\mathcal{L}_\text{SFT}(y_w)}_{\text{standard NLL on chosen}} - \lambda \cdot \underbrace{\log\sigma\left(\log\frac{\text{odds}_\theta(y_w\mid x)}{\text{odds}_\theta(y_l\mid x)}\right)}_{\text{preference alignment via odds ratio}}}
 $$
-其中 $\text{odds}_\theta(y\mid x) = \frac{P_\theta(y\mid x)}{1 - P_\theta(y\mid x)}$。
+其中 $$\text{odds}_\theta(y\mid x) = \frac{P_\theta(y\mid x)}{1 - P_\theta(y\mid x)}$$。
 
 > **ORPO：一次完成 SFT + 对齐**
 >
@@ -310,7 +310,7 @@ $$
 >
 > 许多生产模型就是这样训练的：比 PPO 简单、几乎同样有效、完全稳定。
 >
-> **理论联系** [[185]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-gao2023scaling)]：Best-of-N 实现了隐式的 KL 约束 policy：$\pi_\text{BoN}(y\mid x) \propto \pi_\theta(y\mid x)^{1-1/N} \cdot r(x,y)^{1/N}$。
+> **理论联系** [[185]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-gao2023scaling)]：Best-of-N 实现了隐式的 KL 约束 policy：$$\pi_\text{BoN}(y\mid x) \propto \pi_\theta(y\mid x)^{1-1/N} \cdot r(x,y)^{1/N}$$。
 
 ### TRL 实现
 

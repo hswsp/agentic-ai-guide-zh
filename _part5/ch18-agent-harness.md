@@ -24,7 +24,7 @@ harness 强制实施清晰的 **关注点分离**（separation of concerns）：
 
 > **为何要分离关注点？**
 >
-> 语言模型本质上是一个函数 $f_\theta : \text{tokens} \to \text{tokens}$。它没有持久状态、无法调用 API，也没有时间感知。harness 就是为模型提供“身体”的“操作系统”——持久记忆、执行器（工具）以及调度器（编排器） [[304]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-packer2023memgpt)]。正如操作系统将硬件从应用程序中抽象出来，harness 将基础设施从模型中抽象出来。
+> 语言模型本质上是一个函数 $$f_\theta : \text{tokens} \to \text{tokens}$$。它没有持久状态、无法调用 API，也没有时间感知。harness 就是为模型提供“身体”的“操作系统”——持久记忆、执行器（工具）以及调度器（编排器） [[304]({{ site.baseurl }}/part6/ch29-conclusion.html#ref-packer2023memgpt)]。正如操作系统将硬件从应用程序中抽象出来，harness 将基础设施从模型中抽象出来。
 
 ## Context Window 管理
 
@@ -98,13 +98,13 @@ $$
 
 **重要性加权截断。**
 
-为每一轮分配重要性权重 $w_i$（例如包含工具结果或用户更正的轮次权重更高）。优先截断权重最低的轮次：
+为每一轮分配重要性权重 $$w_i$$（例如包含工具结果或用户更正的轮次权重更高）。优先截断权重最低的轮次：
 
 $$
 \min_{S \subseteq [n]} \sum_{i \notin S} w_i \quad \text{s.t.} \quad \sum_{i \in S} \lvert m_i \rvert \leq B_H
 $$
 
-这是 0/1 背包问题的一个变体，可以通过按 $w_i / \lvert m_i \rvert$ 排序进行贪心求解。
+这是 0/1 背包问题的一个变体，可以通过按 $$w_i / \lvert m_i \rvert$$ 排序进行贪心求解。
 
 ### 滑动窗口方法
 
@@ -126,7 +126,7 @@ $$
 > \text{RLM}(q, C) = M\!\left(q,\; \text{RLM}(q_1, C_1),\; \text{RLM}(q_2, C_2),\; \ldots\right)
 > $$
 >
-> 其中根模型将 Context $C$ 划分为若干块 $\{C_i\}$，构造子查询 $\{q_i\}$，派生递归调用以处理每一块，然后将结果综合为最终答案。任何单次调用都看不到完整 Context——模型在每个递归层级自行决定要查看什么。
+> 其中根模型将 Context $C$ 划分为若干块 $$\{C_i\}$$，构造子查询 $$\{q_i\}$$，派生递归调用以处理每一块，然后将结果综合为最终答案。任何单次调用都看不到完整 Context——模型在每个递归层级自行决定要查看什么。
 
 **为什么递归有效。**
 
@@ -517,7 +517,7 @@ Agent 之间直接通信，无中央协调者。每个 Agent 都可以将任何�
 > \text{Escalate} \iff \underbrace{p_{\text{success}} < \tau_{\text{conf}}}_{\text{低置信度}} \;\lor\; \underbrace{\text{action} \in \mathcal{A}_{\text{irreversible}}}_{\text{不可逆}} \;\lor\; \underbrace{\text{cost} > B_{\text{auto}}}_{\text{超出预算}}
 > $$
 >
-> 其中 $\tau_{\text{conf}}$ 是置信度阈值，$\mathcal{A}_{\text{irreversible}}$ 是不可逆操作集合，$B_{\text{auto}}$ 是自主消费上限。
+> 其中 $$\tau_{\text{conf}}$$ 是置信度阈值，$$\mathcal{A}_{\text{irreversible}}$$ 是不可逆操作集合，$$B_{\text{auto}}$$ 是自主消费上限。
 
 ### 工作流图
 
@@ -579,7 +579,7 @@ Agent 运行在对抗性的、不可预测的环境中。健壮的错误处理�
 
 ### 重试策略
 
-- **指数退避：** 对瞬时失败（速率限制、网络错误），在 $\min(2^k \cdot t_0 + \epsilon, t_{\max})$ 秒后重试，其中 $k$ 是重试次数，$\epsilon$ 是随机抖动。
+- **指数退避：** 对瞬时失败（速率限制、网络错误），在 $$\min(2^k \cdot t_0 + \epsilon, t_{\max})$$ 秒后重试，其中 $k$ 是重试次数，$\epsilon$ 是随机抖动。
 - **Fallback 模型：** 如果主模型不可用或返回错误，则回退到备用模型（能力可能稍弱但可用）。
 - **优雅降级：** 如果某个工具不可用，告知模型并让其在没有该工具的情况下尝试完成任务。
 
@@ -645,7 +645,7 @@ $$
 \text{Cost}_{\text{task}} = \sum_{i=1}^{T} \underbrace{p_{\text{in}} \cdot n_{\text{in},i} + p_{\text{out}} \cdot n_{\text{out},i}}_{\text{LLM cost}} + \sum_{j=1}^{K} \underbrace{c_j}_{\text{tool cost}}
 $$
 
-其中 $p_{\text{in}}, p_{\text{out}}$ 是每 Token 价格，$n_{\text{in},i}, n_{\text{out},i}$ 是第 $i$ 步的输入/输出 Token 数，$c_j$ 是第 $j$ 次工具调用的成本。
+其中 $$p_{\text{in}}, p_{\text{out}}$$ 是每 Token 价格，$$n_{\text{in},i}, n_{\text{out},i}$$ 是第 $i$ 步的输入/输出 Token 数，$$c_j$$ 是第 $j$ 次工具调用的成本。
 
 ### 速率限制与排队
 
